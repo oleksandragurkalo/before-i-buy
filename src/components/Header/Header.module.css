@@ -15,6 +15,13 @@
   justify-content: space-between;
 }
 
+@media (min-width: 880px) {
+  .inner {
+    max-width: 1040px;
+    padding: 18px 24px;
+  }
+}
+
 .brand {
   display: flex;
   align-items: center;

@@ -51,6 +51,20 @@ export function useItems() {
     return newItem.id;
   };
 
+  const editItem = (id, updates) => {
+    setItems(prev => prev.map(item =>
+      item.id === id
+        ? {
+          ...item,
+          name: updates.name.trim(),
+          price: parseFloat(updates.price),
+          category: updates.category || 'other',
+          note: updates.note?.trim() || '',
+        }
+        : item
+    ));
+  };
+
   const decide = (id, status) => {
     setItems(prev => prev.map(item =>
       item.id === id
@@ -67,6 +81,17 @@ export function useItems() {
     setSettings(prev => ({ ...prev, ...updates }));
   };
 
+  const exportData = () => JSON.stringify({ items, settings, exportedAt: Date.now() }, null, 2);
+
+  const importData = (parsed) => {
+    if (!parsed || !Array.isArray(parsed.items)) return false;
+    setItems(parsed.items);
+    if (parsed.settings && typeof parsed.settings === 'object') {
+      setSettings({ ...DEFAULT_SETTINGS, ...parsed.settings });
+    }
+    return true;
+  };
+
   const waiting = items.filter(i => i.status === 'waiting');
   const history = items.filter(i => i.status !== 'waiting');
   const totalSaved = history
@@ -80,6 +105,7 @@ export function useItems() {
     waiting, history,
     totalSaved, totalSpent,
     settings, updateSettings,
-    addItem, decide, removeItem,
+    addItem, editItem, decide, removeItem,
+    exportData, importData,
   };
 }

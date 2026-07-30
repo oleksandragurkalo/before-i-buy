@@ -35,3 +35,29 @@ export function formatDate(timestamp) {
     month: 'short', day: 'numeric', year: 'numeric'
   });
 }
+
+export function computeInsights(waiting, history) {
+  const all = [...waiting, ...history];
+
+  const decided = history.length;
+  const passed = history.filter(i => i.status === 'passed').length;
+  const resistanceRate = decided > 0 ? Math.round((passed / decided) * 100) : null;
+
+  const byCategory = new Map();
+  for (const item of all) {
+    const key = item.category || 'other';
+    const entry = byCategory.get(key) || { category: key, count: 0, total: 0 };
+    entry.count += 1;
+    entry.total += item.price;
+    byCategory.set(key, entry);
+  }
+  const categoryBreakdown = [...byCategory.values()]
+    .map(entry => ({ ...entry, ...(CATEGORIES[entry.category] || CATEGORIES.other) }))
+    .sort((a, b) => b.total - a.total);
+
+  const topTemptations = [...all]
+    .sort((a, b) => b.price - a.price)
+    .slice(0, 3);
+
+  return { resistanceRate, categoryBreakdown, topTemptations, totalItems: all.length };
+}

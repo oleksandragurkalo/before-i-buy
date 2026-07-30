@@ -1,8 +1,13 @@
-import { Trash2, ShoppingBag, ThumbsDown } from 'lucide-react';
+import { useState } from 'react';
+import { Trash2, Pencil, ShoppingBag, ThumbsDown } from 'lucide-react';
 import { CATEGORIES, hoursOfWork, formatHours, formatPrice, daysAgo } from '../../utils';
+import { ConfirmDialog } from '../ConfirmDialog/ConfirmDialog';
+import { EditItemModal } from '../EditItemModal/EditItemModal';
 import styles from './ItemCard.module.css';
 
-export function ItemCard({ item, settings, onDecide, onRemove }) {
+export function ItemCard({ item, settings, onDecide, onRemove, onEdit }) {
+  const [confirmingRemove, setConfirmingRemove] = useState(false);
+  const [editing, setEditing] = useState(false);
   const { emoji } = CATEGORIES[item.category] || CATEGORIES.other;
   const hrs = hoursOfWork(item.price, settings.hourlyRate);
   const hrsLabel = formatHours(hrs);
@@ -17,13 +22,22 @@ export function ItemCard({ item, settings, onDecide, onRemove }) {
           {item.note && <p className={styles.note}>{item.note}</p>}
           <p className={styles.when}>{daysAgo(item.addedAt)}</p>
         </div>
-        <button
-          className={styles.removeBtn}
-          onClick={() => confirm(`Remove "${item.name}"?`) && onRemove(item.id)}
-          aria-label="Remove item"
-        >
-          <Trash2 size={14} />
-        </button>
+        <div className={styles.cardActions}>
+          <button
+            className={styles.removeBtn}
+            onClick={() => setEditing(true)}
+            aria-label="Edit item"
+          >
+            <Pencil size={14} />
+          </button>
+          <button
+            className={styles.removeBtn}
+            onClick={() => setConfirmingRemove(true)}
+            aria-label="Remove item"
+          >
+            <Trash2 size={14} />
+          </button>
+        </div>
       </div>
 
       <div className={styles.cost}>
@@ -56,6 +70,22 @@ export function ItemCard({ item, settings, onDecide, onRemove }) {
           I bought it
         </button>
       </div>
+
+      {confirmingRemove && (
+        <ConfirmDialog
+          title={`Remove "${item.name}"?`}
+          onConfirm={() => onRemove(item.id)}
+          onCancel={() => setConfirmingRemove(false)}
+        />
+      )}
+
+      {editing && (
+        <EditItemModal
+          item={item}
+          onSave={(updates) => onEdit(item.id, updates)}
+          onClose={() => setEditing(false)}
+        />
+      )}
     </article>
   );
 }

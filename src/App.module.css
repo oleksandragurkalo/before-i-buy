@@ -10,9 +10,47 @@
   width: 100%;
   margin: 0 auto;
   padding: 20px 16px 48px;
+}
+
+.layout {
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.aside {
+  min-width: 0;
+}
+
+@media (min-width: 880px) {
+  .main {
+    max-width: 1040px;
+    padding: 32px 24px 64px;
+  }
+
+  .layout {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 24px;
+  }
+
+  .content {
+    flex: 1;
+  }
+
+  .aside {
+    width: 320px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 88px;
+  }
 }
 
 .summary {

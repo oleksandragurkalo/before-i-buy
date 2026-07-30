@@ -1,8 +1,13 @@
-import { Trash2 } from 'lucide-react';
+import { useState } from 'react';
+import { Trash2, Pencil } from 'lucide-react';
 import { CATEGORIES, formatPrice, formatDate } from '../../utils';
+import { ConfirmDialog } from '../ConfirmDialog/ConfirmDialog';
+import { EditItemModal } from '../EditItemModal/EditItemModal';
 import styles from './HistoryItem.module.css';
 
-export function HistoryItem({ item, settings, onRemove }) {
+export function HistoryItem({ item, settings, onRemove, onEdit }) {
+  const [confirmingRemove, setConfirmingRemove] = useState(false);
+  const [editing, setEditing] = useState(false);
   const { emoji } = CATEGORIES[item.category] || CATEGORIES.other;
   const priceLabel = formatPrice(item.price, settings.currencySymbol);
   const bought = item.status === 'bought';
@@ -20,11 +25,34 @@ export function HistoryItem({ item, settings, onRemove }) {
       </span>
       <button
         className={styles.remove}
-        onClick={() => confirm(`Remove "${item.name}" from history?`) && onRemove(item.id)}
+        onClick={() => setEditing(true)}
+        aria-label="Edit item"
+      >
+        <Pencil size={13} />
+      </button>
+      <button
+        className={styles.remove}
+        onClick={() => setConfirmingRemove(true)}
         aria-label="Remove from history"
       >
         <Trash2 size={13} />
       </button>
+
+      {confirmingRemove && (
+        <ConfirmDialog
+          title={`Remove "${item.name}" from history?`}
+          onConfirm={() => onRemove(item.id)}
+          onCancel={() => setConfirmingRemove(false)}
+        />
+      )}
+
+      {editing && (
+        <EditItemModal
+          item={item}
+          onSave={(updates) => onEdit(item.id, updates)}
+          onClose={() => setEditing(false)}
+        />
+      )}
     </div>
   );
 }

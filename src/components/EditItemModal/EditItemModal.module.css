@@ -48,7 +48,13 @@
   padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
 }
 
 .field {
@@ -61,87 +67,28 @@
   font-size: 13px;
   font-weight: 600;
   color: var(--text-primary);
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
 }
 
-.hint {
-  font-size: 11px;
+.optional {
   font-weight: 400;
   color: var(--text-muted);
 }
 
-.rateInput {
-  display: flex;
-  align-items: center;
-  background: var(--bg-subtle);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  overflow: hidden;
-  transition: border-color 0.15s;
-}
-
-.rateInput:focus-within {
-  border-color: var(--green);
-}
-
-.rateSymbol, .ratePer {
-  padding: 0 12px;
-  font-size: 14px;
-  color: var(--text-secondary);
-  font-family: var(--font-mono);
-  user-select: none;
-}
-
 .input {
-  flex: 1;
-  padding: 10px 8px;
-  background: transparent;
-  border: none;
-  border-radius: 0;
-  color: var(--text-primary);
-  font-size: 15px;
-  outline: none;
-  width: 100%;
-}
-
-select.input {
   padding: 10px 12px;
   background: var(--bg-subtle);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  cursor: pointer;
+  color: var(--text-primary);
+  font-size: 14px;
+  outline: none;
+  width: 100%;
+  transition: border-color 0.15s;
 }
 
-.help {
-  font-size: 12px;
-  color: var(--text-muted);
-  line-height: 1.5;
-}
+.input:focus { border-color: var(--green); }
 
-.dataActions {
-  display: flex;
-  gap: 8px;
-}
-
-.dataBtn {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  padding: 9px 12px;
-  background: var(--bg-subtle);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  color: var(--text-secondary);
-  font-size: 13px;
-  font-weight: 500;
-  transition: all 0.15s;
-}
-
-.dataBtn:hover { border-color: var(--border-strong); color: var(--text-primary); }
+select.input { cursor: pointer; }
 
 .error {
   font-size: 12px;
@@ -150,29 +97,11 @@ select.input {
 
 .footer {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 8px;
   padding: 16px 20px 20px;
   border-top: 1px solid var(--border);
 }
-
-.footerRight {
-  display: flex;
-  gap: 8px;
-}
-
-.resetBtn {
-  font-size: 12px;
-  color: var(--text-muted);
-  background: transparent;
-  border: none;
-  padding: 4px 0;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-.resetBtn:hover { color: var(--text-secondary); }
 
 .cancelBtn {
   padding: 9px 16px;
