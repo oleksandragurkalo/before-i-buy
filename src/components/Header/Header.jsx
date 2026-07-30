@@ -1,5 +1,5 @@
 import { Sun, Moon, Settings } from 'lucide-react';
-import { useTheme } from '../context/ThemeContext';
+import { useTheme } from '../../context/ThemeContext';
 import styles from './Header.module.css';
 
 export function Header({ onSettingsClick }) {

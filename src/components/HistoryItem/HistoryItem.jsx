@@ -1,5 +1,5 @@
 import { Trash2 } from 'lucide-react';
-import { CATEGORIES, formatPrice, formatDate } from '../utils';
+import { CATEGORIES, formatPrice, formatDate } from '../../utils';
 import styles from './HistoryItem.module.css';
 
 export function HistoryItem({ item, settings, onRemove }) {

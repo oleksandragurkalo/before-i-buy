@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Plus, X } from 'lucide-react';
-import { CATEGORIES } from '../utils';
+import { CATEGORIES } from '../../utils';
 import styles from './AddItemForm.module.css';
 
 const EMPTY = { name: '', price: '', category: 'other', note: '' };

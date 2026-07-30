@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { useItems } from './hooks/useItems';
 import { useTheme } from './context/ThemeContext';
-import { Header } from './components/Header';
-import { AddItemForm } from './components/AddItemForm';
-import { ItemCard } from './components/ItemCard';
-import { HistoryItem } from './components/HistoryItem';
-import { SettingsModal } from './components/SettingsModal';
+import { Header } from './components/Header/Header';
+import { AddItemForm } from './components/AddItemForm/AddItemForm';
+import { ItemCard } from './components/ItemCard/ItemCard';
+import { HistoryItem } from './components/HistoryItem/HistoryItem';
+import { SettingsModal } from './components/SettingsModal/SettingsModal';
 import { formatPrice } from './utils';
 import styles from './App.module.css';
 

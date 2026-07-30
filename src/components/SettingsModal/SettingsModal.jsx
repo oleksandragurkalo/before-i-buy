@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
-import { DEFAULT_SETTINGS } from '../hooks/useItems';
+import { DEFAULT_SETTINGS } from '../../hooks/useItems';
 import styles from './SettingsModal.module.css';
 
 const CURRENCIES = [

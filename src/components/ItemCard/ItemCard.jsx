@@ -1,5 +1,5 @@
 import { Trash2, ShoppingBag, ThumbsDown } from 'lucide-react';
-import { CATEGORIES, hoursOfWork, formatHours, formatPrice, daysAgo } from '../utils';
+import { CATEGORIES, hoursOfWork, formatHours, formatPrice, daysAgo } from '../../utils';
 import styles from './ItemCard.module.css';
 
 export function ItemCard({ item, settings, onDecide, onRemove }) {
