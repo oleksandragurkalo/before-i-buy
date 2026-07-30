@@ -1,0 +1,79 @@
+.row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  transition: border-color 0.15s;
+}
+
+.row:hover { border-color: var(--border-strong); }
+
+.emoji { font-size: 18px; flex-shrink: 0; }
+
+.info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.date {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.price {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 100px;
+  flex-shrink: 0;
+  letter-spacing: 0.02em;
+}
+
+.bought {
+  background: var(--amber-bg);
+  color: var(--amber);
+}
+
+.passed {
+  background: var(--green-bg);
+  color: var(--green);
+}
+
+.remove {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px; height: 24px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  border-radius: var(--radius);
+  opacity: 0;
+  transition: opacity 0.15s, color 0.15s, background 0.15s;
+}
+
+.row:hover .remove { opacity: 1; }
+.remove:hover { color: var(--red); background: var(--red-bg); }
