@@ -11,8 +11,8 @@ export function InsightsPanel({ waiting, history, settings }) {
   const maxCategoryTotal = categoryBreakdown[0]?.total || 1;
 
   return (
-    <div className={styles.panel}>
-      <div className={styles.header} onClick={() => setIsDropdownOpen(!isDropdownOpen)}>
+    <div className={styles.panel} onClick={() => setIsDropdownOpen(!isDropdownOpen)}>
+      <div className={styles.header}>
         <div className={styles.titleWrapper}>
           <TrendingUp size={16} />
           <h2 className={styles.title}>Insights</h2>

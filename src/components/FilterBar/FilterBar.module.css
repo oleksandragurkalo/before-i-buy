@@ -7,7 +7,7 @@
   flex: 1;
   min-width: 0;
   padding: 8px 10px;
-  background: var(--bg-subtle);
+  background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   color: var(--text-secondary);
@@ -21,7 +21,7 @@
   align-items: center;
   justify-content: center;
   width: 34px;
-  background: var(--bg-subtle);
+  background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   color: var(--text-secondary);
@@ -31,7 +31,7 @@
 .groupBtn:hover { color: var(--text-primary); border-color: var(--border-strong); }
 
 .groupBtn[aria-pressed="true"] {
-  background: var(--text-primary);
-  color: var(--bg);
-  border-color: var(--text-primary);
+  background: var(--accent-bg);
+  color: var(--accent);
+  border-color: var(--accent);
 }
