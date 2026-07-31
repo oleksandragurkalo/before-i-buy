@@ -1,0 +1,67 @@
+import { FilterBar } from '../FilterBar/FilterBar';
+import { sortItems, groupByCategory } from '../../utils';
+import styles from './ItemListSection.module.css';
+
+export function ItemListSection({
+  items,
+  dateField,
+  emptyIcon,
+  emptyTitle,
+  emptyBody,
+  sortBy,
+  onSortChange,
+  filterCategory,
+  onFilterChange,
+  grouped,
+  onGroupToggle,
+  renderItem,
+}) {
+  if (items.length === 0) {
+    return (
+      <div className={styles.empty}>
+        <p className={styles.emptyIcon} aria-hidden="true">{emptyIcon}</p>
+        <p className={styles.emptyTitle}>{emptyTitle}</p>
+        <p className={styles.emptyBody}>{emptyBody}</p>
+      </div>
+    );
+  }
+
+  const availableCategories = [...new Set(items.map(i => i.category || 'other'))];
+  const filtered = filterCategory === 'all' ? items : items.filter(i => (i.category || 'other') === filterCategory);
+  const visible = sortItems(filtered, sortBy, dateField);
+
+  return (
+    <>
+      {items.length > 1 && (
+        <FilterBar
+          sortBy={sortBy}
+          onSortChange={onSortChange}
+          filterCategory={filterCategory}
+          onFilterChange={onFilterChange}
+          availableCategories={availableCategories}
+          grouped={grouped}
+          onGroupToggle={onGroupToggle}
+        />
+      )}
+
+      {grouped ? (
+        groupByCategory(visible).map(group => (
+          <div className={styles.group} key={group.category}>
+            <div className={styles.groupHeader}>
+              <span aria-hidden="true">{group.emoji}</span>
+              <span>{group.label}</span>
+              <span className={styles.groupCount}>{group.items.length}</span>
+            </div>
+            <ul className={styles.list}>
+              {group.items.map(item => <li key={item.id}>{renderItem(item)}</li>)}
+            </ul>
+          </div>
+        ))
+      ) : (
+        <ul className={styles.list}>
+          {visible.map(item => <li key={item.id}>{renderItem(item)}</li>)}
+        </ul>
+      )}
+    </>
+  );
+}
