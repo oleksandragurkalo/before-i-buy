@@ -4,6 +4,7 @@ const STORAGE_KEY = 'bib-items';
 const SETTINGS_KEY = 'bib-settings';
 
 export const DEFAULT_SETTINGS = {
+  listName: 'Waiting List',
   hourlyRate: 25,
   currency: 'CAD',
   currencySymbol: '$',

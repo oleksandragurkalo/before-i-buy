@@ -21,7 +21,7 @@ export function StatTiles( { headerStats, currencySymbol, className }) {
     },
     {
       tone: "blue",
-      label: 'Avg. hours saved',
+      label: 'Hours saved',
       value: formatHours(hoursSaved),
       sublabel: 'per resisted item',
       series: hoursSeries
