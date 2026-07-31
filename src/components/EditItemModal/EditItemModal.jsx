@@ -1,125 +1,40 @@
-import { useEffect, useState } from 'react';
-import { X } from 'lucide-react';
-import { CATEGORIES } from '../../utils';
-import { NumberStepper } from '../NumberStepper/NumberStepper';
-import styles from './EditItemModal.module.css';
+import { useItemForm } from '../../hooks/useItemForm';
+import { ItemFormTemplate } from '../ItemFormTemplate/ItemFormTemplate';
 
 export function EditItemModal({ item, settings, onSave, onClose }) {
   const symbol = settings?.currencySymbol || '$';
-  const [form, setForm] = useState({
+
+  const initial = {
     name: item.name,
     price: String(item.price),
     category: item.category,
     note: item.note || '',
     savedAmount: item.savedAmount ? String(item.savedAmount) : '',
-  });
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    const onKey = (e) => { if (e.key === 'Escape') onClose(); };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [onClose]);
-
-  const set = (field) => (e) => {
-    setForm(prev => ({ ...prev, [field]: e.target.value }));
-    if (error) setError('');
   };
 
-  const save = () => {
-    if (!form.name.trim()) { setError('Give it a name'); return; }
-    const price = parseFloat(form.price);
-    if (!form.price || isNaN(price) || price <= 0) { setError('Enter a valid price'); return; }
-    onSave(form);
+  const { form, error, set, setField, validate } = useItemForm(initial, onClose);
+
+  const save = (e) => {
+    e.preventDefault();
+    const data = validate();
+    if (!data) return;
+    onSave(data);
     onClose();
   };
 
   return (
-    <div className={styles.overlay} onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <div className={styles.modal} role="dialog" aria-modal="true" aria-label="Edit item">
-        <div className={styles.header}>
-          <h2 className={styles.title}>Edit item</h2>
-          <button className={styles.closeBtn} onClick={onClose} aria-label="Close">
-            <X size={16} />
-          </button>
-        </div>
-
-        <div className={styles.body}>
-          <div className={styles.field}>
-            <label className={styles.label} htmlFor="edit-name">What do you want?</label>
-            <input
-              id="edit-name"
-              className={styles.input}
-              type="text"
-              value={form.name}
-              onChange={set('name')}
-              autoFocus
-              maxLength={80}
-            />
-          </div>
-
-          <div className={styles.row}>
-            <div className={styles.field}>
-              <label className={styles.label} htmlFor="edit-price">Price ({symbol})</label>
-              <NumberStepper
-                id="edit-price"
-                value={form.price}
-                onChange={(v) => { setForm(prev => ({ ...prev, price: v })); if (error) setError(''); }}
-                min={0}
-                step={1}
-                ariaLabel="price"
-              />
-            </div>
-            <div className={styles.field}>
-              <label className={styles.label} htmlFor="edit-category">Category</label>
-              <select
-                id="edit-category"
-                className={styles.input}
-                value={form.category}
-                onChange={set('category')}
-              >
-                {Object.entries(CATEGORIES).map(([key, { label, emoji }]) => (
-                  <option key={key} value={key}>{emoji} {label}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div className={styles.field}>
-            <label className={styles.label} htmlFor="edit-note">Note <span className={styles.optional}>(optional)</span></label>
-            <input
-              id="edit-note"
-              className={styles.input}
-              type="text"
-              value={form.note}
-              onChange={set('note')}
-              maxLength={120}
-            />
-          </div>
-
-          {item.status === 'waiting' && (
-            <div className={styles.field}>
-              <label className={styles.label} htmlFor="edit-saved">Already saved ({symbol}) <span className={styles.optional}>(optional)</span></label>
-              <NumberStepper
-                id="edit-saved"
-                value={form.savedAmount}
-                onChange={(v) => setForm(prev => ({ ...prev, savedAmount: v }))}
-                placeholder="0"
-                min={0}
-                step={1}
-                ariaLabel="amount already saved"
-              />
-            </div>
-          )}
-
-          {error && <p className={styles.error} role="alert">{error}</p>}
-        </div>
-
-        <div className={styles.footer}>
-          <button className={styles.cancelBtn} onClick={onClose}>Cancel</button>
-          <button className={styles.saveBtn} onClick={save}>Save</button>
-        </div>
-      </div>
-    </div>
+    <ItemFormTemplate
+      title="Edit item"
+      submitLabel="Save"
+      symbol={symbol}
+      form={form}
+      error={error}
+      showSavedAmount={item.status === 'waiting'}
+      onChange={set}
+      onPriceChange={setField('price')}
+      onSavedChange={setField('savedAmount')}
+      onSubmit={save}
+      onClose={onClose}
+    />
   );
 }
