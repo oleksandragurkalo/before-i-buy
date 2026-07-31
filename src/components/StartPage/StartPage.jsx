@@ -1,5 +1,6 @@
 import { ListChecks, ShoppingCart, AlarmClock, CheckCircle2, Lock, Smartphone, Sun, Moon } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
+import { Button } from '../Button/Button';
 import styles from './StartPage.module.css';
 
 const FEATURES = [
@@ -7,6 +8,11 @@ const FEATURES = [
   { icon: AlarmClock, tone: 'blue', title: 'Day counter & reminders', body: 'Give yourself time to decide' },
   { icon: CheckCircle2, tone: 'green', title: 'Track decisions', body: 'Resisted vs bought anyway' },
   { icon: Smartphone, tone: 'gray', title: 'Works everywhere', body: 'Fully responsive on any device' },
+];
+
+const THEMES = [
+  { value: 'light', label: 'Light', icon: Sun },
+  { value: 'dark', label: 'Dark', icon: Moon },
 ];
 
 export function StartPage({ onGetStarted }) {
@@ -45,25 +51,21 @@ export function StartPage({ onGetStarted }) {
         </ul>
 
         <div className={styles.themeSwitcher}>
-          <button
-            type="button"
-            className={`${styles.themeBtn} ${theme === 'light' ? styles.themeBtnActive : ''}`}
-            onClick={() => setTheme('light')}
-          >
-            <Sun size={14} /> Light
-          </button>
-          <button
-            type="button"
-            className={`${styles.themeBtn} ${theme === 'dark' ? styles.themeBtnActive : ''}`}
-            onClick={() => setTheme('dark')}
-          >
-            <Moon size={14} /> Dark
-          </button>
+          {THEMES.map(({ value, label, icon: Icon }) => (
+            <button
+              key={value}
+              type="button"
+              className={`${styles.themeBtn} ${theme === value ? styles.themeBtnActive : ''}`}
+              onClick={() => setTheme(value)}
+            >
+              <Icon size={14} /> {label}
+            </button>
+          ))}
         </div>
 
-        <button type="button" className={styles.cta} onClick={onGetStarted}>
+        <Button size="lg" fullWidth onClick={onGetStarted}>
           Try it
-        </button>
+        </Button>
       </div>
     </div>
   );
