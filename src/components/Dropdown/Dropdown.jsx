@@ -1,30 +1,52 @@
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Check } from 'lucide-react';
 import styles from './Dropdown.module.css';
 
 export function Dropdown({ value, options, onChange, ariaLabel }) {
   const [open, setOpen] = useState(false);
-  const rootRef = useRef(null);
+  const [menuStyle, setMenuStyle] = useState(null);
+  const triggerRef = useRef(null);
+  const menuRef = useRef(null);
 
   useEffect(() => {
     if (!open) return;
+
+    const updatePosition = () => {
+      const rect = triggerRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      setMenuStyle({ top: rect.bottom + 4, left: rect.left, width: rect.width });
+    };
+    updatePosition();
+
     const onClickOutside = (e) => {
-      if (rootRef.current && !rootRef.current.contains(e.target)) setOpen(false);
+      if (
+        !triggerRef.current?.contains(e.target) &&
+        !menuRef.current?.contains(e.target)
+      ) {
+        setOpen(false);
+      }
     };
     const onKey = (e) => { if (e.key === 'Escape') setOpen(false); };
+
     document.addEventListener('mousedown', onClickOutside);
     window.addEventListener('keydown', onKey);
+    window.addEventListener('resize', updatePosition);
+    window.addEventListener('scroll', updatePosition, true);
     return () => {
       document.removeEventListener('mousedown', onClickOutside);
       window.removeEventListener('keydown', onKey);
+      window.removeEventListener('resize', updatePosition);
+      window.removeEventListener('scroll', updatePosition, true);
     };
   }, [open]);
 
   const current = options.find(o => o.value === value);
 
   return (
-    <div className={styles.dropdown} ref={rootRef}>
+    <div className={styles.dropdown}>
       <button
+        ref={triggerRef}
         type="button"
         className={styles.trigger}
         onClick={() => setOpen(o => !o)}
@@ -35,8 +57,14 @@ export function Dropdown({ value, options, onChange, ariaLabel }) {
         <span className={styles.triggerLabel}>{current?.label}</span>
       </button>
 
-      {open && (
-        <ul className={styles.menu} role="listbox" aria-label={ariaLabel}>
+      {open && menuStyle && createPortal(
+        <ul
+          ref={menuRef}
+          className={styles.menu}
+          style={menuStyle}
+          role="listbox"
+          aria-label={ariaLabel}
+        >
           {options.map(o => (
             <li key={o.value}>
               <button
@@ -51,7 +79,8 @@ export function Dropdown({ value, options, onChange, ariaLabel }) {
               </button>
             </li>
           ))}
-        </ul>
+        </ul>,
+        document.body
       )}
     </div>
   );

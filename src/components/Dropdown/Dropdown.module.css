@@ -43,11 +43,8 @@
 .trigger[aria-expanded="true"]::after { transform: rotate(180deg); }
 
 .menu {
-  position: absolute;
-  top: calc(100% + 4px);
-  left: 0;
-  right: 0;
-  z-index: 20;
+  position: fixed;
+  z-index: 1000;
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -55,7 +52,7 @@
   padding: 4px;
   margin: 0;
   list-style: none;
-  max-height: 240px;
+  max-height: 174px;
   overflow-y: auto;
 }
 
