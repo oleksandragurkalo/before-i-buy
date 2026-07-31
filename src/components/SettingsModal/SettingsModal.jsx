@@ -6,6 +6,7 @@ import { ConfirmDialog } from '../ConfirmDialog/ConfirmDialog';
 import { NumberStepper } from '../NumberStepper/NumberStepper';
 import { Modal } from '../Modal/Modal';
 import { Button } from '../Button/Button';
+import { Dropdown } from '../Dropdown/Dropdown';
 import styles from './SettingsModal.module.css';
 
 const CURRENCIES = [
@@ -78,12 +79,12 @@ export function SettingsModal({ settings, onSave, onClose, onExport, onImport })
   };
 
   const reset = () => {
-    setPayPeriod(DEFAULT_SETTINGS.payPeriod);
-    setPayAmount(String(DEFAULT_SETTINGS.payAmount));
-    setPayType(DEFAULT_SETTINGS.payType);
+    // Keeps the currently selected pay period, pay type, and currency —
+    // only resets the numeric fields, so a visible field never disappears
+    // (which happened when this used to also reset payPeriod to 'hourly').
+    setPayAmount(String(defaultPayAmountFor(payPeriod, currency, DEFAULT_SETTINGS.hoursPerWeek)));
     setTaxRate(String(DEFAULT_SETTINGS.taxRate));
     setHoursPerWeek(String(DEFAULT_SETTINGS.hoursPerWeek));
-    setCurrency(DEFAULT_SETTINGS.currency);
   };
 
   const handleExport = () => {
@@ -215,17 +216,13 @@ export function SettingsModal({ settings, onSave, onClose, onExport, onImport })
           </div>
 
           <div className={styles.field}>
-            <label className={styles.label} htmlFor="currency">Currency</label>
-            <select
-              id="currency"
-              className={styles.input}
+            <label className={styles.label}>Currency</label>
+            <Dropdown
               value={currency}
-              onChange={(e) => changeCurrency(e.target.value)}
-            >
-              {CURRENCIES.map(c => (
-                <option key={c.code} value={c.code}>{c.label}</option>
-              ))}
-            </select>
+              options={CURRENCIES.map(c => ({ value: c.code, label: c.label }))}
+              onChange={changeCurrency}
+              ariaLabel="Currency"
+            />
           </div>
 
           <div className={styles.field}>
