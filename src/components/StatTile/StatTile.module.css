@@ -1,0 +1,47 @@
+.tile {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.value {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.footer {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 28px;
+}
+
+.sublabel {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.icon { font-size: 22px; line-height: 1; }
+
+.sparkline { flex-shrink: 0; }
+
+.green .label, .green .value { color: var(--green); }
+.red .label, .red .value { color: var(--red); }
+.blue .label, .blue .value { color: var(--blue); }
+.amber .label, .amber .value { color: var(--amber); }
+
+.green { background: linear-gradient(135deg, var(--green-bg) 0%, var(--bg-card) 80%); border-color: var(--green); }
+.red { background: linear-gradient(135deg, var(--red-bg) 0%, var(--bg-card) 80%); border-color: var(--red); }
+.blue { background: linear-gradient(135deg, var(--blue-bg) 0%, var(--bg-card) 80%); border-color: var(--blue); }
+.amber { background: linear-gradient(135deg, var(--amber-bg) 0%, var(--bg-card) 80%); border-color: var(--amber); }
