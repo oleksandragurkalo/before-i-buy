@@ -23,7 +23,7 @@ export function Modal({ title, onClose, children, footer, role = 'dialog', maxWi
         aria-label={title}
         style={{ '--modal-max-width': `${maxWidth}px` }}
       >
-        <div className={styles.header}>
+        <div className={`${styles.header} ${!children ? styles.noBorder : ''}`}>
           <span className={styles.title}>{title}</span>
           <Button variant="icon" onClick={onClose} aria-label="Close">
             <X size={16} />
