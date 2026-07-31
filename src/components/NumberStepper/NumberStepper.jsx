@@ -45,6 +45,7 @@ export function NumberStepper({
         max={max}
         step={step}
         placeholder={placeholder}
+        autoComplete="off"
       />
       <button
         type="button"

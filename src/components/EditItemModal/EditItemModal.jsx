@@ -34,6 +34,7 @@ export function EditItemModal({ item, settings, onSave, onClose }) {
       showStatus={item.status !== 'waiting'}
       onChange={set}
       onPriceChange={setField('price')}
+      onCategoryChange={setField('category')}
       onSavedChange={setField('savedAmount')}
       onStatusChange={setField('status')}
       onSubmit={save}

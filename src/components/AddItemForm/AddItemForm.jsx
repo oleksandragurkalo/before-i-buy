@@ -24,6 +24,7 @@ export function AddItemForm({ onAdd, onClose, symbol = '$' }) {
       showSavedAmount
       onChange={set}
       onPriceChange={setField('price')}
+      onCategoryChange={setField('category')}
       onSavedChange={setField('savedAmount')}
       onSubmit={submit}
       onClose={onClose}

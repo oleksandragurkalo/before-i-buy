@@ -3,12 +3,18 @@ import { CATEGORIES } from '../../utils';
 import { NumberStepper } from '../NumberStepper/NumberStepper';
 import { Modal } from '../Modal/Modal';
 import { Button } from '../Button/Button';
+import { Dropdown } from '../Dropdown/Dropdown';
 import styles from './ItemFormTemplate.module.css';
 
 const STATUS_OPTIONS = [
   { value: 'passed', label: "Didn't need it", tone: 'pass' },
   { value: 'bought', label: 'Bought it', tone: 'buy' },
 ];
+
+const CATEGORY_OPTIONS = Object.entries(CATEGORIES).map(([value, { label, emoji }]) => ({
+  value,
+  label: `${emoji} ${label}`,
+}));
 
 function Field({ label, htmlFor, optional, children }) {
   return (
@@ -31,6 +37,7 @@ export function ItemFormTemplate({
   showStatus = false,
   onChange,
   onPriceChange,
+  onCategoryChange,
   onSavedChange,
   onStatusChange,
   onSubmit,
@@ -58,6 +65,7 @@ export function ItemFormTemplate({
             placeholder="e.g. Sony WH-1000XM5"
             value={form.name}
             onChange={onChange('name')}
+            autoComplete="off"
             autoFocus
             maxLength={80}
           />
@@ -76,17 +84,13 @@ export function ItemFormTemplate({
             />
           </Field>
 
-          <Field label="Category" htmlFor="item-category">
-            <select
-              id="item-category"
-              className={styles.input}
+          <Field label="Category">
+            <Dropdown
               value={form.category}
-              onChange={onChange('category')}
-            >
-              {Object.entries(CATEGORIES).map(([key, { label, emoji }]) => (
-                <option key={key} value={key}>{emoji} {label}</option>
-              ))}
-            </select>
+              options={CATEGORY_OPTIONS}
+              onChange={onCategoryChange}
+              ariaLabel="Category"
+            />
           </Field>
         </div>
 
@@ -98,6 +102,7 @@ export function ItemFormTemplate({
             placeholder="e.g. My headphones broke last week"
             value={form.note}
             onChange={onChange('note')}
+            autoComplete="off"
             maxLength={120}
           />
         </Field>
