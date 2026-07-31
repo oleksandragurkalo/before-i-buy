@@ -7,12 +7,16 @@ import { ItemCard } from './components/ItemCard/ItemCard';
 import { HistoryItem } from './components/HistoryItem/HistoryItem';
 import { SettingsModal } from './components/SettingsModal/SettingsModal';
 import { InsightsPanel } from './components/InsightsPanel/InsightsPanel';
-import { formatPrice } from './utils';
+import { FilterBar } from './components/FilterBar/FilterBar';
+import { formatPrice, sortItems, groupByCategory } from './utils';
 import styles from './App.module.css';
 
 export default function App() {
   const [tab, setTab] = useState('waiting');
   const [showSettings, setShowSettings] = useState(false);
+  const [sortBy, setSortBy] = useState('newest');
+  const [filterCategory, setFilterCategory] = useState('all');
+  const [grouped, setGrouped] = useState(false);
   const {
     waiting, history,
     totalSaved, totalSpent,
@@ -21,6 +25,40 @@ export default function App() {
     exportData, importData,
   } = useItems();
   const { theme } = useTheme();
+
+  const changeTab = (nextTab) => {
+    setTab(nextTab);
+    setFilterCategory('all');
+  };
+
+  const presentCategories = (list) => [...new Set(list.map(i => i.category || 'other'))];
+
+  const visibleItems = (list, dateField) => {
+    const filtered = filterCategory === 'all' ? list : list.filter(i => (i.category || 'other') === filterCategory);
+    return sortItems(filtered, sortBy, dateField);
+  };
+
+  const renderList = (items, renderItem) => {
+    if (!grouped) {
+      return (
+        <ul className={styles.list}>
+          {items.map(item => <li key={item.id}>{renderItem(item)}</li>)}
+        </ul>
+      );
+    }
+    return groupByCategory(items).map(group => (
+      <div className={styles.group} key={group.category}>
+        <div className={styles.groupHeader}>
+          <span aria-hidden="true">{group.emoji}</span>
+          <span>{group.label}</span>
+          <span className={styles.groupCount}>{group.items.length}</span>
+        </div>
+        <ul className={styles.list}>
+          {group.items.map(item => <li key={item.id}>{renderItem(item)}</li>)}
+        </ul>
+      </div>
+    ));
+  };
 
   return (
     <div className={styles.app}>
@@ -51,7 +89,7 @@ export default function App() {
                 role="tab"
                 aria-selected={tab === 'waiting'}
                 className={`${styles.tab} ${tab === 'waiting' ? styles.tabActive : ''}`}
-                onClick={() => setTab('waiting')}
+                onClick={() => changeTab('waiting')}
               >
                 Waiting
                 {waiting.length > 0 && <span className={styles.tabCount}>{waiting.length}</span>}
@@ -60,7 +98,7 @@ export default function App() {
                 role="tab"
                 aria-selected={tab === 'history'}
                 className={`${styles.tab} ${tab === 'history' ? styles.tabActive : ''}`}
-                onClick={() => setTab('history')}
+                onClick={() => changeTab('history')}
               >
                 History
                 {history.length > 0 && <span className={styles.tabCount}>{history.length}</span>}
@@ -77,13 +115,22 @@ export default function App() {
                     <p className={styles.emptyBody}>Next time you want to buy something, add it here first and sleep on it.</p>
                   </div>
                 ) : (
-                  <ul className={styles.list}>
-                    {waiting.map(item => (
-                      <li key={item.id}>
-                        <ItemCard item={item} settings={settings} onDecide={decide} onRemove={removeItem} onEdit={editItem} />
-                      </li>
+                  <>
+                    {waiting.length > 1 && (
+                      <FilterBar
+                        sortBy={sortBy}
+                        onSortChange={setSortBy}
+                        filterCategory={filterCategory}
+                        onFilterChange={setFilterCategory}
+                        availableCategories={presentCategories(waiting)}
+                        grouped={grouped}
+                        onGroupToggle={setGrouped}
+                      />
+                    )}
+                    {renderList(visibleItems(waiting, 'addedAt'), item => (
+                      <ItemCard item={item} settings={settings} onDecide={decide} onRemove={removeItem} onEdit={editItem} />
                     ))}
-                  </ul>
+                  </>
                 )}
               </section>
             )}
@@ -97,13 +144,22 @@ export default function App() {
                     <p className={styles.emptyBody}>Items you decide on will appear here.</p>
                   </div>
                 ) : (
-                  <ul className={styles.list}>
-                    {history.map(item => (
-                      <li key={item.id}>
-                        <HistoryItem item={item} settings={settings} onRemove={removeItem} onEdit={editItem} />
-                      </li>
+                  <>
+                    {history.length > 1 && (
+                      <FilterBar
+                        sortBy={sortBy}
+                        onSortChange={setSortBy}
+                        filterCategory={filterCategory}
+                        onFilterChange={setFilterCategory}
+                        availableCategories={presentCategories(history)}
+                        grouped={grouped}
+                        onGroupToggle={setGrouped}
+                      />
+                    )}
+                    {renderList(visibleItems(history, 'decidedAt'), item => (
+                      <HistoryItem item={item} settings={settings} onRemove={removeItem} onEdit={editItem} />
                     ))}
-                  </ul>
+                  </>
                 )}
               </section>
             )}

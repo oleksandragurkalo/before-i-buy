@@ -157,6 +157,28 @@
   gap: 10px;
 }
 
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.groupHeader {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.groupCount {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
 .empty {
   text-align: center;
   padding: 48px 24px;

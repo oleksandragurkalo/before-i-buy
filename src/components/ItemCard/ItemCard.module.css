@@ -69,11 +69,9 @@
   border: none;
   color: var(--text-muted);
   border-radius: var(--radius);
-  opacity: 0;
+  opacity: 1;
   transition: opacity 0.15s, background 0.15s, color 0.15s;
 }
-
-.card:hover .removeBtn { opacity: 1; }
 
 .removeBtn:hover {
   background: var(--red-bg);
@@ -124,6 +122,45 @@
   font-size: 28px;
   color: var(--red);
   font-weight: 500;
+}
+
+.savings {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.savingsTop {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.savingsLabel {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.savingsRemaining {
+  font-size: 11px;
+  color: var(--green);
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.savingsBar {
+  height: 6px;
+  background: var(--bg-subtle);
+  border-radius: 100px;
+  overflow: hidden;
+}
+
+.savingsBarFill {
+  height: 100%;
+  background: var(--green);
+  border-radius: 100px;
 }
 
 .question {

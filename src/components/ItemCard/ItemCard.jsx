@@ -12,6 +12,10 @@ export function ItemCard({ item, settings, onDecide, onRemove, onEdit }) {
   const hrs = hoursOfWork(item.price, settings.hourlyRate);
   const hrsLabel = formatHours(hrs);
   const priceLabel = formatPrice(item.price, settings.currencySymbol);
+  const savedAmount = Math.min(item.savedAmount || 0, item.price);
+  const savedPct = item.price > 0 ? Math.round((savedAmount / item.price) * 100) : 0;
+  const remaining = Math.max(0, item.price - savedAmount);
+  const remainingHrsLabel = formatHours(hoursOfWork(remaining, settings.hourlyRate));
 
   return (
     <article className={styles.card}>
@@ -52,6 +56,20 @@ export function ItemCard({ item, settings, onDecide, onRemove, onEdit }) {
         </div>
       </div>
 
+      {savedAmount > 0 && (
+        <div className={styles.savings}>
+          <div className={styles.savingsTop}>
+            <span className={styles.savingsLabel}>
+              {formatPrice(savedAmount, settings.currencySymbol)} saved of {priceLabel} ({savedPct}%)
+            </span>
+            <span className={styles.savingsRemaining}>{remainingHrsLabel} left to save</span>
+          </div>
+          <div className={styles.savingsBar}>
+            <div className={styles.savingsBarFill} style={{ width: `${savedPct}%` }} />
+          </div>
+        </div>
+      )}
+
       <p className={styles.question}>Do you still want this?</p>
 
       <div className={styles.actions}>
@@ -82,6 +100,7 @@ export function ItemCard({ item, settings, onDecide, onRemove, onEdit }) {
       {editing && (
         <EditItemModal
           item={item}
+          settings={settings}
           onSave={(updates) => onEdit(item.id, updates)}
           onClose={() => setEditing(false)}
         />

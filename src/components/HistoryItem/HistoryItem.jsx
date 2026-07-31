@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Trash2, Pencil } from 'lucide-react';
-import { CATEGORIES, formatPrice, formatDate } from '../../utils';
+import { CATEGORIES, formatPrice, formatDate, formatHours, hoursOfWork } from '../../utils';
 import { ConfirmDialog } from '../ConfirmDialog/ConfirmDialog';
 import { EditItemModal } from '../EditItemModal/EditItemModal';
 import styles from './HistoryItem.module.css';
@@ -10,6 +10,7 @@ export function HistoryItem({ item, settings, onRemove, onEdit }) {
   const [editing, setEditing] = useState(false);
   const { emoji } = CATEGORIES[item.category] || CATEGORIES.other;
   const priceLabel = formatPrice(item.price, settings.currencySymbol);
+  const hrsLabel = formatHours(hoursOfWork(item.price, item.hourlyRateAtDecision ?? settings.hourlyRate));
   const bought = item.status === 'bought';
 
   return (
@@ -19,7 +20,10 @@ export function HistoryItem({ item, settings, onRemove, onEdit }) {
         <span className={styles.name}>{item.name}</span>
         <span className={styles.date}>{formatDate(item.decidedAt)}</span>
       </div>
-      <span className={`mono ${styles.price}`}>{priceLabel}</span>
+      <div className={styles.priceCol}>
+        <span className={`mono ${styles.price}`}>{priceLabel}</span>
+        <span className={`mono ${styles.hours}`}>{hrsLabel}</span>
+      </div>
       <span className={`${styles.badge} ${bought ? styles.bought : styles.passed}`}>
         {bought ? 'bought' : 'passed'}
       </span>
@@ -49,6 +53,7 @@ export function HistoryItem({ item, settings, onRemove, onEdit }) {
       {editing && (
         <EditItemModal
           item={item}
+          settings={settings}
           onSave={(updates) => onEdit(item.id, updates)}
           onClose={() => setEditing(false)}
         />

@@ -4,9 +4,14 @@ const STORAGE_KEY = 'bib-items';
 const SETTINGS_KEY = 'bib-settings';
 
 export const DEFAULT_SETTINGS = {
-  hourlyRate: 27,      // $38 CAD gross * 0.7 (30% tax) ≈ $27 net
+  hourlyRate: 25,
   currency: 'CAD',
   currencySymbol: '$',
+  payPeriod: 'hourly', // 'hourly' | 'monthly' | 'annually'
+  payAmount: 25,
+  payType: 'net',      // 'net' | 'gross'
+  taxRate: 30,
+  hoursPerWeek: 40,
 };
 
 function load(key, fallback) {
@@ -25,7 +30,15 @@ function load(key, fallback) {
 }
 
 export function useItems() {
-  const [items, setItems] = useState(() => load(STORAGE_KEY, []));
+  const [items, setItems] = useState(() => {
+    const loaded = load(STORAGE_KEY, []);
+    const currentSettings = load(SETTINGS_KEY, DEFAULT_SETTINGS);
+    return loaded.map(item =>
+      item.status !== 'waiting' && item.hourlyRateAtDecision == null
+        ? { ...item, hourlyRateAtDecision: currentSettings.hourlyRate }
+        : item
+    );
+  });
   const [settings, setSettings] = useState(() => load(SETTINGS_KEY, DEFAULT_SETTINGS));
 
   useEffect(() => {
@@ -43,6 +56,7 @@ export function useItems() {
       price: parseFloat(item.price),
       category: item.category || 'other',
       note: item.note?.trim() || '',
+      savedAmount: parseFloat(item.savedAmount) || 0,
       addedAt: Date.now(),
       status: 'waiting', // 'waiting' | 'bought' | 'passed'
       decidedAt: null,
@@ -60,6 +74,7 @@ export function useItems() {
           price: parseFloat(updates.price),
           category: updates.category || 'other',
           note: updates.note?.trim() || '',
+          savedAmount: parseFloat(updates.savedAmount) || 0,
         }
         : item
     ));
@@ -68,7 +83,7 @@ export function useItems() {
   const decide = (id, status) => {
     setItems(prev => prev.map(item =>
       item.id === id
-        ? { ...item, status, decidedAt: Date.now() }
+        ? { ...item, status, decidedAt: Date.now(), hourlyRateAtDecision: settings.hourlyRate }
         : item
     ));
   };

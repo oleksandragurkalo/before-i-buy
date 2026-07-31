@@ -1,14 +1,17 @@
 import { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
 import { CATEGORIES } from '../../utils';
+import { NumberStepper } from '../NumberStepper/NumberStepper';
 import styles from './EditItemModal.module.css';
 
-export function EditItemModal({ item, onSave, onClose }) {
+export function EditItemModal({ item, settings, onSave, onClose }) {
+  const symbol = settings?.currencySymbol || '$';
   const [form, setForm] = useState({
     name: item.name,
     price: String(item.price),
     category: item.category,
     note: item.note || '',
+    savedAmount: item.savedAmount ? String(item.savedAmount) : '',
   });
   const [error, setError] = useState('');
 
@@ -57,15 +60,14 @@ export function EditItemModal({ item, onSave, onClose }) {
 
           <div className={styles.row}>
             <div className={styles.field}>
-              <label className={styles.label} htmlFor="edit-price">Price</label>
-              <input
+              <label className={styles.label} htmlFor="edit-price">Price ({symbol})</label>
+              <NumberStepper
                 id="edit-price"
-                className={`${styles.input} mono`}
-                type="number"
-                min="0.01"
-                step="0.01"
                 value={form.price}
-                onChange={set('price')}
+                onChange={(v) => { setForm(prev => ({ ...prev, price: v })); if (error) setError(''); }}
+                min={0}
+                step={1}
+                ariaLabel="price"
               />
             </div>
             <div className={styles.field}>
@@ -94,6 +96,21 @@ export function EditItemModal({ item, onSave, onClose }) {
               maxLength={120}
             />
           </div>
+
+          {item.status === 'waiting' && (
+            <div className={styles.field}>
+              <label className={styles.label} htmlFor="edit-saved">Already saved ({symbol}) <span className={styles.optional}>(optional)</span></label>
+              <NumberStepper
+                id="edit-saved"
+                value={form.savedAmount}
+                onChange={(v) => setForm(prev => ({ ...prev, savedAmount: v }))}
+                placeholder="0"
+                min={0}
+                step={1}
+                ariaLabel="amount already saved"
+              />
+            </div>
+          )}
 
           {error && <p className={styles.error} role="alert">{error}</p>}
         </div>
