@@ -1,9 +1,11 @@
-import { useState, useEffect, useRef } from 'react';
-import { X, Download, Upload } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { Download, Upload } from 'lucide-react';
 import { DEFAULT_SETTINGS } from '../../hooks/useItems';
 import { computeHourlyRate, convertPayAmount, defaultPayAmountFor, formatPrice } from '../../utils';
 import { ConfirmDialog } from '../ConfirmDialog/ConfirmDialog';
 import { NumberStepper } from '../NumberStepper/NumberStepper';
+import { Modal } from '../Modal/Modal';
+import { Button } from '../Button/Button';
 import styles from './SettingsModal.module.css';
 
 const CURRENCIES = [
@@ -20,6 +22,11 @@ const PAY_PERIODS = [
   { value: 'annually', label: 'Annually' },
 ];
 
+const PAY_TYPES = [
+  { value: 'net', label: 'Net' },
+  { value: 'gross', label: 'Gross' },
+];
+
 export function SettingsModal({ settings, onSave, onClose, onExport, onImport }) {
   const [payPeriod, setPayPeriod] = useState(settings.payPeriod || DEFAULT_SETTINGS.payPeriod);
   const [payAmount, setPayAmount] = useState(String(settings.payAmount ?? settings.hourlyRate));
@@ -30,12 +37,6 @@ export function SettingsModal({ settings, onSave, onClose, onExport, onImport })
   const [importError, setImportError] = useState('');
   const [pendingImport, setPendingImport] = useState(null);
   const fileInputRef = useRef(null);
-
-  useEffect(() => {
-    const onKey = (e) => { if (e.key === 'Escape') onClose(); };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [onClose]);
 
   const computedHourlyRate = computeHourlyRate({
     payPeriod, payAmount, payType,
@@ -119,16 +120,21 @@ export function SettingsModal({ settings, onSave, onClose, onExport, onImport })
   };
 
   return (
-    <div className={styles.overlay} onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <div className={styles.modal} role="dialog" aria-modal="true" aria-label="Settings">
-        <div className={styles.header}>
-          <h2 className={styles.title}>Settings</h2>
-          <button className={styles.closeBtn} onClick={onClose} aria-label="Close settings">
-            <X size={16} />
-          </button>
-        </div>
-
-        <div className={styles.body}>
+    <>
+      <Modal
+        title="Settings"
+        onClose={onClose}
+        footer={
+          <div className={styles.footerInner}>
+            <Button variant="text" onClick={reset}>Reset to defaults</Button>
+            <div className={styles.footerRight}>
+              <Button variant="secondary" onClick={onClose}>Cancel</Button>
+              <Button onClick={save}>Save</Button>
+            </div>
+          </div>
+        }
+      >
+        <div className={styles.fields}>
           <div className={styles.field}>
             <label className={styles.label}>
               Your pay
@@ -158,20 +164,16 @@ export function SettingsModal({ settings, onSave, onClose, onExport, onImport })
                 ariaLabel="pay amount"
               />
               <div className={styles.segmented}>
-                <button
-                  type="button"
-                  className={`${styles.segment} ${payType === 'net' ? styles.segmentActive : ''}`}
-                  onClick={() => setPayType('net')}
-                >
-                  Net
-                </button>
-                <button
-                  type="button"
-                  className={`${styles.segment} ${payType === 'gross' ? styles.segmentActive : ''}`}
-                  onClick={() => setPayType('gross')}
-                >
-                  Gross
-                </button>
+                {PAY_TYPES.map(t => (
+                  <button
+                    key={t.value}
+                    type="button"
+                    className={`${styles.segment} ${payType === t.value ? styles.segmentActive : ''}`}
+                    onClick={() => setPayType(t.value)}
+                  >
+                    {t.label}
+                  </button>
+                ))}
               </div>
             </div>
 
@@ -232,14 +234,12 @@ export function SettingsModal({ settings, onSave, onClose, onExport, onImport })
               <span className={styles.hint}>Backup or restore everything (stored only in this browser)</span>
             </label>
             <div className={styles.dataActions}>
-              <button type="button" className={styles.dataBtn} onClick={handleExport}>
-                <Download size={14} />
+              <Button variant="secondary" icon={<Download size={14} />} onClick={handleExport}>
                 Export
-              </button>
-              <button type="button" className={styles.dataBtn} onClick={() => fileInputRef.current?.click()}>
-                <Upload size={14} />
+              </Button>
+              <Button variant="secondary" icon={<Upload size={14} />} onClick={() => fileInputRef.current?.click()}>
                 Import
-              </button>
+              </Button>
               <input
                 ref={fileInputRef}
                 type="file"
@@ -251,18 +251,11 @@ export function SettingsModal({ settings, onSave, onClose, onExport, onImport })
             {importError && <p className={styles.error} role="alert">{importError}</p>}
           </div>
         </div>
-
-        <div className={styles.footer}>
-          <button className={styles.resetBtn} onClick={reset}>Reset to defaults</button>
-          <div className={styles.footerRight}>
-            <button className={styles.cancelBtn} onClick={onClose}>Cancel</button>
-            <button className={styles.saveBtn} onClick={save}>Save</button>
-          </div>
-        </div>
-      </div>
+      </Modal>
 
       {pendingImport && (
         <ConfirmDialog
+          icon="⚠️"
           title="Replace all current data?"
           message={`This will overwrite everything in the app (${pendingImport.items.length} item${pendingImport.items.length === 1 ? '' : 's'} in the file) with no way to undo.`}
           confirmLabel="Replace"
@@ -270,6 +263,6 @@ export function SettingsModal({ settings, onSave, onClose, onExport, onImport })
           onCancel={() => setPendingImport(null)}
         />
       )}
-    </div>
+    </>
   );
 }

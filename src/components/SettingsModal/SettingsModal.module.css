@@ -1,51 +1,4 @@
-.overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.4);
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  z-index: 200;
-  padding: 0;
-}
-
-.modal {
-  background: var(--bg-card);
-  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-  width: 100%;
-  max-width: 480px;
-  box-shadow: 0 -4px 24px rgba(0,0,0,0.12);
-  display: flex;
-  flex-direction: column;
-}
-
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 20px 20px 16px;
-  border-bottom: 1px solid var(--border);
-}
-
-.title {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.closeBtn {
-  display: flex; align-items: center; justify-content: center;
-  width: 28px; height: 28px;
-  border: none; background: transparent;
-  color: var(--text-muted);
-  border-radius: var(--radius);
-  transition: background 0.15s;
-}
-
-.closeBtn:hover { background: var(--bg-subtle); color: var(--text-primary); }
-
-.body {
-  padding: 20px;
+.fields {
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -81,7 +34,7 @@
 
 .segmented {
   display: flex;
-  background: var(--bg-subtle);
+  background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 2px;
@@ -104,7 +57,7 @@
 .segment:hover { color: var(--text-primary); }
 
 .segmentActive {
-  background: var(--bg-card);
+  background: var(--accent-bg);
   color: var(--text-primary);
   box-shadow: var(--shadow);
 }
@@ -134,7 +87,7 @@
 
 select.input {
   padding: 10px 12px;
-  background: var(--bg-subtle);
+  background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   cursor: pointer;
@@ -151,82 +104,22 @@ select.input {
   gap: 8px;
 }
 
-.dataBtn {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  padding: 9px 12px;
-  background: var(--bg-subtle);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  color: var(--text-secondary);
-  font-size: 13px;
-  font-weight: 500;
-  transition: all 0.15s;
-}
-
-.dataBtn:hover { border-color: var(--border-strong); color: var(--text-primary); }
+.dataActions > button { flex: 1; }
 
 .error {
   font-size: 12px;
   color: var(--red);
 }
 
-.footer {
+.footerInner {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  padding: 16px 20px 20px;
-  border-top: 1px solid var(--border);
+  width: 100%;
 }
 
 .footerRight {
   display: flex;
   gap: 8px;
-}
-
-.resetBtn {
-  font-size: 12px;
-  color: var(--text-muted);
-  background: transparent;
-  border: none;
-  padding: 4px 0;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-.resetBtn:hover { color: var(--text-secondary); }
-
-.cancelBtn {
-  padding: 9px 16px;
-  background: transparent;
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius);
-  color: var(--text-secondary);
-  font-size: 13px;
-  font-weight: 500;
-  transition: all 0.15s;
-}
-
-.cancelBtn:hover { border-color: var(--text-primary); color: var(--text-primary); }
-
-.saveBtn {
-  padding: 9px 20px;
-  background: var(--green);
-  border: none;
-  border-radius: var(--radius);
-  color: #fff;
-  font-size: 13px;
-  font-weight: 600;
-  transition: opacity 0.15s;
-}
-
-.saveBtn:hover { opacity: 0.88; }
-
-@media (min-width: 520px) {
-  .overlay { align-items: center; padding: 20px; }
-  .modal { border-radius: var(--radius-lg); }
 }
