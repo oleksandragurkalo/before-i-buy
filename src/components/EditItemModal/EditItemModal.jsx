@@ -10,6 +10,7 @@ export function EditItemModal({ item, settings, onSave, onClose }) {
     category: item.category,
     note: item.note || '',
     savedAmount: item.savedAmount ? String(item.savedAmount) : '',
+    status: item.status,
   };
 
   const { form, error, set, setField, validate } = useItemForm(initial, onClose);
@@ -30,9 +31,11 @@ export function EditItemModal({ item, settings, onSave, onClose }) {
       form={form}
       error={error}
       showSavedAmount={item.status === 'waiting'}
+      showStatus={item.status !== 'waiting'}
       onChange={set}
       onPriceChange={setField('price')}
       onSavedChange={setField('savedAmount')}
+      onStatusChange={setField('status')}
       onSubmit={save}
       onClose={onClose}
     />

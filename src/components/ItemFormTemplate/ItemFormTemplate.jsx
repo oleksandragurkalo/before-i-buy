@@ -5,6 +5,22 @@ import { Modal } from '../Modal/Modal';
 import { Button } from '../Button/Button';
 import styles from './ItemFormTemplate.module.css';
 
+const STATUS_OPTIONS = [
+  { value: 'passed', label: "Didn't need it", tone: 'pass' },
+  { value: 'bought', label: 'Bought it', tone: 'buy' },
+];
+
+function Field({ label, htmlFor, optional, children }) {
+  return (
+    <div className={styles.field}>
+      <label className={styles.label} htmlFor={htmlFor}>
+        {label} {optional && <span className={styles.optional}>(optional)</span>}
+      </label>
+      {children}
+    </div>
+  );
+}
+
 export function ItemFormTemplate({
   title,
   submitLabel,
@@ -12,9 +28,11 @@ export function ItemFormTemplate({
   form,
   error,
   showSavedAmount = true,
+  showStatus = false,
   onChange,
   onPriceChange,
   onSavedChange,
+  onStatusChange,
   onSubmit,
   onClose,
 }) {
@@ -32,8 +50,7 @@ export function ItemFormTemplate({
       }
     >
       <form id={formId} onSubmit={onSubmit} className={styles.form} noValidate>
-        <div className={styles.field}>
-          <label className={styles.label} htmlFor="item-name">What do you want?</label>
+        <Field label="What do you want?" htmlFor="item-name">
           <input
             id="item-name"
             className={styles.input}
@@ -44,11 +61,10 @@ export function ItemFormTemplate({
             autoFocus
             maxLength={80}
           />
-        </div>
+        </Field>
 
         <div className={styles.row}>
-          <div className={styles.field}>
-            <label className={styles.label} htmlFor="item-price">Price ({symbol})</label>
+          <Field label={`Price (${symbol})`} htmlFor="item-price">
             <NumberStepper
               id="item-price"
               value={form.price}
@@ -58,9 +74,9 @@ export function ItemFormTemplate({
               step={1}
               ariaLabel="price"
             />
-          </div>
-          <div className={styles.field}>
-            <label className={styles.label} htmlFor="item-category">Category</label>
+          </Field>
+
+          <Field label="Category" htmlFor="item-category">
             <select
               id="item-category"
               className={styles.input}
@@ -71,13 +87,10 @@ export function ItemFormTemplate({
                 <option key={key} value={key}>{emoji} {label}</option>
               ))}
             </select>
-          </div>
+          </Field>
         </div>
 
-        <div className={styles.field}>
-          <label className={styles.label} htmlFor="item-note">
-            Why do you want it? <span className={styles.optional}>(optional)</span>
-          </label>
+        <Field label="Why do you want it?" htmlFor="item-note" optional>
           <input
             id="item-note"
             className={styles.input}
@@ -87,13 +100,27 @@ export function ItemFormTemplate({
             onChange={onChange('note')}
             maxLength={120}
           />
-        </div>
+        </Field>
+
+        {showStatus && (
+          <Field label="Decision">
+            <div className={styles.segmented}>
+              {STATUS_OPTIONS.map(({ value, label, tone }) => (
+                <button
+                  key={value}
+                  type="button"
+                  className={`${styles.segment} ${form.status === value ? `${styles.segmentActive} ${styles[tone]}` : ''}`}
+                  onClick={() => onStatusChange(value)}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </Field>
+        )}
 
         {showSavedAmount && (
-          <div className={styles.field}>
-            <label className={styles.label} htmlFor="item-saved">
-              Already saved ({symbol}) <span className={styles.optional}>(optional)</span>
-            </label>
+          <Field label={`Already saved (${symbol})`} htmlFor="item-saved" optional>
             <NumberStepper
               id="item-saved"
               value={form.savedAmount}
@@ -103,7 +130,7 @@ export function ItemFormTemplate({
               step={1}
               ariaLabel="amount already saved"
             />
-          </div>
+          </Field>
         )}
 
         {error && <p className={styles.error} role="alert">{error}</p>}

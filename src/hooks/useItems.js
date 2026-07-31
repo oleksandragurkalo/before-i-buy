@@ -76,6 +76,7 @@ export function useItems() {
           category: updates.category || 'other',
           note: updates.note?.trim() || '',
           savedAmount: parseFloat(updates.savedAmount) || 0,
+          status: updates.status ?? item.status,
         }
         : item
     ));
