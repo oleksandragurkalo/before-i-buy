@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Plus } from 'lucide-react';
 import { useItems } from './hooks/useItems';
 import { NavBar } from './components/NavBar/NavBar';
 import { StartPage } from './components/StartPage/StartPage';
@@ -8,22 +9,26 @@ import { HistoryItem } from './components/HistoryItem/HistoryItem';
 import { SettingsModal } from './components/SettingsModal/SettingsModal';
 import { InsightsPanel } from './components/InsightsPanel/InsightsPanel';
 import { FilterBar } from './components/FilterBar/FilterBar';
-import { formatPrice, sortItems, groupByCategory } from './utils';
+import { StatTile } from './components/StatTile/StatTile';
+import { formatPrice, formatHours, sortItems, groupByCategory, computeHeaderStats } from './utils';
 import styles from './App.module.css';
+import { StatTiles } from './components/StatTiles/StatTiles.jsx';
 
 export default function App() {
   const [view, setView] = useState('start');
   const [showSettings, setShowSettings] = useState(false);
+  const [showAddItem, setShowAddItem] = useState(false);
   const [sortBy, setSortBy] = useState('newest');
   const [filterCategory, setFilterCategory] = useState('all');
   const [grouped, setGrouped] = useState(false);
   const {
     waiting, history,
-    totalSaved, totalSpent,
     settings, updateSettings,
     addItem, editItem, decide, removeItem,
     exportData, importData,
   } = useItems();
+
+  const headerStats = computeHeaderStats(waiting, history, settings.hourlyRate);
 
   const navigate = (nextView) => {
     setView(nextView);
@@ -69,27 +74,22 @@ export default function App() {
       <main className={styles.main}>
         <div className={styles.layout}>
           <div className={styles.content}>
-            {history.length > 0 && (
-              <div className={styles.summary}>
-                <div className={styles.summaryItem}>
-                  <span className={`${styles.summaryValue} mono`} style={{ color: 'var(--green)' }}>
-                    {formatPrice(totalSaved, settings.currencySymbol)}
-                  </span>
-                  <span className={styles.summaryLabel}>resisted</span>
-                </div>
-                <div className={styles.summaryDivider} />
-                <div className={styles.summaryItem}>
-                  <span className={`${styles.summaryValue} mono`} style={{ color: 'var(--text-secondary)' }}>
-                    {formatPrice(totalSpent, settings.currencySymbol)}
-                  </span>
-                  <span className={styles.summaryLabel}>bought anyway</span>
-                </div>
-              </div>
-            )}
 
             {view === 'waiting' && (
               <section className={styles.section} aria-label="Items waiting">
-                <AddItemForm onAdd={addItem} symbol={settings.currencySymbol} />
+                <aside className={styles.aside}>
+                  <InsightsPanel waiting={waiting} history={history} settings={settings} />
+                </aside>
+                <StatTiles className={styles.statsRow} headerStats={headerStats} currencySymbol={settings.currencySymbol} />
+
+                <button type="button" className={styles.addItemBtn} onClick={() => setShowAddItem(true)}>
+                  <Plus size={16} />
+                  Add Item
+                </button>
+                {showAddItem && (
+                  <AddItemForm onAdd={addItem} onClose={() => setShowAddItem(false)} symbol={settings.currencySymbol} />
+                )}
+
                 {waiting.length === 0 ? (
                   <div className={styles.empty}>
                     <p className={styles.emptyIcon} aria-hidden="true">🎉</p>
@@ -146,10 +146,6 @@ export default function App() {
               </section>
             )}
           </div>
-
-          <aside className={styles.aside}>
-            <InsightsPanel waiting={waiting} history={history} settings={settings} />
-          </aside>
         </div>
       </main>
       )}

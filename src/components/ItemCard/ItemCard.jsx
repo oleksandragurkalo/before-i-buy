@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Trash2, Pencil, ShoppingBag, ThumbsDown } from 'lucide-react';
-import { CATEGORIES, hoursOfWork, formatHours, formatPrice, daysAgo } from '../../utils';
+import { CATEGORIES, hoursOfWork, formatHours, formatPrice, daysAgo, daysSince } from '../../utils';
 import { ConfirmDialog } from '../ConfirmDialog/ConfirmDialog';
 import { EditItemModal } from '../EditItemModal/EditItemModal';
 import styles from './ItemCard.module.css';
@@ -16,6 +16,7 @@ export function ItemCard({ item, settings, onDecide, onRemove, onEdit }) {
   const savedPct = item.price > 0 ? Math.round((savedAmount / item.price) * 100) : 0;
   const remaining = Math.max(0, item.price - savedAmount);
   const remainingHrsLabel = formatHours(hoursOfWork(remaining, settings.hourlyRate));
+  const waitingDays = daysSince(item.addedAt);
 
   return (
     <article className={styles.card}>
@@ -41,6 +42,10 @@ export function ItemCard({ item, settings, onDecide, onRemove, onEdit }) {
           >
             <Trash2 size={14} />
           </button>
+        </div>
+        <div className={styles.dayBadge} aria-label={`Waiting ${waitingDays} day${waitingDays === 1 ? '' : 's'}`}>
+          <span className={styles.dayBadgeNum}>{waitingDays}</span>
+          <span className={styles.dayBadgeLabel}>{waitingDays === 1 ? 'day' : 'days'}</span>
         </div>
       </div>
 

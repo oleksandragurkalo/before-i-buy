@@ -6,7 +6,6 @@ const FEATURES = [
   { icon: ShoppingCart, tone: 'purple', title: 'See real cost in hours', body: 'Know how long you work for it' },
   { icon: AlarmClock, tone: 'blue', title: 'Day counter & reminders', body: 'Give yourself time to decide' },
   { icon: CheckCircle2, tone: 'green', title: 'Track decisions', body: 'Resisted vs bought anyway' },
-  { icon: Lock, tone: 'red', title: 'Private & local', body: '100% stored in your browser' },
   { icon: Smartphone, tone: 'gray', title: 'Works everywhere', body: 'Fully responsive on any device' },
 ];
 

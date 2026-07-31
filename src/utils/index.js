@@ -67,6 +67,10 @@ export function daysAgo(timestamp) {
   return `${days} days ago`;
 }
 
+export function daysSince(timestamp) {
+  return Math.floor((Date.now() - timestamp) / (1000 * 60 * 60 * 24));
+}
+
 export function formatDate(timestamp) {
   return new Date(timestamp).toLocaleDateString('en-CA', {
     month: 'short', day: 'numeric', year: 'numeric'
@@ -124,4 +128,37 @@ export function computeInsights(waiting, history) {
     .slice(0, 3);
 
   return { resistanceRate, categoryBreakdown, topTemptations, totalItems: all.length };
+}
+
+function series(items, valueFn, cap = 8) {
+  const values = items.map(valueFn);
+  return values.length >= 2 ? values.slice(-cap) : null;
+}
+
+export function computeHeaderStats(waiting, history, hourlyRate) {
+  const passed = [...history.filter(i => i.status === 'passed')].sort((a, b) => a.decidedAt - b.decidedAt);
+  const bought = [...history.filter(i => i.status === 'bought')].sort((a, b) => a.decidedAt - b.decidedAt);
+
+  let runningSaved = 0;
+  const resistedSeries = series(passed, i => (runningSaved += i.price));
+  runningSaved = 0;
+
+  let runningSpent = 0;
+  const spentSeries = series(bought, i => (runningSpent += i.price));
+  runningSpent = 0;
+
+  const hoursForItem = (item) => hoursOfWork(item.price, item.hourlyRateAtDecision ?? hourlyRate);
+  const hoursSeries = series(passed, hoursForItem);
+  const hoursSaved = passed.reduce((sum, i) => sum + hoursForItem(i), 0);
+
+  return {
+    totalSaved: passed.reduce((sum, i) => sum + i.price, 0),
+    resistedCount: passed.length,
+    resistedSeries,
+    totalSpent: bought.reduce((sum, i) => sum + i.price, 0),
+    spentCount: bought.length,
+    spentSeries,
+    hoursSaved,
+    hoursSeries,
+  };
 }
