@@ -56,7 +56,7 @@ export function formatHours(hours) {
 }
 
 export function formatPrice(price, symbol = '$') {
-  return `${symbol}${price.toLocaleString('en-CA', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
+  return `${symbol} ${price.toLocaleString('en-CA', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
 }
 
 export function daysAgo(timestamp) {
