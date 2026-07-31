@@ -83,6 +83,41 @@
 
 .settingsPill:hover { color: var(--text-primary); border-color: var(--border-strong); }
 
+.themeSwitch {
+  flex-shrink: 0;
+  position: relative;
+  width: 42px;
+  height: 24px;
+  padding: 2px;
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  background: var(--bg-grey);
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.themeSwitch[aria-checked="true"] {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.themeThumb {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  color: var(--amber);
+  transform: translateX(0);
+  transition: transform 0.15s;
+}
+
+.themeSwitch[aria-checked="true"] .themeThumb {
+  transform: translateX(18px);
+  color: var(--accent);
+}
+
 @media (max-width: 560px) {
   .brand { display: none; }
   .pill span,

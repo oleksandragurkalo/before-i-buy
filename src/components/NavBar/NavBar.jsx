@@ -1,4 +1,5 @@
-import { Home, Clock3, ListChecks, Settings } from 'lucide-react';
+import { Home, Clock3, ListChecks, Settings, Sun, Moon } from 'lucide-react';
+import { useTheme } from '../../context/ThemeContext';
 import styles from './NavBar.module.css';
 
 const DESTINATIONS = [
@@ -8,6 +9,8 @@ const DESTINATIONS = [
 ];
 
 export function NavBar({ view, onNavigate, onSettingsClick }) {
+  const { theme, toggle } = useTheme();
+
   return (
     <nav className={styles.nav}>
       <div className={styles.inner}>
@@ -30,6 +33,21 @@ export function NavBar({ view, onNavigate, onSettingsClick }) {
           <Settings size={13} />
           <span>Settings</span>
         </button>
+
+        {view !== 'start' && (
+          <button
+            type="button"
+            role="switch"
+            aria-checked={theme === 'dark'}
+            aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            className={styles.themeSwitch}
+            onClick={toggle}
+          >
+            <span className={styles.themeThumb}>
+              {theme === 'dark' ? <Moon size={11} /> : <Sun size={11} />}
+            </span>
+          </button>
+        )}
       </div>
     </nav>
   );
