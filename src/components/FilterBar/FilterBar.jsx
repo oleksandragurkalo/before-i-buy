@@ -1,5 +1,6 @@
 import { Rows3, LayoutGrid } from 'lucide-react';
 import { CATEGORIES } from '../../utils';
+import { Dropdown } from '../Dropdown/Dropdown';
 import styles from './FilterBar.module.css';
 
 const SORT_OPTIONS = [
@@ -10,32 +11,18 @@ const SORT_OPTIONS = [
 ];
 
 export function FilterBar({ sortBy, onSortChange, filterCategory, onFilterChange, availableCategories, grouped, onGroupToggle }) {
+  const categoryOptions = [
+    { value: 'all', label: 'All categories' },
+    ...availableCategories.map(key => ({
+      value: key,
+      label: `${(CATEGORIES[key] || CATEGORIES.other).emoji} ${(CATEGORIES[key] || CATEGORIES.other).label}`,
+    })),
+  ];
+
   return (
     <div className={styles.bar}>
-      <select
-        className={styles.select}
-        value={sortBy}
-        onChange={(e) => onSortChange(e.target.value)}
-        aria-label="Sort by"
-      >
-        {SORT_OPTIONS.map(o => (
-          <option key={o.value} value={o.value}>{o.label}</option>
-        ))}
-      </select>
-
-      <select
-        className={styles.select}
-        value={filterCategory}
-        onChange={(e) => onFilterChange(e.target.value)}
-        aria-label="Filter by category"
-      >
-        <option value="all">All categories</option>
-        {availableCategories.map(key => (
-          <option key={key} value={key}>
-            {(CATEGORIES[key] || CATEGORIES.other).emoji} {(CATEGORIES[key] || CATEGORIES.other).label}
-          </option>
-        ))}
-      </select>
+      <Dropdown value={sortBy} options={SORT_OPTIONS} onChange={onSortChange} ariaLabel="Sort by" />
+      <Dropdown value={filterCategory} options={categoryOptions} onChange={onFilterChange} ariaLabel="Filter by category" />
 
       <button
         type="button"
