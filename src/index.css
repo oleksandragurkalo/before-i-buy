@@ -15,6 +15,9 @@
   --red-bg: #FBEAEA;
   --amber: #8A6000;
   --amber-bg: #FEF7E6;
+  --accent: #6C3FD4;
+  --accent-bg: #EDE8FA;
+  --accent-contrast: #FFFFFF;
   --radius: 6px;
   --radius-lg: 12px;
   --font-body: 'Inter', system-ui, sans-serif;
@@ -37,6 +40,9 @@
   --red-bg: #2A0E0E;
   --amber: #D4A017;
   --amber-bg: #2A200A;
+  --accent: #9B7BE8;
+  --accent-bg: #2A2140;
+  --accent-contrast: #FFFFFF;
   --shadow: 0 1px 3px rgba(0,0,0,0.3);
 }
 

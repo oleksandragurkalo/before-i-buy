@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useItems } from './hooks/useItems';
-import { useTheme } from './context/ThemeContext';
-import { Header } from './components/Header/Header';
+import { NavBar } from './components/NavBar/NavBar';
+import { StartPage } from './components/StartPage/StartPage';
 import { AddItemForm } from './components/AddItemForm/AddItemForm';
 import { ItemCard } from './components/ItemCard/ItemCard';
 import { HistoryItem } from './components/HistoryItem/HistoryItem';
@@ -12,7 +12,7 @@ import { formatPrice, sortItems, groupByCategory } from './utils';
 import styles from './App.module.css';
 
 export default function App() {
-  const [tab, setTab] = useState('waiting');
+  const [view, setView] = useState('start');
   const [showSettings, setShowSettings] = useState(false);
   const [sortBy, setSortBy] = useState('newest');
   const [filterCategory, setFilterCategory] = useState('all');
@@ -24,10 +24,9 @@ export default function App() {
     addItem, editItem, decide, removeItem,
     exportData, importData,
   } = useItems();
-  const { theme } = useTheme();
 
-  const changeTab = (nextTab) => {
-    setTab(nextTab);
+  const navigate = (nextView) => {
+    setView(nextView);
     setFilterCategory('all');
   };
 
@@ -62,7 +61,11 @@ export default function App() {
 
   return (
     <div className={styles.app}>
-      <Header onSettingsClick={() => setShowSettings(true)} />
+      <NavBar view={view} onNavigate={navigate} onSettingsClick={() => setShowSettings(true)} />
+
+      {view === 'start' && <StartPage onGetStarted={() => navigate('waiting')} />}
+
+      {view !== 'start' && (
       <main className={styles.main}>
         <div className={styles.layout}>
           <div className={styles.content}>
@@ -84,28 +87,7 @@ export default function App() {
               </div>
             )}
 
-            <div className={styles.tabs} role="tablist">
-              <button
-                role="tab"
-                aria-selected={tab === 'waiting'}
-                className={`${styles.tab} ${tab === 'waiting' ? styles.tabActive : ''}`}
-                onClick={() => changeTab('waiting')}
-              >
-                Waiting
-                {waiting.length > 0 && <span className={styles.tabCount}>{waiting.length}</span>}
-              </button>
-              <button
-                role="tab"
-                aria-selected={tab === 'history'}
-                className={`${styles.tab} ${tab === 'history' ? styles.tabActive : ''}`}
-                onClick={() => changeTab('history')}
-              >
-                History
-                {history.length > 0 && <span className={styles.tabCount}>{history.length}</span>}
-              </button>
-            </div>
-
-            {tab === 'waiting' && (
+            {view === 'waiting' && (
               <section className={styles.section} aria-label="Items waiting">
                 <AddItemForm onAdd={addItem} symbol={settings.currencySymbol} />
                 {waiting.length === 0 ? (
@@ -135,7 +117,7 @@ export default function App() {
               </section>
             )}
 
-            {tab === 'history' && (
+            {view === 'history' && (
               <section className={styles.section} aria-label="Decision history">
                 {history.length === 0 ? (
                   <div className={styles.empty}>
@@ -170,6 +152,7 @@ export default function App() {
           </aside>
         </div>
       </main>
+      )}
       {showSettings && (
         <SettingsModal
           settings={settings}
