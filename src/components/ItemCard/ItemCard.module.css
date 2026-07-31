@@ -59,25 +59,6 @@
   gap: 2px;
 }
 
-.removeBtn {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px; height: 28px;
-  background: transparent;
-  border: none;
-  color: var(--text-muted);
-  border-radius: var(--radius);
-  opacity: 1;
-  transition: opacity 0.15s, background 0.15s, color 0.15s;
-}
-
-.removeBtn:hover {
-  background: var(--red-bg);
-  color: var(--red);
-}
-
 .dayBadge {
   flex-shrink: 0;
   width: 48px;
@@ -110,7 +91,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  background: var(--bg-subtle);
+  background: var(--bg-card);
   border-radius: var(--radius);
   padding: 14px 16px;
 }
@@ -180,7 +161,7 @@
 
 .savingsBar {
   height: 6px;
-  background: var(--bg-subtle);
+  background: var(--bg-grey);
   border-radius: 100px;
   overflow: hidden;
 }
@@ -197,46 +178,6 @@
   color: var(--text-secondary);
   text-align: center;
 }
-
-.actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
-
-.actionBtn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  padding: 10px 12px;
-  border-radius: var(--radius);
-  font-size: 13px;
-  font-weight: 600;
-  border: none;
-  transition: opacity 0.15s, transform 0.1s;
-}
-
-.actionBtn:active { transform: scale(0.97); }
-
-.passBtn {
-  background: var(--bg-subtle);
-  color: var(--text-secondary);
-  border: 1px solid var(--border-strong);
-}
-
-.passBtn:hover {
-  background: var(--green-bg);
-  color: var(--green);
-  border-color: var(--green);
-}
-
-.buyBtn {
-  background: var(--text-primary);
-  color: var(--bg);
-}
-
-.buyBtn:hover { opacity: 0.82; }
 
 @media (max-width: 380px) {
   .cost { flex-direction: column; gap: 8px; align-items: flex-start; }

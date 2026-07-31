@@ -1,13 +1,14 @@
-import { useState } from 'react';
 import { Trash2, Pencil } from 'lucide-react';
 import { CATEGORIES, formatPrice, formatDate, formatHours, hoursOfWork } from '../../utils';
-import { ConfirmDialog } from '../ConfirmDialog/ConfirmDialog';
-import { EditItemModal } from '../EditItemModal/EditItemModal';
+import { useItemActionDialogs } from '../../hooks/useItemActionDialogs';
+import { Button } from '../Button/Button';
 import styles from './HistoryItem.module.css';
 
 export function HistoryItem({ item, settings, onRemove, onEdit }) {
-  const [confirmingRemove, setConfirmingRemove] = useState(false);
-  const [editing, setEditing] = useState(false);
+  const { setEditing, setConfirmingRemove, dialogs } = useItemActionDialogs({
+    item, settings, onRemove, onEdit,
+    confirmTitle: `Remove "${item.name}" from history?`,
+  });
   const { emoji } = CATEGORIES[item.category] || CATEGORIES.other;
   const priceLabel = formatPrice(item.price, settings.currencySymbol);
   const hrsLabel = formatHours(hoursOfWork(item.price, item.hourlyRateAtDecision ?? settings.hourlyRate));
@@ -27,37 +28,14 @@ export function HistoryItem({ item, settings, onRemove, onEdit }) {
       <span className={`${styles.badge} ${bought ? styles.bought : styles.passed}`}>
         {bought ? 'bought' : 'passed'}
       </span>
-      <button
-        className={styles.remove}
-        onClick={() => setEditing(true)}
-        aria-label="Edit item"
-      >
+      <Button variant="icon" onClick={() => setEditing(true)} aria-label="Edit item">
         <Pencil size={13} />
-      </button>
-      <button
-        className={styles.remove}
-        onClick={() => setConfirmingRemove(true)}
-        aria-label="Remove from history"
-      >
+      </Button>
+      <Button variant="icon" tone="danger" onClick={() => setConfirmingRemove(true)} aria-label="Remove from history">
         <Trash2 size={13} />
-      </button>
+      </Button>
 
-      {confirmingRemove && (
-        <ConfirmDialog
-          title={`Remove "${item.name}" from history?`}
-          onConfirm={() => onRemove(item.id)}
-          onCancel={() => setConfirmingRemove(false)}
-        />
-      )}
-
-      {editing && (
-        <EditItemModal
-          item={item}
-          settings={settings}
-          onSave={(updates) => onEdit(item.id, updates)}
-          onClose={() => setEditing(false)}
-        />
-      )}
+      {dialogs}
     </div>
   );
 }

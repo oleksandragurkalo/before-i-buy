@@ -1,13 +1,17 @@
 import { useState } from 'react';
-import { Trash2, Pencil, ShoppingBag, ThumbsDown } from 'lucide-react';
+import { Pencil, Scale, Trash2 } from 'lucide-react';
 import { CATEGORIES, hoursOfWork, formatHours, formatPrice, daysAgo, daysSince } from '../../utils';
-import { ConfirmDialog } from '../ConfirmDialog/ConfirmDialog';
-import { EditItemModal } from '../EditItemModal/EditItemModal';
+import { useItemActionDialogs } from '../../hooks/useItemActionDialogs';
+import { Button } from '../Button/Button';
+import { DecisionModal } from '../DecisionModal/DecisionModal';
 import styles from './ItemCard.module.css';
 
 export function ItemCard({ item, settings, onDecide, onRemove, onEdit }) {
-  const [confirmingRemove, setConfirmingRemove] = useState(false);
-  const [editing, setEditing] = useState(false);
+  const [decisionOpen, setDecisionOpen] = useState(false);
+  const { setEditing, dialogs } = useItemActionDialogs({
+    item, settings, onRemove, onEdit,
+    confirmRemoval: false,
+  });
   const { emoji } = CATEGORIES[item.category] || CATEGORIES.other;
   const hrs = hoursOfWork(item.price, settings.hourlyRate);
   const hrsLabel = formatHours(hrs);
@@ -28,20 +32,12 @@ export function ItemCard({ item, settings, onDecide, onRemove, onEdit }) {
           <p className={styles.when}>{daysAgo(item.addedAt)}</p>
         </div>
         <div className={styles.cardActions}>
-          <button
-            className={styles.removeBtn}
-            onClick={() => setEditing(true)}
-            aria-label="Edit item"
-          >
+          <Button variant="icon" onClick={() => setEditing(true)} aria-label="Edit item">
             <Pencil size={14} />
-          </button>
-          <button
-            className={styles.removeBtn}
-            onClick={() => setConfirmingRemove(true)}
-            aria-label="Remove item"
-          >
+          </Button>
+          <Button variant="icon" tone="danger" onClick={() => setDecisionOpen(true)} aria-label="Remove item">
             <Trash2 size={14} />
-          </button>
+          </Button>
         </div>
         <div className={styles.dayBadge} aria-label={`Waiting ${waitingDays} day${waitingDays === 1 ? '' : 's'}`}>
           <span className={styles.dayBadgeNum}>{waitingDays}</span>
@@ -77,39 +73,21 @@ export function ItemCard({ item, settings, onDecide, onRemove, onEdit }) {
 
       <p className={styles.question}>Do you still want this?</p>
 
-      <div className={styles.actions}>
-        <button
-          className={`${styles.actionBtn} ${styles.passBtn}`}
-          onClick={() => onDecide(item.id, 'passed')}
-        >
-          <ThumbsDown size={15} />
-          I don't need it
-        </button>
-        <button
-          className={`${styles.actionBtn} ${styles.buyBtn}`}
-          onClick={() => onDecide(item.id, 'bought')}
-        >
-          <ShoppingBag size={15} />
-          I bought it
-        </button>
-      </div>
+      <Button fullWidth icon={<Scale size={15} />} onClick={() => setDecisionOpen(true)}>
+        Decide
+      </Button>
 
-      {confirmingRemove && (
-        <ConfirmDialog
-          title={`Remove "${item.name}"?`}
-          onConfirm={() => onRemove(item.id)}
-          onCancel={() => setConfirmingRemove(false)}
-        />
-      )}
-
-      {editing && (
-        <EditItemModal
+      {decisionOpen && (
+        <DecisionModal
           item={item}
           settings={settings}
-          onSave={(updates) => onEdit(item.id, updates)}
-          onClose={() => setEditing(false)}
+          onDecide={(status) => { onDecide(item.id, status); setDecisionOpen(false); }}
+          onRemove={() => { onRemove(item.id); setDecisionOpen(false); }}
+          onClose={() => setDecisionOpen(false)}
         />
       )}
+
+      {dialogs}
     </article>
   );
 }
