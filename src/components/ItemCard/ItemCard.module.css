@@ -236,3 +236,22 @@
 .card.grid .hoursValue { font-size: 26px; font-weight: 700; }
 
 .card.grid .question { display: none; }
+
+@media (max-width: 480px) {
+  .card.grid { padding: 10px; gap: 8px; }
+  .card.grid .top { flex-wrap: wrap; gap: 6px; }
+  .card.grid .categoryTag { display: none; }
+  .card.grid .emoji { font-size: 18px; }
+  .card.grid .name { font-size: 13px; }
+
+  .card.grid .dayBadge {
+    width: 26px;
+    height: 26px;
+    border-width: 1px;
+    margin-left: 0;
+  }
+  .card.grid .dayBadgeNum { font-size: 10px; }
+  .card.grid .dayBadgeLabel { display: none; }
+
+  .card.grid .hoursValue { font-size: 20px; }
+}

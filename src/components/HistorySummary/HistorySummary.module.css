@@ -70,3 +70,14 @@
 
 .red { background: linear-gradient(135deg, var(--red-bg) 0%, var(--bg-card) 80%); border-color: var(--red); }
 .red .title, .red .count, .red .amount { color: var(--red); }
+
+@media (max-width: 560px) {
+  /* Match StatTile's compact mobile sizing instead of the desktop-sized
+     huge numbers. */
+  .card { padding: 14px 16px; gap: 6px; }
+  .title { font-size: 12px; font-weight: 600; }
+  .count { font-size: 24px; font-weight: 700; }
+  .countLabel { font-size: 11px; font-weight: 500; }
+  .amount { font-size: 18px; font-weight: 700; }
+  .hoursLabel { font-size: 11px; }
+}
