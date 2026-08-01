@@ -16,6 +16,7 @@
     color: var(--text-primary);
     cursor: pointer;
     user-select: none;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .titleWrapper {
@@ -44,6 +45,7 @@
     display: grid;
     grid-template-rows: 0fr;
     transition: grid-template-rows 0.25s ease;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .dropdownWrapper.open {
