@@ -2,7 +2,7 @@
 	"name": "before-i-buy",
 	"version": "1.0.0",
 	"description": "Anti-impulse-purchase tracker — see how many hours of work something costs before you buy it",
-	"author": "Sandra Gurkalo",
+	"author": "Oleksandra Gurkalo",
 	"license": "MIT",
 	"private": true,
 	"type": "module",
