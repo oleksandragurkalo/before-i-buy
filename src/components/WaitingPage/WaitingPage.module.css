@@ -1,0 +1,15 @@
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.statsRow {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 10px;
+}
+
+@media (min-width: 560px) {
+  .statsRow { grid-template-columns: repeat(3, 1fr); }
+}
