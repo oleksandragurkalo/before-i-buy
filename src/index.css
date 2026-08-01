@@ -69,3 +69,8 @@ a, button, input, select, textarea, [role="button"] { -webkit-tap-highlight-colo
 
 .mono { font-family: var(--font-mono); }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
+
+@media (max-width: 600px) {
+  /* Keeps iOS Safari from auto-zooming on focus (triggers below 16px). */
+  input, select, textarea { font-size: 16px; }
+}

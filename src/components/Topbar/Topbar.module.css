@@ -74,3 +74,10 @@
   display: flex;
   gap: 8px;
 }
+
+@media (max-width: 600px) {
+  /* .input's 16px comes from the global mobile rule in index.css (real
+     <input> elements only); .measure is a plain span so it needs its own
+     override to keep the width calc in sync with the rendered input font. */
+  .measure { font-size: 16px; }
+}
