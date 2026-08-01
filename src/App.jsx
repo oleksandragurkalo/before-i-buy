@@ -6,13 +6,16 @@ import { StartPage } from './components/StartPage/StartPage';
 import { AddItemForm } from './components/AddItemForm/AddItemForm';
 import { ItemCard } from './components/ItemCard/ItemCard';
 import { HistoryItem } from './components/HistoryItem/HistoryItem';
+import { HistoryTableHeader } from './components/HistoryItem/HistoryTableHeader';
 import { SettingsModal } from './components/SettingsModal/SettingsModal';
 import { InsightsPanel } from './components/InsightsPanel/InsightsPanel';
 import { ItemListSection } from './components/ItemListSection/ItemListSection';
 import { StatTiles } from './components/StatTiles/StatTiles';
+import { HistorySummary } from './components/HistorySummary/HistorySummary';
+import { ResistanceMeter } from './components/ResistanceMeter/ResistanceMeter';
 import { Topbar } from './components/Topbar/Topbar';
 import { Button } from './components/Button/Button';
-import { computeHeaderStats } from './utils';
+import { computeHeaderStats, computeInsights } from './utils';
 import styles from './App.module.css';
 
 export default function App() {
@@ -23,6 +26,7 @@ export default function App() {
   const [filterCategory, setFilterCategory] = useState('all');
   const [grouped, setGrouped] = useState(false);
   const [viewMode, setViewMode] = useState('grid');
+  const [decisionFilter, setDecisionFilter] = useState('all');
   const {
     waiting, history,
     settings, updateSettings,
@@ -31,10 +35,12 @@ export default function App() {
   } = useItems();
 
   const headerStats = computeHeaderStats(waiting, history, settings.hourlyRate);
+  const { resistanceRate } = computeInsights(waiting, history);
 
   const navigate = (nextView) => {
     setView(nextView);
     setFilterCategory('all');
+    setDecisionFilter('all');
   };
 
   const listProps = {
@@ -94,6 +100,12 @@ export default function App() {
 
             {view === 'history' && (
               <section className={styles.section} aria-label="Decision history">
+                <aside className={styles.aside}>
+                  <InsightsPanel waiting={waiting} history={history} settings={settings} />
+                </aside>
+
+                <HistorySummary headerStats={headerStats} currencySymbol={settings.currencySymbol} />
+
                 <ItemListSection
                   items={history}
                   dateField="decidedAt"
@@ -102,10 +114,15 @@ export default function App() {
                   emptyBody="Items you decide on will appear here."
                   {...listProps}
                   viewMode="rows"
+                  decisionFilter={decisionFilter}
+                  onDecisionFilterChange={setDecisionFilter}
+                  header={<HistoryTableHeader />}
                   renderItem={(item) => (
                     <HistoryItem item={item} settings={settings} onRemove={removeItem} onEdit={editItem} />
                   )}
                 />
+
+                <ResistanceMeter resistanceRate={resistanceRate} />
               </section>
             )}
           </div>
