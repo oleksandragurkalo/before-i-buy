@@ -33,7 +33,13 @@
 .dropdownIcon {
     width: 16px;
     height: 16px;
-    transition: transform 0.2s ease;
+    transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+:global([data-theme='dark']) .dropdownIcon {
+    /* The SVG has a hardcoded dark stroke, so it's invisible against the
+       dark card background without inverting it. */
+    filter: invert(1);
 }
 
 .dropdownIconOpen {

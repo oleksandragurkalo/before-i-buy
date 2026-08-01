@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { TrendingUp } from 'lucide-react';
 import { computeInsights, formatPrice, formatHours, hoursOfWork } from '../../utils';
 import styles from './InsightsPanel.module.css';
-import dropdownIcon from '../../assets/dropdown-icon.png';
+import dropdownIcon from '../../assets/icon-arrow-down.svg';
 
 export function InsightsPanel({ waiting, history, settings }) {
   const { resistanceRate, categoryBreakdown, topTemptations, totalItems } = computeInsights(waiting, history);
