@@ -9,7 +9,7 @@ export function WaitingPage({ waiting, history, settings, onDecide, onRemove, on
   const [sortBy, setSortBy] = useState('newest');
   const [filterCategory, setFilterCategory] = useState('all');
   const [grouped, setGrouped] = useState(false);
-  const [viewMode, setViewMode] = useState('grid');
+  const [viewMode, setViewMode] = useState(() => (window.innerWidth < 640 ? 'rows' : 'grid'));
 
   const headerStats = computeHeaderStats(waiting, history, settings.hourlyRate);
 
