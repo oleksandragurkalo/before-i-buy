@@ -1,38 +1,22 @@
 import { useState } from 'react';
-import { ConfirmDialog } from '../components/ConfirmDialog/ConfirmDialog';
 import { EditItemModal } from '../components/EditItemModal/EditItemModal';
 
 /**
- * Shared edit/remove wiring for ItemCard and HistoryItem: local open state
- * for the two dialogs, plus the dialogs themselves ready to drop into JSX.
- *
- * Pass confirmRemoval: false when removal is already confirmed elsewhere
- * (e.g. ItemCard's DecisionModal already offers "Remove item").
+ * Shared edit-dialog wiring for ItemCard and HistoryItem: local open state
+ * plus the modal itself ready to drop into JSX. Removal has no confirm step
+ * of its own — it's optimistic, with an Undo toast handled at the app level.
  */
-export function useItemActionDialogs({ item, settings, onRemove, onEdit, confirmTitle, confirmRemoval = true }) {
+export function useItemActionDialogs({ item, settings, onEdit }) {
   const [editing, setEditing] = useState(false);
-  const [confirmingRemove, setConfirmingRemove] = useState(false);
 
-  const dialogs = (
-    <>
-      {confirmRemoval && confirmingRemove && (
-        <ConfirmDialog
-          icon="🗑️"
-          title={confirmTitle}
-          onConfirm={() => onRemove(item.id)}
-          onCancel={() => setConfirmingRemove(false)}
-        />
-      )}
-      {editing && (
-        <EditItemModal
-          item={item}
-          settings={settings}
-          onSave={(updates) => onEdit(item.id, updates)}
-          onClose={() => setEditing(false)}
-        />
-      )}
-    </>
+  const dialogs = editing && (
+    <EditItemModal
+      item={item}
+      settings={settings}
+      onSave={(updates) => onEdit(item.id, updates)}
+      onClose={() => setEditing(false)}
+    />
   );
 
-  return { editing, setEditing, confirmingRemove, setConfirmingRemove, dialogs };
+  return { editing, setEditing, dialogs };
 }

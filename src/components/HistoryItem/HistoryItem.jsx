@@ -5,10 +5,7 @@ import { Button } from '../Button/Button';
 import styles from './HistoryItem.module.css';
 
 export function HistoryItem({ item, settings, onRemove, onEdit }) {
-  const { setEditing, setConfirmingRemove, dialogs } = useItemActionDialogs({
-    item, settings, onRemove, onEdit,
-    confirmTitle: `Remove "${item.name}" from history?`,
-  });
+  const { setEditing, dialogs } = useItemActionDialogs({ item, settings, onEdit });
   const { emoji, label: categoryLabel } = CATEGORIES[item.category] || CATEGORIES.other;
   const priceLabel = formatPrice(item.price, settings.currencySymbol);
   const hrsLabel = formatHours(hoursOfWork(item.price, item.hourlyRateAtDecision ?? settings.hourlyRate));
@@ -35,7 +32,7 @@ export function HistoryItem({ item, settings, onRemove, onEdit }) {
         <Button variant="icon" onClick={() => setEditing(true)} aria-label="Edit item">
           <Pencil size={13} />
         </Button>
-        <Button variant="icon" tone="danger" onClick={() => setConfirmingRemove(true)} aria-label="Remove from history">
+        <Button variant="icon" tone="danger" onClick={() => onRemove(item.id)} aria-label="Remove from history">
           <Trash2 size={13} />
         </Button>
       </div>

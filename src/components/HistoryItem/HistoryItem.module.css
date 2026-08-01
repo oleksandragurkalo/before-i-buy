@@ -3,7 +3,7 @@
   display: grid;
   grid-template-columns: minmax(0, 1.8fr) 90px 130px 80px 70px 110px auto;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
   padding: 12px 16px;
 }
 
@@ -98,7 +98,12 @@
   justify-self: end;
 }
 
-@media (max-width: 720px) {
+/* .main is capped at 640px wide for any viewport below 880px (see
+   App.module.css), so the container available to this table stays ~608px
+   the whole way from 720px up to 879px too — not just below 720px. The
+   full 7-column grid needs more room than that, so it was overflowing in
+   that gap. Match the breakpoint to App.module.css's 880px instead. */
+@media (max-width: 879px) {
   .row, .headerRow {
     grid-template-columns: minmax(0, 1fr) 110px 70px auto;
   }

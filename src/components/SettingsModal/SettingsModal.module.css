@@ -91,18 +91,6 @@
   line-height: 1.5;
 }
 
-.dataActions {
-  display: flex;
-  gap: 8px;
-}
-
-.dataActions > button { flex: 1; }
-
-.error {
-  font-size: 12px;
-  color: var(--red);
-}
-
 .footerInner {
   display: flex;
   align-items: center;

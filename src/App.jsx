@@ -7,18 +7,29 @@ import { PageHeader } from './components/PageHeader/PageHeader';
 import { WaitingPage } from './components/WaitingPage/WaitingPage';
 import { HistoryPage } from './components/HistoryPage/HistoryPage';
 import { SettingsModal } from './components/SettingsModal/SettingsModal';
+import { Toast } from './components/Toast/Toast';
 import styles from './App.module.css';
 
 export default function App() {
   const [view, setView] = useState('start');
   const [showSettings, setShowSettings] = useState(false);
   const [showAddItem, setShowAddItem] = useState(false);
+  const [pendingUndo, setPendingUndo] = useState(null);
   const {
     waiting, history,
     settings, updateSettings,
-    addItem, editItem, decide, removeItem,
-    exportData, importData,
+    addItem, editItem, decide, removeItem, restoreItem,
   } = useItems();
+
+  const handleRemove = (id) => {
+    const removed = removeItem(id);
+    if (removed) setPendingUndo(removed);
+  };
+
+  const handleUndo = () => {
+    if (pendingUndo) restoreItem(pendingUndo);
+    setPendingUndo(null);
+  };
 
   return (
     <div className={styles.app}>
@@ -48,7 +59,7 @@ export default function App() {
                   history={history}
                   settings={settings}
                   onDecide={decide}
-                  onRemove={removeItem}
+                  onRemove={handleRemove}
                   onEdit={editItem}
                 />
               )}
@@ -58,7 +69,7 @@ export default function App() {
                   waiting={waiting}
                   history={history}
                   settings={settings}
-                  onRemove={removeItem}
+                  onRemove={handleRemove}
                   onEdit={editItem}
                 />
               )}
@@ -72,8 +83,15 @@ export default function App() {
           settings={settings}
           onSave={updateSettings}
           onClose={() => setShowSettings(false)}
-          onExport={exportData}
-          onImport={importData}
+        />
+      )}
+
+      {pendingUndo && (
+        <Toast
+          message={`Removed "${pendingUndo.item.name}"`}
+          actionLabel="Undo"
+          onAction={handleUndo}
+          onDismiss={() => setPendingUndo(null)}
         />
       )}
     </div>
