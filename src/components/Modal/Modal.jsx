@@ -3,6 +3,42 @@ import { X } from 'lucide-react';
 import { Button } from '../Button/Button';
 import styles from './Modal.module.css';
 
+// Module-level so nested modals (e.g. a confirm dialog opened over settings)
+// share one lock: only the first mount locks and only the last unmount
+// restores scroll. `overflow: hidden` alone doesn't stop touch-driven
+// scroll/rubber-banding on iOS Safari, so the body is pinned with
+// position: fixed at its current offset instead.
+let lockCount = 0;
+let savedScrollY = 0;
+
+function lockBodyScroll() {
+  if (lockCount === 0) {
+    savedScrollY = window.scrollY;
+    const body = document.body;
+    body.style.position = 'fixed';
+    body.style.top = `-${savedScrollY}px`;
+    body.style.left = '0';
+    body.style.right = '0';
+    body.style.width = '100%';
+    body.style.overflow = 'hidden';
+  }
+  lockCount++;
+}
+
+function unlockBodyScroll() {
+  lockCount--;
+  if (lockCount === 0) {
+    const body = document.body;
+    body.style.position = '';
+    body.style.top = '';
+    body.style.left = '';
+    body.style.right = '';
+    body.style.width = '';
+    body.style.overflow = '';
+    window.scrollTo(0, savedScrollY);
+  }
+}
+
 export function Modal({ title, onClose, children, footer, role = 'dialog', maxWidth = 480, zIndex = 200 }) {
   useEffect(() => {
     const onKey = (e) => { if (e.key === 'Escape') onClose(); };
@@ -11,9 +47,8 @@ export function Modal({ title, onClose, children, footer, role = 'dialog', maxWi
   }, [onClose]);
 
   useEffect(() => {
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => { document.body.style.overflow = previousOverflow; };
+    lockBodyScroll();
+    return unlockBodyScroll;
   }, []);
 
   return (
