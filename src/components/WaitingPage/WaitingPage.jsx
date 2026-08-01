@@ -1,16 +1,28 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { StatTiles } from '../StatTiles/StatTiles';
 import { ItemListSection } from '../ItemListSection/ItemListSection';
 import { ItemCard } from '../ItemCard/ItemCard';
 import { computeHeaderStats } from '../../utils';
 import styles from './WaitingPage.module.css';
 
+// Below this width (covers phones and iPad) there's no room for a
+// meaningful rows/grid choice, so rows is forced and the toggle is hidden.
+const COMPACT_BREAKPOINT = 1024;
+
 export function WaitingPage({ waiting, history, settings, onDecide, onRemove, onEdit }) {
   const [sortBy, setSortBy] = useState('newest');
   const [filterCategory, setFilterCategory] = useState('all');
   const [grouped, setGrouped] = useState(false);
-  const [viewMode, setViewMode] = useState(() => (window.innerWidth < 640 ? 'rows' : 'grid'));
+  const [viewMode, setViewMode] = useState('grid');
+  const [isCompact, setIsCompact] = useState(() => window.innerWidth < COMPACT_BREAKPOINT);
 
+  useEffect(() => {
+    const onResize = () => setIsCompact(window.innerWidth < COMPACT_BREAKPOINT);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
+  const effectiveViewMode = isCompact ? 'rows' : viewMode;
   const headerStats = computeHeaderStats(waiting, history, settings.hourlyRate);
 
   return (
@@ -29,10 +41,10 @@ export function WaitingPage({ waiting, history, settings, onDecide, onRemove, on
         onFilterChange={setFilterCategory}
         grouped={grouped}
         onGroupToggle={setGrouped}
-        viewMode={viewMode}
-        onViewModeChange={setViewMode}
+        viewMode={effectiveViewMode}
+        onViewModeChange={isCompact ? undefined : setViewMode}
         renderItem={(item) => (
-          <ItemCard item={item} settings={settings} onDecide={onDecide} onRemove={onRemove} onEdit={onEdit} view={viewMode} />
+          <ItemCard item={item} settings={settings} onDecide={onDecide} onRemove={onRemove} onEdit={onEdit} view={effectiveViewMode} />
         )}
       />
     </section>
