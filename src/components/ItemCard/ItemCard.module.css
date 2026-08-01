@@ -27,13 +27,33 @@
 
 .meta { flex: 1; min-width: 0; }
 
+.nameRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 .name {
+  min-width: 0;
   font-size: 16px;
   font-weight: 600;
   color: var(--text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.categoryTag {
+  flex-shrink: 0;
+  padding: 2px 8px;
+  background: var(--bg-grey);
+  color: var(--text-secondary);
+  font-size: 10px;
+  font-weight: 600;
+  border-radius: 100px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
 }
 
 .note {
@@ -91,7 +111,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  background: var(--bg-card);
+  background: var(--bg-grey);
   border-radius: var(--radius);
   padding: 14px 16px;
 }
@@ -124,8 +144,6 @@
   letter-spacing: 0.02em;
   text-transform: uppercase;
 }
-
-.costHighlight { }
 
 .hoursValue {
   font-size: 28px;
@@ -182,4 +200,39 @@
 @media (max-width: 380px) {
   .cost { flex-direction: column; gap: 8px; align-items: flex-start; }
   .costDivider { display: none; }
+
+  .dayBadge { width: 40px; height: 40px; }
+  .dayBadgeNum { font-size: 14px; }
+  .dayBadgeLabel { font-size: 8px; }
 }
+
+/* Grid (square) view: same markup as the row card, compacted via CSS only. */
+.card.grid {
+  height: 100%;
+  padding: 14px;
+  gap: 10px;
+}
+
+.card.grid .emoji { font-size: 22px; }
+.card.grid .name { font-size: 14px; white-space: normal; }
+.card.grid .note { display: none; }
+
+.card.grid .dayBadge {
+  width: 36px;
+  height: 36px;
+  border-width: 1.5px;
+}
+.card.grid .dayBadgeNum { font-size: 13px; }
+.card.grid .dayBadgeLabel { font-size: 7px; }
+
+.card.grid .cost {
+  flex: 1;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+}
+.card.grid .costDivider { display: none; }
+.card.grid .costValue { font-size: 14px; font-weight: 500; }
+.card.grid .hoursValue { font-size: 26px; font-weight: 700; }
+
+.card.grid .question { display: none; }

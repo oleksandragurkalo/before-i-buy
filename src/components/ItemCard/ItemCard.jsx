@@ -6,13 +6,13 @@ import { Button } from '../Button/Button';
 import { DecisionModal } from '../DecisionModal/DecisionModal';
 import styles from './ItemCard.module.css';
 
-export function ItemCard({ item, settings, onDecide, onRemove, onEdit }) {
+export function ItemCard({ item, settings, onDecide, onRemove, onEdit, view = 'rows' }) {
   const [decisionOpen, setDecisionOpen] = useState(false);
   const { setEditing, dialogs } = useItemActionDialogs({
     item, settings, onRemove, onEdit,
     confirmRemoval: false,
   });
-  const { emoji } = CATEGORIES[item.category] || CATEGORIES.other;
+  const { emoji, label: categoryLabel } = CATEGORIES[item.category] || CATEGORIES.other;
   const hrs = hoursOfWork(item.price, settings.hourlyRate);
   const hrsLabel = formatHours(hrs);
   const priceLabel = formatPrice(item.price, settings.currencySymbol);
@@ -23,11 +23,14 @@ export function ItemCard({ item, settings, onDecide, onRemove, onEdit }) {
   const waitingDays = daysSince(item.addedAt);
 
   return (
-    <article className={styles.card}>
+    <article className={`${styles.card} ${view === 'grid' ? styles.grid : ''}`}>
       <div className={styles.top}>
         <span className={styles.emoji} aria-hidden="true">{emoji}</span>
         <div className={styles.meta}>
-          <h3 className={styles.name}>{item.name}</h3>
+          <div className={styles.nameRow}>
+            <h3 className={styles.name}>{item.name}</h3>
+            <span className={styles.categoryTag}>{categoryLabel}</span>
+          </div>
           {item.note && <p className={styles.note}>{item.note}</p>}
           <p className={styles.when}>{daysAgo(item.addedAt)}</p>
         </div>
@@ -51,25 +54,23 @@ export function ItemCard({ item, settings, onDecide, onRemove, onEdit }) {
           <span className={styles.costLabel}>{settings.currency} price</span>
         </div>
         <div className={styles.costDivider} aria-hidden="true">=</div>
-        <div className={`${styles.costBlock} ${styles.costHighlight}`}>
+        <div className={styles.costBlock}>
           <span className={`${styles.costValue} ${styles.hoursValue} mono`}>{hrsLabel}</span>
           <span className={styles.costLabel}>of net take-home pay</span>
         </div>
       </div>
 
-      {savedAmount > 0 && (
-        <div className={styles.savings}>
-          <div className={styles.savingsTop}>
-            <span className={styles.savingsLabel}>
-              {formatPrice(savedAmount, settings.currencySymbol)} saved of {priceLabel} ({savedPct}%)
-            </span>
-            <span className={styles.savingsRemaining}>{remainingHrsLabel} left to save</span>
-          </div>
-          <div className={styles.savingsBar}>
-            <div className={styles.savingsBarFill} style={{ width: `${savedPct}%` }} />
-          </div>
+      <div className={styles.savings}>
+        <div className={styles.savingsTop}>
+          <span className={styles.savingsLabel}>
+            {formatPrice(savedAmount, settings.currencySymbol)} saved of {priceLabel} ({savedPct}%)
+          </span>
+          <span className={styles.savingsRemaining}>{remainingHrsLabel} left to save</span>
         </div>
-      )}
+        <div className={styles.savingsBar}>
+          <div className={styles.savingsBarFill} style={{ width: `${savedPct}%` }} />
+        </div>
+      </div>
 
       <p className={styles.question}>Do you still want this?</p>
 
