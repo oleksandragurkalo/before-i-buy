@@ -79,12 +79,13 @@ export function SettingsModal({ settings, onSave, onClose, onExport, onImport })
   };
 
   const reset = () => {
-    // Keeps the currently selected pay period, pay type, and currency —
-    // only resets the numeric fields, so a visible field never disappears
+    // Keeps the currently selected pay period and pay type — only resets the
+    // numeric fields (plus currency) — so a visible field never disappears
     // (which happened when this used to also reset payPeriod to 'hourly').
-    setPayAmount(String(defaultPayAmountFor(payPeriod, currency, DEFAULT_SETTINGS.hoursPerWeek)));
+    setPayAmount(String(defaultPayAmountFor(payPeriod, DEFAULT_SETTINGS.currency, DEFAULT_SETTINGS.hoursPerWeek)));
     setTaxRate(String(DEFAULT_SETTINGS.taxRate));
     setHoursPerWeek(String(DEFAULT_SETTINGS.hoursPerWeek));
+    setCurrency(DEFAULT_SETTINGS.currency);
   };
 
   const handleExport = () => {
