@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { TrendingUp } from 'lucide-react';
-import { computeInsights, formatPrice, formatHours, hoursOfWork } from '../../utils';
+import { TrendingUp, Flame } from 'lucide-react';
+import { computeInsights, computeStreak, formatPrice, formatHours, hoursOfWork } from '../../utils';
 import styles from './InsightsPanel.module.css';
 import dropdownIcon from '../../assets/icon-arrow-down.svg';
 
 export function InsightsPanel({ waiting, history, settings }) {
   const { resistanceRate, categoryBreakdown, topTemptations, totalItems } = computeInsights(waiting, history);
+  const streak = computeStreak(history);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const maxCategoryTotal = categoryBreakdown[0]?.total || 1;
@@ -51,6 +52,18 @@ export function InsightsPanel({ waiting, history, settings }) {
                   </>
                 )}
               </div>
+
+              {resistanceRate !== null && (
+                <div className={styles.section}>
+                  <p className={styles.sectionLabel}>Current streak</p>
+                  <div className={styles.streakRow}>
+                    <Flame size={20} className={streak > 0 ? styles.streakIconLit : styles.streakIcon} />
+                    <span className={styles.streakValue}>
+                      {streak === 0 ? 'No streak yet' : `${streak} resisted in a row`}
+                    </span>
+                  </div>
+                </div>
+              )}
 
               {categoryBreakdown.length > 0 && (
                 <div className={styles.section}>

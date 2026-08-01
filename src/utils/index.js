@@ -71,6 +71,18 @@ export function daysSince(timestamp) {
   return Math.max(0, Math.floor((Date.now() - timestamp) / (1000 * 60 * 60 * 24)));
 }
 
+// Flat cooling-off period before deciding on any item.
+export function coolingOffDays() {
+  return 7;
+}
+
+export function coolingOffStatus(item) {
+  const required = coolingOffDays();
+  const elapsed = daysSince(item.addedAt);
+  const remaining = Math.max(0, required - elapsed);
+  return { required, elapsed, remaining, ready: remaining === 0 };
+}
+
 export function formatDate(timestamp) {
   return new Date(timestamp).toLocaleDateString('en-CA', {
     month: 'short', day: 'numeric', year: 'numeric'
@@ -128,6 +140,18 @@ export function computeInsights(waiting, history) {
     .slice(0, 3);
 
   return { resistanceRate, categoryBreakdown, topTemptations, totalItems: all.length };
+}
+
+// Consecutive resisted decisions counting back from the most recent one,
+// stopping at the first "bought anyway" — resets the streak, doesn't erase it.
+export function computeStreak(history) {
+  const decided = [...history].sort((a, b) => b.decidedAt - a.decidedAt);
+  let streak = 0;
+  for (const item of decided) {
+    if (item.status !== 'passed') break;
+    streak++;
+  }
+  return streak;
 }
 
 function series(items, valueFn, cap = 8) {

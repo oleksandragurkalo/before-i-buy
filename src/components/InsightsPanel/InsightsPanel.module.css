@@ -108,6 +108,21 @@
     gap: 8px;
 }
 
+.streakRow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.streakIcon { color: var(--text-muted); flex-shrink: 0; }
+.streakIconLit { color: var(--amber); flex-shrink: 0; }
+
+.streakValue {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
 .rateValue {
     font-size: 24px;
     font-weight: 500;
