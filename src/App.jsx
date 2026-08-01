@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, ListChecks, History as HistoryIcon } from 'lucide-react';
+import { Plus, ListChecks } from 'lucide-react';
 import { useItems } from './hooks/useItems';
 import { NavBar } from './components/NavBar/NavBar';
 import { StartPage } from './components/StartPage/StartPage';
@@ -22,6 +22,7 @@ export default function App() {
   const [sortBy, setSortBy] = useState('newest');
   const [filterCategory, setFilterCategory] = useState('all');
   const [grouped, setGrouped] = useState(false);
+  const [viewMode, setViewMode] = useState('grid');
   const {
     waiting, history,
     settings, updateSettings,
@@ -54,16 +55,19 @@ export default function App() {
           <div className={styles.content}>
 
             <Topbar
-              key={view}
-              icon={view === 'waiting' ? <ListChecks size={16} /> : <HistoryIcon size={16} />}
-              title={view === 'waiting' ? (settings.listName || 'Waiting List') : 'History'}
-              onTitleChange={view === 'waiting' ? (name) => updateSettings({ listName: name }) : undefined}
-              actions={view === 'waiting' ? (
+              icon={<ListChecks size={16} />}
+              title={settings.listName || 'Waiting List'}
+              onTitleChange={(name) => updateSettings({ listName: name })}
+              actions={
                 <Button icon={<Plus size={14} />} onClick={() => setShowAddItem(true)}>
                   Add Item
                 </Button>
-              ) : undefined}
+              }
             />
+
+            {showAddItem && (
+              <AddItemForm onAdd={addItem} onClose={() => setShowAddItem(false)} symbol={settings.currencySymbol} />
+            )}
 
             {view === 'waiting' && (
               <section className={styles.section} aria-label="Items waiting">
@@ -72,10 +76,6 @@ export default function App() {
                 </aside>
                 <StatTiles className={styles.statsRow} headerStats={headerStats} currencySymbol={settings.currencySymbol} />
 
-                {showAddItem && (
-                  <AddItemForm onAdd={addItem} onClose={() => setShowAddItem(false)} symbol={settings.currencySymbol} />
-                )}
-
                 <ItemListSection
                   items={waiting}
                   dateField="addedAt"
@@ -83,8 +83,10 @@ export default function App() {
                   emptyTitle="Nothing waiting"
                   emptyBody="Next time you want to buy something, add it here first and sleep on it."
                   {...listProps}
+                  viewMode={viewMode}
+                  onViewModeChange={setViewMode}
                   renderItem={(item) => (
-                    <ItemCard item={item} settings={settings} onDecide={decide} onRemove={removeItem} onEdit={editItem} />
+                    <ItemCard item={item} settings={settings} onDecide={decide} onRemove={removeItem} onEdit={editItem} view={viewMode} />
                   )}
                 />
               </section>
@@ -99,6 +101,7 @@ export default function App() {
                   emptyTitle="No decisions yet"
                   emptyBody="Items you decide on will appear here."
                   {...listProps}
+                  viewMode="rows"
                   renderItem={(item) => (
                     <HistoryItem item={item} settings={settings} onRemove={removeItem} onEdit={editItem} />
                   )}
