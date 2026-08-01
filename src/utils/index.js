@@ -71,16 +71,10 @@ export function daysSince(timestamp) {
   return Math.max(0, Math.floor((Date.now() - timestamp) / (1000 * 60 * 60 * 24)));
 }
 
-// Flat cooling-off period before deciding on any item.
-export function coolingOffDays() {
-  return 7;
-}
-
-export function coolingOffStatus(item) {
-  const required = coolingOffDays();
+export function coolingOffStatus(item, requiredDays) {
   const elapsed = daysSince(item.addedAt);
-  const remaining = Math.max(0, required - elapsed);
-  return { required, elapsed, remaining, ready: remaining === 0 };
+  const remaining = Math.max(0, requiredDays - elapsed);
+  return { required: requiredDays, elapsed, remaining, ready: remaining === 0 };
 }
 
 export function formatDate(timestamp) {

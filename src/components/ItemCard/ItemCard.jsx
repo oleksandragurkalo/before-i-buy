@@ -18,7 +18,7 @@ export function ItemCard({ item, settings, onDecide, onRemove, onEdit, view = 'r
   const remaining = Math.max(0, item.price - savedAmount);
   const remainingHrsLabel = formatHours(hoursOfWork(remaining, settings.hourlyRate));
   const waitingDays = daysSince(item.addedAt);
-  const { remaining: coolingOffDaysLeft, ready } = coolingOffStatus(item);
+  const { remaining: coolingOffDaysLeft, ready } = coolingOffStatus(item, item.coolingOffDays ?? 7);
 
   return (
     <article className={`${styles.card} ${view === 'grid' ? styles.grid : ''}`}>

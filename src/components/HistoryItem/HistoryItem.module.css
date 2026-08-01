@@ -11,7 +11,7 @@
   background: var(--bg-card);
   border-radius: var(--radius);
   border: 1px solid var(--border);
-  transition: border-color 0.15s;
+  transition: border-color 0.15s, background-color 0.2s ease, color 0.2s ease;
 }
 
 .row:hover { border-color: var(--border-strong); }

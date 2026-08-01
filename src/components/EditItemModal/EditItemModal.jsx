@@ -10,6 +10,7 @@ export function EditItemModal({ item, settings, onSave, onClose }) {
     category: item.category,
     note: item.note || '',
     savedAmount: item.savedAmount ? String(item.savedAmount) : '',
+    coolingOffDays: String(item.coolingOffDays ?? 7),
     status: item.status,
   };
 
@@ -32,11 +33,13 @@ export function EditItemModal({ item, settings, onSave, onClose }) {
       error={error}
       showSavedAmount={item.status === 'waiting'}
       showStatus={item.status !== 'waiting'}
+      showCoolingOff={item.status === 'waiting'}
       onChange={set}
       onPriceChange={setField('price')}
       onCategoryChange={setField('category')}
       onSavedChange={setField('savedAmount')}
       onStatusChange={setField('status')}
+      onCoolingOffChange={setField('coolingOffDays')}
       onSubmit={save}
       onClose={onClose}
     />

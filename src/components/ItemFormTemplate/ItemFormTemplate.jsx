@@ -35,11 +35,13 @@ export function ItemFormTemplate({
   error,
   showSavedAmount = true,
   showStatus = false,
+  showCoolingOff = true,
   onChange,
   onPriceChange,
   onCategoryChange,
   onSavedChange,
   onStatusChange,
+  onCoolingOffChange,
   onSubmit,
   onClose,
 }) {
@@ -134,6 +136,20 @@ export function ItemFormTemplate({
               min={0}
               step={1}
               ariaLabel="amount already saved"
+            />
+          </Field>
+        )}
+
+        {showCoolingOff && (
+          <Field label="Days to wait before deciding" htmlFor="item-cooling-off">
+            <NumberStepper
+              id="item-cooling-off"
+              value={form.coolingOffDays}
+              onChange={onCoolingOffChange}
+              min={1}
+              max={60}
+              step={1}
+              ariaLabel="cooling-off days"
             />
           </Field>
         )}

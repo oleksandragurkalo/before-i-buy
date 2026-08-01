@@ -36,7 +36,7 @@
   font-size: 14px;
   outline: none;
   width: 100%;
-  transition: border-color 0.15s;
+  transition: border-color 0.15s, background-color 0.2s ease, color 0.2s ease;
 }
 
 .input:focus { border-color: var(--green); }

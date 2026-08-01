@@ -9,14 +9,14 @@
   --text-primary: #1A1A18;
   --text-secondary: #6B6B68;
   --text-muted: #9C9C98;
-  --green: #22A861;
-  --green-bg: #EBF5F0;
-  --red: #E84444;
-  --red-bg: #FBEAEA;
+  --green: #1F9C7C;
+  --green-bg: #E5F5F0;
+  --red: #C1604A;
+  --red-bg: #F8ECE6;
   --amber: #F59E0B;
   --amber-bg: #FEF7E6;
-  --blue: #3B82F6;
-  --blue-bg: #E8F4FF;
+  --blue: #4C74B9;
+  --blue-bg: #E9EFF9;
   --accent: #6C3FD4;
   --accent-bg: #EDE8FA;
   --accent-contrast: #FFFFFF;
@@ -28,22 +28,22 @@
 }
 
 [data-theme="dark"] {
-  --bg: #141412;
-  --bg-card: #1E1E1C;
-  --bg-grey: #374151;
-  --border: #2E2E2C;
-  --border-strong: #3E3E3C;
+  --bg: #1C1917;
+  --bg-card: #262220;
+  --bg-grey: #3A332E;
+  --border: #332D28;
+  --border-strong: #443C35;
   --text-primary: #F0F0EE;
   --text-secondary: #9C9C98;
   --text-muted: #5C5C58;
-  --green: #4CAF7D;
-  --green-bg: #0D2B1A;
-  --red: #E05555;
-  --red-bg: #2A0E0E;
+  --green: #4FBDA0;
+  --green-bg: #0F2E27;
+  --red: #D98066;
+  --red-bg: #2E1810;
   --amber: #D4A017;
   --amber-bg: #2A200A;
-  --blue: #6BA3EC;
-  --blue-bg: #12253A;
+  --blue: #7C9DD9;
+  --blue-bg: #16203A;
   --accent: #9B7BE8;
   --accent-bg: #2A2140;
   --accent-contrast: #FFFFFF;
@@ -51,6 +51,17 @@
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* Baseline so every surface fades together on a theme switch instead of
+   most elements popping instantly while only a few (e.g. body) fade —
+   that mismatch is what read as a "flicker". Anything with its own more
+   specific transition (buttons, hover states, etc.) overrides this per
+   the usual cascade; those are kept in sync with it by hand where they
+   don't already include background-color/color. */
+*, *::before, *::after {
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
 html { font-size: 16px; }
 body {
   font-family: var(--font-body);
@@ -58,7 +69,6 @@ body {
   color: var(--text-primary);
   line-height: 1.5;
   min-height: 100svh;
-  transition: background 0.2s, color 0.2s;
   -webkit-font-smoothing: antialiased;
 }
 a { color: inherit; text-decoration: none; }

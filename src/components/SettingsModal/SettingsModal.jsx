@@ -57,6 +57,22 @@ export function SettingsModal({ settings, onSave, onClose }) {
     setCurrency(nextCode);
   };
 
+  const changeHoursPerWeek = (nextHoursPerWeek) => {
+    const amt = parseFloat(payAmount);
+    if (payPeriod !== 'hourly' && !isNaN(amt) && amt > 0) {
+      // Re-derive the amount for the same period at the new hours/week,
+      // anchored to the hourly rate the old hours/week implied — otherwise
+      // the displayed monthly/annual figure silently stops matching the
+      // hourly rate shown below.
+      const oldHours = parseFloat(hoursPerWeek) || 1;
+      const nextHours = parseFloat(nextHoursPerWeek) || 1;
+      const hourlyEquivalent = convertPayAmount(amt, payPeriod, 'hourly', oldHours);
+      const reconverted = convertPayAmount(hourlyEquivalent, 'hourly', payPeriod, nextHours);
+      setPayAmount(String(Math.round(reconverted)));
+    }
+    setHoursPerWeek(nextHoursPerWeek);
+  };
+
   const save = () => {
     if (computedHourlyRate === null || computedHourlyRate <= 0) return;
     const curr = CURRENCIES.find(c => c.code === currency);
@@ -161,7 +177,7 @@ export function SettingsModal({ settings, onSave, onClose }) {
               <NumberStepper
                 id="hours-per-week"
                 value={hoursPerWeek}
-                onChange={setHoursPerWeek}
+                onChange={changeHoursPerWeek}
                 step={1}
                 min={1}
                 max={100}

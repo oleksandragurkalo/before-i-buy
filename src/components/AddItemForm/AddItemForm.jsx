@@ -1,7 +1,7 @@
 import { useItemForm } from '../../hooks/useItemForm';
 import { ItemFormTemplate } from '../ItemFormTemplate/ItemFormTemplate';
 
-const EMPTY = { name: '', price: '', category: 'other', note: '', savedAmount: '' };
+const EMPTY = { name: '', price: '', category: 'other', note: '', savedAmount: '', coolingOffDays: '7' };
 
 export function AddItemForm({ onAdd, onClose, symbol = '$' }) {
   const { form, error, set, setField, validate } = useItemForm(EMPTY, onClose);
@@ -26,6 +26,7 @@ export function AddItemForm({ onAdd, onClose, symbol = '$' }) {
       onPriceChange={setField('price')}
       onCategoryChange={setField('category')}
       onSavedChange={setField('savedAmount')}
+      onCoolingOffChange={setField('coolingOffDays')}
       onSubmit={submit}
       onClose={onClose}
     />

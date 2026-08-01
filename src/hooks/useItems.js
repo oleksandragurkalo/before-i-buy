@@ -15,6 +15,8 @@ export const DEFAULT_SETTINGS = {
   hoursPerWeek: 40,
 };
 
+export const DEFAULT_COOLING_OFF_DAYS = 7;
+
 function load(key, fallback) {
   try {
     const raw = localStorage.getItem(key);
@@ -58,6 +60,7 @@ export function useItems() {
       category: item.category || 'other',
       note: item.note?.trim() || '',
       savedAmount: Math.max(0, parseFloat(item.savedAmount) || 0),
+      coolingOffDays: Math.max(1, parseInt(item.coolingOffDays, 10) || DEFAULT_COOLING_OFF_DAYS),
       addedAt: Date.now(),
       status: 'waiting', // 'waiting' | 'bought' | 'passed'
       decidedAt: null,
@@ -76,6 +79,11 @@ export function useItems() {
           category: updates.category || 'other',
           note: updates.note?.trim() || '',
           savedAmount: Math.max(0, parseFloat(updates.savedAmount) || 0),
+          // Only present when the form showed the field (item still
+          // waiting) — otherwise (editing a decided item) leave it as-is.
+          coolingOffDays: updates.coolingOffDays != null
+            ? Math.max(1, parseInt(updates.coolingOffDays, 10) || DEFAULT_COOLING_OFF_DAYS)
+            : item.coolingOffDays,
           status: updates.status ?? item.status,
         }
         : item

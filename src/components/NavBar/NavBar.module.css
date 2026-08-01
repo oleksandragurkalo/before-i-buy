@@ -110,7 +110,7 @@
   background: var(--bg-card);
   color: var(--amber);
   transform: translateX(0);
-  transition: transform 0.15s;
+  transition: transform 0.15s, background-color 0.2s ease, color 0.2s ease;
 }
 
 .themeSwitch[aria-checked="true"] .themeThumb {
