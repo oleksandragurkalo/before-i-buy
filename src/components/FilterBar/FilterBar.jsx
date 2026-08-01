@@ -1,4 +1,4 @@
-import { Rows3, LayoutGrid } from 'lucide-react';
+import { Rows3, LayoutGrid, List, Grid2x2 } from 'lucide-react';
 import { CATEGORIES } from '../../utils';
 import { Dropdown } from '../Dropdown/Dropdown';
 import styles from './FilterBar.module.css';
@@ -10,7 +10,10 @@ const SORT_OPTIONS = [
   { value: 'price-asc', label: 'Price: low to high' },
 ];
 
-export function FilterBar({ sortBy, onSortChange, filterCategory, onFilterChange, availableCategories, grouped, onGroupToggle }) {
+export function FilterBar({
+  sortBy, onSortChange, filterCategory, onFilterChange, availableCategories,
+  grouped, onGroupToggle, viewMode, onViewModeChange,
+}) {
   const categoryOptions = [
     { value: 'all', label: 'All categories' },
     ...availableCategories.map(key => ({
@@ -23,6 +26,31 @@ export function FilterBar({ sortBy, onSortChange, filterCategory, onFilterChange
     <div className={styles.bar}>
       <Dropdown value={sortBy} options={SORT_OPTIONS} onChange={onSortChange} ariaLabel="Sort by" />
       <Dropdown value={filterCategory} options={categoryOptions} onChange={onFilterChange} ariaLabel="Filter by category" />
+
+      {onViewModeChange && (
+        <div className={styles.viewToggle}>
+          <button
+            type="button"
+            className={styles.viewBtn}
+            onClick={() => onViewModeChange('rows')}
+            aria-pressed={viewMode === 'rows'}
+            aria-label="Row view"
+            title="Row view"
+          >
+            <List size={15} />
+          </button>
+          <button
+            type="button"
+            className={styles.viewBtn}
+            onClick={() => onViewModeChange('grid')}
+            aria-pressed={viewMode === 'grid'}
+            aria-label="Grid view"
+            title="Grid view"
+          >
+            <Grid2x2 size={15} />
+          </button>
+        </div>
+      )}
 
       <button
         type="button"

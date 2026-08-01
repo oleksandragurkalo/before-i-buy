@@ -18,6 +18,33 @@
 
 .groupBtn:hover { color: var(--text-primary); border-color: var(--border-strong); }
 
+.viewToggle {
+  flex-shrink: 0;
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.viewBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  background: var(--bg-card);
+  border: none;
+  color: var(--text-secondary);
+  transition: all 0.15s;
+}
+
+.viewBtn:not(:last-child) { border-right: 1px solid var(--border); }
+.viewBtn:hover { color: var(--text-primary); }
+
+.viewBtn[aria-pressed="true"] {
+  background: var(--accent-bg);
+  color: var(--accent);
+}
+
 .groupBtn[aria-pressed="true"] {
   background: var(--accent-bg);
   color: var(--accent);
