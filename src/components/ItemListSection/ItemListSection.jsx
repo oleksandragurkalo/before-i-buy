@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { FilterBar } from '../FilterBar/FilterBar';
 import { sortItems, groupByCategory } from '../../utils';
 import styles from './ItemListSection.module.css';
@@ -21,6 +22,19 @@ export function ItemListSection({
   header,
   renderItem,
 }) {
+  const byDecision = !decisionFilter || decisionFilter === 'all'
+    ? items
+    : items.filter(i => i.status === decisionFilter);
+  const availableCategories = [...new Set(byDecision.map(i => i.category || 'other'))];
+
+  // If the currently selected category no longer has any matching items
+  // (e.g. they were all decided on, removed, or the decision filter changed),
+  // fall back to "all" instead of silently showing zero results forever.
+  const categoryIsStale = filterCategory !== 'all' && !availableCategories.includes(filterCategory);
+  useEffect(() => {
+    if (categoryIsStale) onFilterChange('all');
+  }, [categoryIsStale, onFilterChange]);
+
   if (items.length === 0) {
     return (
       <div className={styles.empty}>
@@ -31,12 +45,9 @@ export function ItemListSection({
     );
   }
 
-  const availableCategories = [...new Set(items.map(i => i.category || 'other'))];
-  const byCategory = filterCategory === 'all' ? items : items.filter(i => (i.category || 'other') === filterCategory);
-  const filtered = !decisionFilter || decisionFilter === 'all'
-    ? byCategory
-    : byCategory.filter(i => i.status === decisionFilter);
-  const visible = sortItems(filtered, sortBy, dateField);
+  const effectiveCategory = categoryIsStale ? 'all' : filterCategory;
+  const byCategory = effectiveCategory === 'all' ? byDecision : byDecision.filter(i => (i.category || 'other') === effectiveCategory);
+  const visible = sortItems(byCategory, sortBy, dateField);
   const listClass = viewMode === 'grid' ? styles.grid : styles.list;
 
   return (
@@ -45,7 +56,7 @@ export function ItemListSection({
         <FilterBar
           sortBy={sortBy}
           onSortChange={onSortChange}
-          filterCategory={filterCategory}
+          filterCategory={effectiveCategory}
           onFilterChange={onFilterChange}
           availableCategories={availableCategories}
           grouped={grouped}
@@ -59,7 +70,9 @@ export function ItemListSection({
 
       {header}
 
-      {grouped ? (
+      {visible.length === 0 ? (
+        <p className={styles.noMatches}>No items match this filter.</p>
+      ) : grouped ? (
         groupByCategory(visible).map(group => (
           <div className={styles.group} key={group.category}>
             <div className={styles.groupHeader}>

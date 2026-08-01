@@ -10,6 +10,12 @@ export function Modal({ title, onClose, children, footer, role = 'dialog', maxWi
     return () => window.removeEventListener('keydown', onKey);
   }, [onClose]);
 
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = previousOverflow; };
+  }, []);
+
   return (
     <div
       className={styles.overlay}

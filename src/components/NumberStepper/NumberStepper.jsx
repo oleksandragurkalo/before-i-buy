@@ -24,6 +24,18 @@ export function NumberStepper({
   const atMin = min != null && (parseFloat(value) || 0) <= min;
   const atMax = max != null && (parseFloat(value) || 0) >= max;
 
+  // Typing bypasses the min/max attributes on <input type="number"> entirely
+  // (they only affect the stepper arrows), so clamp once the user leaves the
+  // field rather than fighting their keystrokes while they're still typing.
+  const handleBlur = () => {
+    let next = parseFloat(value);
+    if (isNaN(next)) next = min != null ? min : 0;
+    if (min != null) next = Math.max(min, next);
+    if (max != null) next = Math.min(max, next);
+    next = Math.round(next * 100) / 100;
+    if (String(next) !== value) onChange(String(next));
+  };
+
   return (
     <div className={styles.stepper}>
       <button
@@ -41,6 +53,7 @@ export function NumberStepper({
         className={`${styles.input} ${mono ? 'mono' : ''}`}
         value={value}
         onChange={(e) => onChange(e.target.value)}
+        onBlur={handleBlur}
         min={min}
         max={max}
         step={step}

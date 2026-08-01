@@ -12,6 +12,13 @@
   gap: 10px;
 }
 
+@media (max-width: 480px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+}
+
 .group {
   display: flex;
   flex-direction: column;
@@ -56,4 +63,11 @@
   color: var(--text-muted);
   max-width: 280px;
   line-height: 1.6;
+}
+
+.noMatches {
+  text-align: center;
+  padding: 32px 24px;
+  font-size: 13px;
+  color: var(--text-muted);
 }

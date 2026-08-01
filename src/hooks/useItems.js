@@ -57,7 +57,7 @@ export function useItems() {
       price: parseFloat(item.price),
       category: item.category || 'other',
       note: item.note?.trim() || '',
-      savedAmount: parseFloat(item.savedAmount) || 0,
+      savedAmount: Math.max(0, parseFloat(item.savedAmount) || 0),
       addedAt: Date.now(),
       status: 'waiting', // 'waiting' | 'bought' | 'passed'
       decidedAt: null,
@@ -75,7 +75,7 @@ export function useItems() {
           price: parseFloat(updates.price),
           category: updates.category || 'other',
           note: updates.note?.trim() || '',
-          savedAmount: parseFloat(updates.savedAmount) || 0,
+          savedAmount: Math.max(0, parseFloat(updates.savedAmount) || 0),
           status: updates.status ?? item.status,
         }
         : item

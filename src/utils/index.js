@@ -61,14 +61,14 @@ export function formatPrice(price, symbol = '$') {
 
 export function daysAgo(timestamp) {
   const diff = Date.now() - timestamp;
-  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const days = Math.max(0, Math.floor(diff / (1000 * 60 * 60 * 24)));
   if (days === 0) return 'added today';
   if (days === 1) return '1 day ago';
   return `${days} days ago`;
 }
 
 export function daysSince(timestamp) {
-  return Math.floor((Date.now() - timestamp) / (1000 * 60 * 60 * 24));
+  return Math.max(0, Math.floor((Date.now() - timestamp) / (1000 * 60 * 60 * 24)));
 }
 
 export function formatDate(timestamp) {
