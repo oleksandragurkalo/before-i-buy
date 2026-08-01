@@ -48,4 +48,4 @@ Click the gear icon to set your actual pay — hourly, monthly, or annual, net o
 
 ## Built by
 
-Sandra Gurkalo — [sandradev.ca](https://sandradev.ca)
+Oleksandra Gurkalo
