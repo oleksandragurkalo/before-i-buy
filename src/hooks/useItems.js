@@ -91,7 +91,21 @@ export function useItems() {
   };
 
   const removeItem = (id) => {
+    const index = items.findIndex(item => item.id === id);
+    if (index === -1) return null;
+    const removed = items[index];
     setItems(prev => prev.filter(item => item.id !== id));
+    return { item: removed, index };
+  };
+
+  // Puts a removed item back at its original position, for "Undo" — not a
+  // general insert, so it only makes sense right after removeItem.
+  const restoreItem = ({ item, index }) => {
+    setItems(prev => {
+      const next = [...prev];
+      next.splice(Math.min(index, next.length), 0, item);
+      return next;
+    });
   };
 
   const updateSettings = (updates) => {
@@ -122,7 +136,7 @@ export function useItems() {
     waiting, history,
     totalSaved, totalSpent,
     settings, updateSettings,
-    addItem, editItem, decide, removeItem,
+    addItem, editItem, decide, removeItem, restoreItem,
     exportData, importData,
   };
 }

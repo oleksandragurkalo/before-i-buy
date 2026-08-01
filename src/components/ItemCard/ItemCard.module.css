@@ -107,6 +107,13 @@
   letter-spacing: 0.02em;
 }
 
+.dayBadgeReady {
+  border-color: var(--green);
+  background: var(--green-bg);
+}
+
+.dayBadgeReady .dayBadgeNum { color: var(--green); }
+
 .cost {
   display: flex;
   align-items: center;

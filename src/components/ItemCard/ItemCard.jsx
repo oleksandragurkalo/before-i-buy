@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Pencil, Scale, Trash2 } from 'lucide-react';
-import { CATEGORIES, hoursOfWork, formatHours, formatPrice, daysAgo, daysSince } from '../../utils';
+import { CATEGORIES, hoursOfWork, formatHours, formatPrice, daysAgo, daysSince, coolingOffStatus } from '../../utils';
 import { useItemActionDialogs } from '../../hooks/useItemActionDialogs';
 import { Button } from '../Button/Button';
 import { DecisionModal } from '../DecisionModal/DecisionModal';
@@ -8,10 +8,7 @@ import styles from './ItemCard.module.css';
 
 export function ItemCard({ item, settings, onDecide, onRemove, onEdit, view = 'rows' }) {
   const [decisionOpen, setDecisionOpen] = useState(false);
-  const { setEditing, dialogs } = useItemActionDialogs({
-    item, settings, onRemove, onEdit,
-    confirmRemoval: false,
-  });
+  const { setEditing, dialogs } = useItemActionDialogs({ item, settings, onEdit });
   const { emoji, label: categoryLabel } = CATEGORIES[item.category] || CATEGORIES.other;
   const hrs = hoursOfWork(item.price, settings.hourlyRate);
   const hrsLabel = formatHours(hrs);
@@ -21,6 +18,7 @@ export function ItemCard({ item, settings, onDecide, onRemove, onEdit, view = 'r
   const remaining = Math.max(0, item.price - savedAmount);
   const remainingHrsLabel = formatHours(hoursOfWork(remaining, settings.hourlyRate));
   const waitingDays = daysSince(item.addedAt);
+  const { remaining: coolingOffDaysLeft, ready } = coolingOffStatus(item);
 
   return (
     <article className={`${styles.card} ${view === 'grid' ? styles.grid : ''}`}>
@@ -42,9 +40,16 @@ export function ItemCard({ item, settings, onDecide, onRemove, onEdit, view = 'r
             <Trash2 size={14} />
           </Button>
         </div>
-        <div className={styles.dayBadge} aria-label={`Waiting ${waitingDays} day${waitingDays === 1 ? '' : 's'}`}>
-          <span className={styles.dayBadgeNum}>{waitingDays}</span>
-          <span className={styles.dayBadgeLabel}>{waitingDays === 1 ? 'day' : 'days'}</span>
+        <div
+          className={`${styles.dayBadge} ${ready ? styles.dayBadgeReady : ''}`}
+          aria-label={ready
+            ? `Cooling-off done — waited ${waitingDays} day${waitingDays === 1 ? '' : 's'}`
+            : `${coolingOffDaysLeft} day${coolingOffDaysLeft === 1 ? '' : 's'} left before deciding`}
+        >
+          <span className={styles.dayBadgeNum}>{ready ? waitingDays : coolingOffDaysLeft}</span>
+          <span className={styles.dayBadgeLabel}>
+            {ready ? (waitingDays === 1 ? 'day' : 'days') : (coolingOffDaysLeft === 1 ? 'day' : 'days')}
+          </span>
         </div>
       </div>
 
