@@ -45,3 +45,25 @@
 .red { background: linear-gradient(135deg, var(--red-bg) 0%, var(--bg-card) 80%); border-color: var(--red); }
 .blue { background: linear-gradient(135deg, var(--blue-bg) 0%, var(--bg-card) 80%); border-color: var(--blue); }
 .amber { background: linear-gradient(135deg, var(--amber-bg) 0%, var(--bg-card) 80%); border-color: var(--amber); }
+
+@media (max-width: 560px) {
+  /* Three tiles now sit side by side even on mobile instead of stacking
+     full-width, so each one needs to be much more compact. */
+  .tile { padding: 8px 10px; gap: 2px; }
+  .label {
+    font-size: 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .value { font-size: 15px; }
+  .footer { min-height: auto; }
+  .sublabel {
+    font-size: 9px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .icon { font-size: 15px; }
+  .sparkline { display: none; }
+}

@@ -1,24 +1,24 @@
 .row {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
+  gap: 8px;
 }
 
-@media (max-width: 560px) {
-  .row { grid-template-columns: 1fr; }
+@media (min-width: 560px) {
+  .row { gap: 12px; }
 }
 
 .card {
   border-radius: var(--radius-lg);
   border: 1px solid var(--border);
-  padding: 20px;
+  padding: 14px 16px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
 }
 
 .title {
-  font-size: 18px;
+  font-size: 13px;
   font-weight: 700;
 }
 
@@ -37,13 +37,13 @@
 }
 
 .count {
-  font-size: 60px;
+  font-size: 32px;
   font-weight: 800;
   letter-spacing: -0.02em;
 }
 
 .countLabel {
-  font-size: 18px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--text-muted);
 }
@@ -52,16 +52,16 @@
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 4px;
+  gap: 2px;
 }
 
 .amount {
-  font-size: 36px;
+  font-size: 20px;
   font-weight: 700;
 }
 
 .hoursLabel {
-  font-size: 16px;
+  font-size: 12px;
   color: var(--text-muted);
 }
 
@@ -74,10 +74,25 @@
 @media (max-width: 560px) {
   /* Match StatTile's compact mobile sizing instead of the desktop-sized
      huge numbers. */
-  .card { padding: 14px 16px; gap: 6px; }
-  .title { font-size: 12px; font-weight: 600; }
-  .count { font-size: 24px; font-weight: 700; }
-  .countLabel { font-size: 11px; font-weight: 500; }
-  .amount { font-size: 18px; font-weight: 700; }
-  .hoursLabel { font-size: 11px; }
+  .card { padding: 10px 12px; gap: 3px; }
+  .title {
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .body { gap: 6px; }
+  .countBlock { gap: 4px; }
+  .count { font-size: 18px; font-weight: 700; }
+  .countLabel { font-size: 9px; font-weight: 500; }
+  .amountBlock { gap: 1px; }
+  .amount { font-size: 14px; font-weight: 700; }
+  .hoursLabel {
+    font-size: 9px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
 }
