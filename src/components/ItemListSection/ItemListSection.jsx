@@ -14,6 +14,8 @@ export function ItemListSection({
   onFilterChange,
   grouped,
   onGroupToggle,
+  viewMode = 'grid',
+  onViewModeChange,
   renderItem,
 }) {
   if (items.length === 0) {
@@ -29,6 +31,7 @@ export function ItemListSection({
   const availableCategories = [...new Set(items.map(i => i.category || 'other'))];
   const filtered = filterCategory === 'all' ? items : items.filter(i => (i.category || 'other') === filterCategory);
   const visible = sortItems(filtered, sortBy, dateField);
+  const listClass = viewMode === 'grid' ? styles.grid : styles.list;
 
   return (
     <>
@@ -41,6 +44,8 @@ export function ItemListSection({
           availableCategories={availableCategories}
           grouped={grouped}
           onGroupToggle={onGroupToggle}
+          viewMode={viewMode}
+          onViewModeChange={onViewModeChange}
         />
       )}
 
@@ -52,13 +57,13 @@ export function ItemListSection({
               <span>{group.label}</span>
               <span className={styles.groupCount}>{group.items.length}</span>
             </div>
-            <ul className={styles.list}>
+            <ul className={listClass}>
               {group.items.map(item => <li key={item.id}>{renderItem(item)}</li>)}
             </ul>
           </div>
         ))
       ) : (
-        <ul className={styles.list}>
+        <ul className={listClass}>
           {visible.map(item => <li key={item.id}>{renderItem(item)}</li>)}
         </ul>
       )}

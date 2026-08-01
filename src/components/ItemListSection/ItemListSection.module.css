@@ -5,6 +5,13 @@
   gap: 10px;
 }
 
+.grid {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 10px;
+}
+
 .group {
   display: flex;
   flex-direction: column;
