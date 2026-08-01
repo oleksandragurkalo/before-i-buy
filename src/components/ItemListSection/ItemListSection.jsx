@@ -16,6 +16,9 @@ export function ItemListSection({
   onGroupToggle,
   viewMode = 'grid',
   onViewModeChange,
+  decisionFilter,
+  onDecisionFilterChange,
+  header,
   renderItem,
 }) {
   if (items.length === 0) {
@@ -29,7 +32,10 @@ export function ItemListSection({
   }
 
   const availableCategories = [...new Set(items.map(i => i.category || 'other'))];
-  const filtered = filterCategory === 'all' ? items : items.filter(i => (i.category || 'other') === filterCategory);
+  const byCategory = filterCategory === 'all' ? items : items.filter(i => (i.category || 'other') === filterCategory);
+  const filtered = !decisionFilter || decisionFilter === 'all'
+    ? byCategory
+    : byCategory.filter(i => i.status === decisionFilter);
   const visible = sortItems(filtered, sortBy, dateField);
   const listClass = viewMode === 'grid' ? styles.grid : styles.list;
 
@@ -46,8 +52,12 @@ export function ItemListSection({
           onGroupToggle={onGroupToggle}
           viewMode={viewMode}
           onViewModeChange={onViewModeChange}
+          decisionFilter={decisionFilter}
+          onDecisionFilterChange={onDecisionFilterChange}
         />
       )}
+
+      {header}
 
       {grouped ? (
         groupByCategory(visible).map(group => (

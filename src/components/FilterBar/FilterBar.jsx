@@ -10,9 +10,16 @@ const SORT_OPTIONS = [
   { value: 'price-asc', label: 'Price: low to high' },
 ];
 
+const DECISION_OPTIONS = [
+  { value: 'all', label: 'All decisions' },
+  { value: 'passed', label: 'Resisted' },
+  { value: 'bought', label: 'Bought anyway' },
+];
+
 export function FilterBar({
   sortBy, onSortChange, filterCategory, onFilterChange, availableCategories,
   grouped, onGroupToggle, viewMode, onViewModeChange,
+  decisionFilter, onDecisionFilterChange,
 }) {
   const categoryOptions = [
     { value: 'all', label: 'All categories' },
@@ -24,6 +31,9 @@ export function FilterBar({
 
   return (
     <div className={styles.bar}>
+      {onDecisionFilterChange && (
+        <Dropdown value={decisionFilter} options={DECISION_OPTIONS} onChange={onDecisionFilterChange} ariaLabel="Filter by decision" />
+      )}
       <Dropdown value={sortBy} options={SORT_OPTIONS} onChange={onSortChange} ariaLabel="Sort by" />
       <Dropdown value={filterCategory} options={categoryOptions} onChange={onFilterChange} ariaLabel="Filter by category" />
 
