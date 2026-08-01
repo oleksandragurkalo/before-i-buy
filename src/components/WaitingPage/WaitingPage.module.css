@@ -10,6 +10,6 @@
   gap: 8px;
 }
 
-@media (min-width: 560px) {
+@media (min-width: 610px) {
   .statsRow { gap: 10px; }
 }

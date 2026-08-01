@@ -4,7 +4,7 @@
   gap: 8px;
 }
 
-@media (min-width: 560px) {
+@media (min-width: 610px) {
   .row { gap: 12px; }
 }
 
@@ -71,7 +71,7 @@
 .red { background: linear-gradient(135deg, var(--red-bg) 0%, var(--bg-card) 80%); border-color: var(--red); }
 .red .title, .red .count, .red .amount { color: var(--red); }
 
-@media (max-width: 560px) {
+@media (max-width: 610px) {
   /* Match StatTile's compact mobile sizing instead of the desktop-sized
      huge numbers. */
   .card { padding: 10px 12px; gap: 3px; }
