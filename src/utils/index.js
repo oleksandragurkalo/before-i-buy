@@ -150,6 +150,7 @@ export function computeHeaderStats(waiting, history, hourlyRate) {
   const hoursForItem = (item) => hoursOfWork(item.price, item.hourlyRateAtDecision ?? hourlyRate);
   const hoursSeries = series(passed, hoursForItem);
   const hoursSaved = passed.reduce((sum, i) => sum + hoursForItem(i), 0);
+  const hoursSpent = bought.reduce((sum, i) => sum + hoursForItem(i), 0);
 
   return {
     totalSaved: passed.reduce((sum, i) => sum + i.price, 0),
@@ -159,6 +160,7 @@ export function computeHeaderStats(waiting, history, hourlyRate) {
     spentCount: bought.length,
     spentSeries,
     hoursSaved,
+    hoursSpent,
     hoursSeries,
   };
 }

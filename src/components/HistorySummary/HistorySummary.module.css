@@ -14,7 +14,7 @@
   padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 6px;
 }
 
 .title {
@@ -56,12 +56,12 @@
 }
 
 .amount {
-  font-size: 28px;
+  font-size: 36px;
   font-weight: 700;
 }
 
 .hoursLabel {
-  font-size: 13px;
+  font-size: 16px;
   color: var(--text-muted);
 }
 
