@@ -1,19 +1,11 @@
 import { useState } from 'react';
 import { DEFAULT_SETTINGS } from '../../hooks/useItems';
-import { computeHourlyRate, convertPayAmount, defaultPayAmountFor, formatPrice } from '../../utils';
+import { CURRENCIES, computeHourlyRate, convertPayAmount, defaultPayAmountFor, formatPrice } from '../../utils';
 import { NumberStepper } from '../NumberStepper/NumberStepper';
 import { Modal } from '../Modal/Modal';
 import { Button } from '../Button/Button';
 import { Dropdown } from '../Dropdown/Dropdown';
 import styles from './SettingsModal.module.css';
-
-const CURRENCIES = [
-  { code: 'CAD', symbol: '$', label: 'CAD — Canadian dollar' },
-  { code: 'USD', symbol: '$', label: 'USD — US dollar' },
-  { code: 'EUR', symbol: '€', label: 'EUR — Euro' },
-  { code: 'PLN', symbol: 'zł', label: 'PLN — Polish złoty' },
-  { code: 'UAH', symbol: '₴', label: 'UAH — Ukrainian hryvnia' },
-];
 
 const PAY_PERIODS = [
   { value: 'hourly', label: 'Hourly' },

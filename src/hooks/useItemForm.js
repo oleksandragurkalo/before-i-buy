@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { DEFAULT_COOLING_OFF_DAYS, MIN_COOLING_OFF_DAYS, MAX_COOLING_OFF_DAYS } from './useItems';
+import { DEFAULT_COOLING_OFF_DAYS } from './useItems';
 
 export function toFormState(item = {}) {
   return {
@@ -50,11 +50,6 @@ export function useItemForm(initial, onClose) {
     if (!form.name.trim()) { setError('Give it a name'); return null; }
     const price = parseFloat(form.price);
     if (!form.price || isNaN(price) || price <= 0) { setError('Enter a valid price'); return null; }
-    const coolingOffDays = parseInt(form.coolingOffDays, 10);
-    if (isNaN(coolingOffDays) || coolingOffDays < MIN_COOLING_OFF_DAYS || coolingOffDays > MAX_COOLING_OFF_DAYS) {
-      setError(`Cooling-off must be between ${MIN_COOLING_OFF_DAYS} and ${MAX_COOLING_OFF_DAYS} days`);
-      return null;
-    }
     return { ...form, price };
   };
 

@@ -42,6 +42,14 @@ export function convertPayAmount(amount, fromPeriod, toPeriod, hoursPerWeek) {
   return asHourly * periodToHourlyFactor(toPeriod, hoursPerWeek);
 }
 
+export const CURRENCIES = [
+  { code: 'CAD', symbol: '$', label: 'CAD — Canadian dollar' },
+  { code: 'USD', symbol: '$', label: 'USD — US dollar' },
+  { code: 'EUR', symbol: '€', label: 'EUR — Euro' },
+  { code: 'PLN', symbol: 'zł', label: 'PLN — Polish złoty' },
+  { code: 'UAH', symbol: '₴', label: 'UAH — Ukrainian hryvnia' },
+];
+
 export const CURRENCY_DEFAULT_HOURLY = {
   CAD: 25,
   USD: 22,
