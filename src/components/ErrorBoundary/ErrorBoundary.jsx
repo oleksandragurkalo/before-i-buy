@@ -1,4 +1,7 @@
 import { Component } from 'react';
+import { AlertTriangle } from 'lucide-react';
+import { Button } from '../Button/Button';
+import styles from './ErrorBoundary.module.css';
 
 export class ErrorBoundary extends Component {
   state = { hasError: false };
@@ -14,9 +17,19 @@ export class ErrorBoundary extends Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div style={{ padding: '2rem', textAlign: 'center', fontFamily: 'sans-serif' }}>
-          <p>Something went wrong.</p>
-          <button onClick={() => window.location.reload()}>Reload</button>
+        <div className={styles.backdrop}>
+          <div className={styles.card}>
+            <div className={styles.icon} aria-hidden="true">
+              <AlertTriangle size={22} />
+            </div>
+            <p className={styles.title}>Something went wrong</p>
+            <p className={styles.body}>
+              Reloading usually fixes it.
+            </p>
+            <Button size="lg" fullWidth onClick={() => window.location.reload()}>
+              Reload
+            </Button>
+          </div>
         </div>
       );
     }
