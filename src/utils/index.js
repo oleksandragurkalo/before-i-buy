@@ -1,4 +1,4 @@
-export const CATEGORIES = {
+export const  CATEGORIES = {
   tech:     { label: 'Tech',     emoji: '💻' },
   clothing: { label: 'Clothing', emoji: '👕' },
   food:     { label: 'Food',     emoji: '🍔' },
@@ -33,9 +33,6 @@ export function convertPayAmount(amount, fromPeriod, toPeriod, hoursPerWeek) {
   return asHourly * periodToHourlyFactor(toPeriod, hoursPerWeek);
 }
 
-// Rough "typical net take-home" starting points per currency, so switching
-// currency suggests a sane figure instead of carrying over a number from
-// a completely different economy. Editable by the user either way.
 export const CURRENCY_DEFAULT_HOURLY = {
   CAD: 25,
   USD: 22,
@@ -47,6 +44,21 @@ export const CURRENCY_DEFAULT_HOURLY = {
 export function defaultPayAmountFor(payPeriod, currencyCode, hoursPerWeek) {
   const hourly = CURRENCY_DEFAULT_HOURLY[currencyCode] ?? 20;
   return Math.round(hourly * periodToHourlyFactor(payPeriod, hoursPerWeek));
+}
+
+export const EXCHANGE_RATES_PER_USD = {
+  USD: 1,
+  CAD: 1.36,
+  EUR: 0.92,
+  PLN: 3.95,
+  UAH: 41.5,
+};
+
+export function convertCurrency(amount, fromCode, toCode) {
+  if (fromCode === toCode) return amount;
+  const fromRate = EXCHANGE_RATES_PER_USD[fromCode] ?? 1;
+  const toRate = EXCHANGE_RATES_PER_USD[toCode] ?? 1;
+  return (amount / fromRate) * toRate;
 }
 
 export function formatHours(hours) {
@@ -136,8 +148,6 @@ export function computeInsights(waiting, history) {
   return { resistanceRate, categoryBreakdown, topTemptations, totalItems: all.length };
 }
 
-// Consecutive resisted decisions counting back from the most recent one,
-// stopping at the first "bought anyway" — resets the streak, doesn't erase it.
 export function computeStreak(history) {
   const decided = [...history].sort((a, b) => b.decidedAt - a.decidedAt);
   let streak = 0;

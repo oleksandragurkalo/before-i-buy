@@ -1,10 +1,8 @@
-import { useItemForm } from '../../hooks/useItemForm';
+import { useItemForm, toFormState } from '../../hooks/useItemForm';
 import { ItemFormTemplate } from '../ItemFormTemplate/ItemFormTemplate';
 
-const EMPTY = { name: '', price: '', category: 'other', note: '', savedAmount: '', coolingOffDays: '7' };
-
 export function AddItemForm({ onAdd, onClose, symbol = '$' }) {
-  const { form, error, set, setField, validate } = useItemForm(EMPTY, onClose);
+  const { form, error, set, setField, validate } = useItemForm(toFormState, onClose);
 
   const submit = (e) => {
     e.preventDefault();

@@ -1,12 +1,17 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
-/**
- * Shared logic for AddItemForm and EditItemModal.
- *
- * @param {object} initial  - initial field values
- * @param {function} onClose - called on Escape keydown
- * @returns {{ form, error, set, setField, validate }}
- */
+export function toFormState(item = {}) {
+  return {
+    name: item.name ?? '',
+    price: item.price != null ? String(item.price) : '',
+    category: item.category ?? 'other',
+    note: item.note ?? '',
+    savedAmount: item.savedAmount ? String(item.savedAmount) : '',
+    coolingOffDays: String(item.coolingOffDays ?? 7),
+    status: item.status ?? 'waiting',
+  };
+}
+
 export function useItemForm(initial, onClose) {
   const [form, setForm] = useState(initial);
   const [error, setError] = useState('');
@@ -17,22 +22,29 @@ export function useItemForm(initial, onClose) {
     return () => window.removeEventListener('keydown', onKey);
   }, [onClose]);
 
-  /** onChange handler factory for plain inputs / selects */
-  const set = (field) => (e) => {
-    setForm(prev => ({ ...prev, [field]: e.target.value }));
-    if (error) setError('');
+  const setHandlers = useRef({});
+  const setFieldHandlers = useRef({});
+
+  const set = (field) => {
+    if (!setHandlers.current[field]) {
+      setHandlers.current[field] = (e) => {
+        setForm(prev => ({ ...prev, [field]: e.target.value }));
+        setError('');
+      };
+    }
+    return setHandlers.current[field];
   };
 
-  /** Direct setter for programmatic updates (e.g. NumberStepper callbacks) */
-  const setField = (field) => (value) => {
-    setForm(prev => ({ ...prev, [field]: value }));
-    if (error) setError('');
+  const setField = (field) => {
+    if (!setFieldHandlers.current[field]) {
+      setFieldHandlers.current[field] = (value) => {
+        setForm(prev => ({ ...prev, [field]: value }));
+        setError('');
+      };
+    }
+    return setFieldHandlers.current[field];
   };
 
-  /**
-   * Validates the form and returns the parsed data, or null on failure.
-   * Sets the error state as a side effect when validation fails.
-   */
   const validate = () => {
     if (!form.name.trim()) { setError('Give it a name'); return null; }
     const price = parseFloat(form.price);

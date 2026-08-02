@@ -1,4 +1,3 @@
-import { useId } from 'react';
 import { CATEGORIES } from '../../utils';
 import { NumberStepper } from '../NumberStepper/NumberStepper';
 import { Modal } from '../Modal/Modal';
@@ -6,7 +5,10 @@ import { Button } from '../Button/Button';
 import { Dropdown } from '../Dropdown/Dropdown';
 import styles from './ItemFormTemplate.module.css';
 
+const FORM_ID = 'item-form';
+
 const STATUS_OPTIONS = [
+  { value: 'waiting', label: 'Still deciding', tone: 'wait' },
   { value: 'passed', label: "Didn't need it", tone: 'pass' },
   { value: 'bought', label: 'Bought it', tone: 'buy' },
 ];
@@ -45,8 +47,6 @@ export function ItemFormTemplate({
   onSubmit,
   onClose,
 }) {
-  const formId = useId();
-
   return (
     <Modal
       title={title}
@@ -54,11 +54,11 @@ export function ItemFormTemplate({
       footer={
         <>
           <Button variant="secondary" onClick={onClose}>Cancel</Button>
-          <Button type="submit" form={formId}>{submitLabel}</Button>
+          <Button type="submit" form={FORM_ID}>{submitLabel}</Button>
         </>
       }
     >
-      <form id={formId} onSubmit={onSubmit} className={styles.form} noValidate>
+      <form id={FORM_ID} onSubmit={onSubmit} className={styles.form} noValidate>
         <Field label="What do you want?" htmlFor="item-name">
           <input
             id="item-name"
@@ -116,6 +116,7 @@ export function ItemFormTemplate({
                 <button
                   key={value}
                   type="button"
+                  aria-pressed={form.status === value}
                   className={`${styles.segment} ${form.status === value ? `${styles.segmentActive} ${styles[tone]}` : ''}`}
                   onClick={() => onStatusChange(value)}
                 >

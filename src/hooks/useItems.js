@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { convertCurrency } from '../utils';
 
 const STORAGE_KEY = 'bib-items';
 const SETTINGS_KEY = 'bib-settings';
@@ -85,6 +86,11 @@ export function useItems() {
             ? Math.max(1, parseInt(updates.coolingOffDays, 10) || DEFAULT_COOLING_OFF_DAYS)
             : item.coolingOffDays,
           status: updates.status ?? item.status,
+          // Moved back to "still deciding" from History — it's no longer
+          // a decided item, so the decision timestamp/snapshot no longer
+          // applies.
+          decidedAt: updates.status === 'waiting' ? null : item.decidedAt,
+          hourlyRateAtDecision: updates.status === 'waiting' ? null : item.hourlyRateAtDecision,
         }
         : item
     ));
@@ -117,6 +123,23 @@ export function useItems() {
   };
 
   const updateSettings = (updates) => {
+    if (updates.currency && updates.currency !== settings.currency) {
+      const fromCode = settings.currency;
+      const toCode = updates.currency;
+      setItems(prev => prev.map(item => ({
+        ...item,
+        price: Math.round(convertCurrency(item.price, fromCode, toCode) * 100) / 100,
+        savedAmount: item.savedAmount
+          ? Math.round(convertCurrency(item.savedAmount, fromCode, toCode) * 100) / 100
+          : item.savedAmount,
+        // Keep the frozen hourly-rate snapshot in the same currency as the
+        // (now-converted) price, so hours-of-work for History items still
+        // computes correctly after a currency switch.
+        hourlyRateAtDecision: item.hourlyRateAtDecision != null
+          ? convertCurrency(item.hourlyRateAtDecision, fromCode, toCode)
+          : item.hourlyRateAtDecision,
+      })));
+    }
     setSettings(prev => ({ ...prev, ...updates }));
   };
 

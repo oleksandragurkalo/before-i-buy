@@ -1,20 +1,10 @@
-import { useItemForm } from '../../hooks/useItemForm';
+import { useItemForm, toFormState } from '../../hooks/useItemForm';
 import { ItemFormTemplate } from '../ItemFormTemplate/ItemFormTemplate';
 
 export function EditItemModal({ item, settings, onSave, onClose }) {
   const symbol = settings?.currencySymbol || '$';
 
-  const initial = {
-    name: item.name,
-    price: String(item.price),
-    category: item.category,
-    note: item.note || '',
-    savedAmount: item.savedAmount ? String(item.savedAmount) : '',
-    coolingOffDays: String(item.coolingOffDays ?? 7),
-    status: item.status,
-  };
-
-  const { form, error, set, setField, validate } = useItemForm(initial, onClose);
+  const { form, error, set, setField, validate } = useItemForm(() => toFormState(item), onClose);
 
   const save = (e) => {
     e.preventDefault();
