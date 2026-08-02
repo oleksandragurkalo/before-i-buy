@@ -4,7 +4,7 @@ import { formatHours, formatPrice } from '../../utils/index.js';
 export function StatTiles( { headerStats, currencySymbol, className }) {
   const { totalSaved, totalSpent, resistedCount, spentCount, resistedSeries, spentSeries, hoursSaved, hoursSeries } = headerStats;
 
-  const data = [
+  const tiles = [
     {
       tone: 'green',
       label: 'Resisted',
@@ -30,7 +30,7 @@ export function StatTiles( { headerStats, currencySymbol, className }) {
 
   return (
     <div className={className}>
-      {data.map((tile) => (
+      {tiles.map((tile) => (
         <StatTile key={tile.label} {...tile} />
       ))}
     </div>

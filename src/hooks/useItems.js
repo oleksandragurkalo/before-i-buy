@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { convertCurrency } from '../utils';
+import { convertCurrency, COOLING_OFF_PRESETS } from '../utils';
 
 const STORAGE_KEY = 'bib-items';
 const SETTINGS_KEY = 'bib-settings';
@@ -17,8 +17,11 @@ export const DEFAULT_SETTINGS = {
 };
 
 export const DEFAULT_COOLING_OFF_DAYS = 7;
-export const MIN_COOLING_OFF_DAYS = 0;
-export const MAX_COOLING_OFF_DAYS = 60;
+// Derived from the same preset list the form renders, so the clamp bounds
+// can never fall out of sync with what's actually selectable.
+const COOLING_OFF_VALUES = COOLING_OFF_PRESETS.map(p => p.value);
+const MIN_COOLING_OFF_DAYS = Math.min(...COOLING_OFF_VALUES);
+const MAX_COOLING_OFF_DAYS = Math.max(...COOLING_OFF_VALUES);
 
 function clampCoolingOffDays(value) {
   const parsed = parseInt(value, 10);
@@ -164,16 +167,9 @@ export function useItems() {
 
   const waiting = items.filter(i => i.status === 'waiting');
   const history = items.filter(i => i.status !== 'waiting');
-  const totalSaved = history
-    .filter(i => i.status === 'passed')
-    .reduce((sum, i) => sum + i.price, 0);
-  const totalSpent = history
-    .filter(i => i.status === 'bought')
-    .reduce((sum, i) => sum + i.price, 0);
 
   return {
     waiting, history,
-    totalSaved, totalSpent,
     settings, updateSettings,
     addItem, editItem, decide, removeItem, restoreItem,
     exportData, importData,

@@ -17,6 +17,17 @@ export const DECISION_LABELS = {
   bought: 'Bought anyway',
 };
 
+// Single source of truth for the cooling-off period options — the add/edit
+// form's preset chips render this list, and useItems.js derives its
+// min/max clamp bounds from it, so the two can never drift apart.
+export const COOLING_OFF_PRESETS = [
+  { value: 0, label: 'No wait' },
+  { value: 3, label: '3d' },
+  { value: 7, label: '7d' },
+  { value: 14, label: '14d' },
+  { value: 30, label: '30d' },
+];
+
 export function hoursOfWork(price, netHourlyRate) {
   return price / netHourlyRate;
 }

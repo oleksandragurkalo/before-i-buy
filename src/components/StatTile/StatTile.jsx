@@ -23,16 +23,14 @@ function Sparkline({ series, color }) {
   );
 }
 
-export function StatTile({ tone, label, value, sublabel, series, icon }) {
+export function StatTile({ tone, label, value, sublabel, series }) {
   return (
     <div className={`${styles.tile} ${styles[tone]}`}>
       <p className={styles.label}>{label}</p>
       <p className={`${styles.value} mono`}>{value}</p>
       <div className={styles.footer}>
         <p className={styles.sublabel}>{sublabel}</p>
-        {icon
-          ? <span className={styles.icon} aria-hidden="true">{icon}</span>
-          : <Sparkline series={series} color={`var(--${tone})`} />}
+        <Sparkline series={series} color={`var(--${tone})`} />
       </div>
     </div>
   );

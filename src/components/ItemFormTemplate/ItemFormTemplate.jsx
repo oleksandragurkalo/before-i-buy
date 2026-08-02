@@ -1,4 +1,4 @@
-import { CATEGORIES } from '../../utils';
+import { CATEGORIES, COOLING_OFF_PRESETS } from '../../utils';
 import { NumberStepper } from '../NumberStepper/NumberStepper';
 import { Modal } from '../Modal/Modal';
 import { Button } from '../Button/Button';
@@ -17,14 +17,6 @@ const CATEGORY_OPTIONS = Object.entries(CATEGORIES).map(([value, { label, emoji 
   value,
   label: `${emoji} ${label}`,
 }));
-
-const COOLING_OFF_PRESETS = [
-  { value: 0, label: 'No wait' },
-  { value: 3, label: '3d' },
-  { value: 7, label: '7d' },
-  { value: 14, label: '14d' },
-  { value: 30, label: '30d' },
-];
 
 function Field({ label, htmlFor, optional, hint, children }) {
   return (
