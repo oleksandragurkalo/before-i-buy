@@ -8,6 +8,10 @@ export const  CATEGORIES = {
   other:    { label: 'Other',    emoji: '📦' },
 };
 
+export function getCategory(key) {
+  return CATEGORIES[key] || CATEGORIES.other;
+}
+
 export function hoursOfWork(price, netHourlyRate) {
   return price / netHourlyRate;
 }
@@ -118,7 +122,7 @@ export function groupByCategory(items) {
     map.get(key).push(item);
   }
   return [...map.entries()]
-    .map(([category, groupItems]) => ({ category, items: groupItems, ...(CATEGORIES[category] || CATEGORIES.other) }))
+    .map(([category, groupItems]) => ({ category, items: groupItems, ...getCategory(category) }))
     .sort((a, b) => b.items.length - a.items.length);
 }
 
@@ -138,7 +142,7 @@ export function computeInsights(waiting, history) {
     byCategory.set(key, entry);
   }
   const categoryBreakdown = [...byCategory.values()]
-    .map(entry => ({ ...entry, ...(CATEGORIES[entry.category] || CATEGORIES.other) }))
+    .map(entry => ({ ...entry, ...getCategory(entry.category) }))
     .sort((a, b) => b.total - a.total);
 
   const topTemptations = [...all]

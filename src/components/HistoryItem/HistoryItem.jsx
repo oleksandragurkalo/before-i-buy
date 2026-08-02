@@ -1,12 +1,12 @@
 import { Trash2, Pencil } from 'lucide-react';
-import { CATEGORIES, formatPrice, formatDate, formatHours, hoursOfWork } from '../../utils';
+import { getCategory, formatPrice, formatDate, formatHours, hoursOfWork } from '../../utils';
 import { useItemActionDialogs } from '../../hooks/useItemActionDialogs';
 import { Button } from '../Button/Button';
 import styles from './HistoryItem.module.css';
 
 export function HistoryItem({ item, settings, onRemove, onEdit }) {
   const { setEditing, dialogs } = useItemActionDialogs({ item, settings, onEdit });
-  const { emoji, label: categoryLabel } = CATEGORIES[item.category] || CATEGORIES.other;
+  const { emoji, label: categoryLabel } = getCategory(item.category);
   const priceLabel = formatPrice(item.price, settings.currencySymbol);
   const hrsLabel = formatHours(hoursOfWork(item.price, item.hourlyRateAtDecision ?? settings.hourlyRate));
   const bought = item.status === 'bought';

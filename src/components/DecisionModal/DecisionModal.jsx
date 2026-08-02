@@ -1,5 +1,5 @@
 import { ShoppingBag, ThumbsDown, Trash2 } from 'lucide-react';
-import { CATEGORIES, formatPrice } from '../../utils';
+import { getCategory, formatPrice } from '../../utils';
 import { Modal } from '../Modal/Modal';
 import styles from './DecisionModal.module.css';
 
@@ -10,7 +10,7 @@ const OPTIONS = [
 ];
 
 export function DecisionModal({ item, settings, onDecide, onRemove, onClose }) {
-  const { emoji } = CATEGORIES[item.category] || CATEGORIES.other;
+  const { emoji } = getCategory(item.category);
   const priceLabel = formatPrice(item.price, settings.currencySymbol);
 
   return (

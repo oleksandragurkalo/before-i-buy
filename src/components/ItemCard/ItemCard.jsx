@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Pencil, Scale, Trash2 } from 'lucide-react';
-import { CATEGORIES, hoursOfWork, formatHours, formatPrice, daysAgo, daysSince, coolingOffStatus } from '../../utils';
+import { getCategory, hoursOfWork, formatHours, formatPrice, daysAgo, daysSince, coolingOffStatus } from '../../utils';
 import { useItemActionDialogs } from '../../hooks/useItemActionDialogs';
 import { Button } from '../Button/Button';
 import { DecisionModal } from '../DecisionModal/DecisionModal';
@@ -9,7 +9,7 @@ import styles from './ItemCard.module.css';
 export function ItemCard({ item, settings, onDecide, onRemove, onEdit, view = 'rows' }) {
   const [decisionOpen, setDecisionOpen] = useState(false);
   const { setEditing, dialogs } = useItemActionDialogs({ item, settings, onEdit });
-  const { emoji, label: categoryLabel } = CATEGORIES[item.category] || CATEGORIES.other;
+  const { emoji, label: categoryLabel } = getCategory(item.category);
   const hrs = hoursOfWork(item.price, settings.hourlyRate);
   const hrsLabel = formatHours(hrs);
   const priceLabel = formatPrice(item.price, settings.currencySymbol);

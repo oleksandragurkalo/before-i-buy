@@ -1,5 +1,5 @@
 import { Rows3, LayoutGrid, List, Grid2x2 } from 'lucide-react';
-import { CATEGORIES } from '../../utils';
+import { getCategory } from '../../utils';
 import { Dropdown } from '../Dropdown/Dropdown';
 import styles from './FilterBar.module.css';
 
@@ -23,10 +23,10 @@ export function FilterBar({
 }) {
   const categoryOptions = [
     { value: 'all', label: 'All categories' },
-    ...availableCategories.map(key => ({
-      value: key,
-      label: `${(CATEGORIES[key] || CATEGORIES.other).emoji} ${(CATEGORIES[key] || CATEGORIES.other).label}`,
-    })),
+    ...availableCategories.map(key => {
+      const { emoji, label } = getCategory(key);
+      return { value: key, label: `${emoji} ${label}` };
+    }),
   ];
 
   return (
