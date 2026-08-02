@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Check } from 'lucide-react';
 import styles from './Dropdown.module.css';
@@ -9,7 +9,7 @@ export function Dropdown({ value, options, onChange, ariaLabel }) {
   const triggerRef = useRef(null);
   const menuRef = useRef(null);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!open) return;
 
     const updatePosition = () => {
