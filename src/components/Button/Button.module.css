@@ -43,26 +43,6 @@
 
 .secondary:hover:not(:disabled) { border-color: var(--border-strong); color: var(--text-primary); }
 
-.danger {
-  padding: 9px 16px;
-  background: var(--red);
-  border: none;
-  color: #fff;
-  font-size: 13px;
-}
-
-.danger:hover:not(:disabled) { opacity: 0.88; }
-
-.dangerOutline {
-  padding: 9px 16px;
-  background: var(--bg-card);
-  border: 1px solid var(--red);
-  color: var(--red);
-  font-size: 13px;
-}
-
-.dangerOutline:hover:not(:disabled) { opacity: 0.85; }
-
 .text {
   padding: 4px 0;
   background: transparent;
