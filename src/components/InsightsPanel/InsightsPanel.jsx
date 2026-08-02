@@ -12,8 +12,13 @@ export function InsightsPanel({ waiting, history, settings }) {
   const maxCategoryTotal = categoryBreakdown[0]?.total || 1;
 
   return (
-    <div className={styles.panel} onClick={() => setIsDropdownOpen(!isDropdownOpen)}>
-      <div className={styles.header}>
+    <div className={styles.panel}>
+      <button 
+        type="button"
+        className={styles.header}
+        onClick={() => setIsDropdownOpen(o => !o)}
+        aria-expanded={isDropdownOpen}
+      >
         <div className={styles.titleWrapper}>
           <TrendingUp size={16} />
           <h2 className={styles.title}>Insights</h2>
@@ -21,9 +26,9 @@ export function InsightsPanel({ waiting, history, settings }) {
         <img
           className={`${styles.dropdownIcon} ${isDropdownOpen ? styles.dropdownIconOpen : ''}`}
           src={dropdownIcon}
-          alt="dropdown"
+          alt=""
         />
-      </div>
+      </button>
 
       <div className={`${styles.dropdownWrapper} ${isDropdownOpen ? styles.open : ''}`}>
         <div className={styles.dropdownInner}>
