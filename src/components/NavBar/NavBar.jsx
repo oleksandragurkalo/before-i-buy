@@ -8,7 +8,7 @@ const DESTINATIONS = [
   { key: 'history', label: 'History', icon: ListChecks },
 ];
 
-export function NavBar({ view, onNavigate, onSettingsClick }) {
+export function NavBar({ view, onNavigate, onSettingsClick, readyCount = 0 }) {
   const { theme, toggle } = useTheme();
 
   return (
@@ -26,6 +26,11 @@ export function NavBar({ view, onNavigate, onSettingsClick }) {
             >
               <Icon size={13} />
               <span>{label}</span>
+              {key === 'waiting' && readyCount > 0 && (
+                <span className={styles.badge} aria-label={`${readyCount} item${readyCount === 1 ? '' : 's'} ready to decide`}>
+                  {readyCount}
+                </span>
+              )}
             </button>
           ))}
         </div>

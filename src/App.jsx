@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useItems } from './hooks/useItems';
+import { coolingOffStatus } from './utils';
 import { NavBar } from './components/NavBar/NavBar';
 import { StartPage } from './components/StartPage/StartPage';
 import { AddItemForm } from './components/AddItemForm/AddItemForm';
@@ -31,9 +32,22 @@ export default function App() {
     setPendingUndo(null);
   };
 
+  // A pending Undo snapshot is frozen at removal time, so if currency
+  // changes while it's showing, the snapshot's amounts are left in the old
+  // currency — restoring it would put a stale, inconsistent price back
+  // into an otherwise-converted list. Simplest safe fix: drop the toast.
+  useEffect(() => {
+    setPendingUndo(null);
+  }, [settings.currency]);
+
+  // Every waiting item that's currently decidable — whether it got there by
+  // waiting out its cooling-off period or started at "No wait" — counts as
+  // actionable, so all of them show up in the badge.
+  const readyCount = waiting.filter(item => coolingOffStatus(item, item.coolingOffDays ?? 7).ready).length;
+
   return (
     <div className={styles.app}>
-      <NavBar view={view} onNavigate={setView} onSettingsClick={() => setShowSettings(true)} />
+      <NavBar view={view} onNavigate={setView} onSettingsClick={() => setShowSettings(true)} readyCount={readyCount} />
 
       {view === 'start' && <StartPage onGetStarted={() => setView('waiting')} />}
 

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Pencil, Scale, Trash2 } from 'lucide-react';
 import { getCategory, hoursOfWork, formatHours, formatPrice, daysAgo, daysSince, coolingOffStatus } from '../../utils';
+import { DEFAULT_COOLING_OFF_DAYS } from '../../hooks/useItems';
 import { useItemActionDialogs } from '../../hooks/useItemActionDialogs';
 import { Button } from '../Button/Button';
 import { DecisionModal } from '../DecisionModal/DecisionModal';
@@ -18,7 +19,7 @@ export function ItemCard({ item, settings, onDecide, onRemove, onEdit, view = 'r
   const remaining = Math.max(0, item.price - savedAmount);
   const remainingHrsLabel = formatHours(hoursOfWork(remaining, settings.hourlyRate));
   const waitingDays = daysSince(item.addedAt);
-  const { remaining: coolingOffDaysLeft, ready } = coolingOffStatus(item, item.coolingOffDays ?? 7);
+  const { remaining: coolingOffDaysLeft, ready } = coolingOffStatus(item, item.coolingOffDays ?? DEFAULT_COOLING_OFF_DAYS);
 
   return (
     <article className={`${styles.card} ${view === 'grid' ? styles.grid : ''}`}>

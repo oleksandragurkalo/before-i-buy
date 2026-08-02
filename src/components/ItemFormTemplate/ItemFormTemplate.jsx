@@ -18,12 +18,21 @@ const CATEGORY_OPTIONS = Object.entries(CATEGORIES).map(([value, { label, emoji 
   label: `${emoji} ${label}`,
 }));
 
-function Field({ label, htmlFor, optional, children }) {
+const COOLING_OFF_PRESETS = [
+  { value: 0, label: 'No wait' },
+  { value: 3, label: '3d' },
+  { value: 7, label: '7d' },
+  { value: 14, label: '14d' },
+  { value: 30, label: '30d' },
+];
+
+function Field({ label, htmlFor, optional, hint, children }) {
   return (
     <div className={styles.field}>
       <label className={styles.label} htmlFor={htmlFor}>
         {label} {optional && <span className={styles.optional}>(optional)</span>}
       </label>
+      {hint && <p className={styles.hint}>{hint}</p>}
       {children}
     </div>
   );
@@ -142,16 +151,20 @@ export function ItemFormTemplate({
         )}
 
         {showCoolingOff && (
-          <Field label="Days to wait before deciding" htmlFor="item-cooling-off">
-            <NumberStepper
-              id="item-cooling-off"
-              value={form.coolingOffDays}
-              onChange={onCoolingOffChange}
-              min={1}
-              max={60}
-              step={1}
-              ariaLabel="cooling-off days"
-            />
+          <Field label="Days to wait before deciding" hint="Sleep on it, or pick “No wait” to decide right away">
+            <div className={styles.segmented}>
+              {COOLING_OFF_PRESETS.map(({ value, label }) => (
+                <button
+                  key={value}
+                  type="button"
+                  aria-pressed={Number(form.coolingOffDays) === value}
+                  className={`${styles.segment} ${Number(form.coolingOffDays) === value ? styles.segmentActive : ''}`}
+                  onClick={() => onCoolingOffChange(String(value))}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
           </Field>
         )}
 

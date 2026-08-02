@@ -1,7 +1,7 @@
 .row,
 .headerRow {
   display: grid;
-  grid-template-columns: minmax(0, 1.8fr) 90px 130px 80px 70px 110px auto;
+  grid-template-columns: minmax(0, 1.8fr) 90px 130px 100px 85px 110px auto;
   align-items: center;
   gap: 6px;
   padding: 12px 16px;
@@ -17,6 +17,10 @@
 .row:hover { border-color: var(--border-strong); }
 
 .headerRow {
+  /* Match .row's box model exactly (border-box eats 1px per side into the
+     content box) so the flexible first column — and everything after it —
+     lines up pixel-for-pixel with the rows below. */
+  border: 1px solid transparent;
   padding: 0 16px 8px;
 }
 
@@ -74,6 +78,10 @@
 .passed { background: var(--green-bg); color: var(--green); }
 
 .price {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-size: 14px;
   font-weight: 600;
   color: var(--text-primary);
@@ -81,6 +89,10 @@
 }
 
 .hours {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-size: 13px;
   color: var(--text-secondary);
   text-align: right;
@@ -105,7 +117,7 @@
    that gap. Match the breakpoint to App.module.css's 880px instead. */
 @media (max-width: 879px) {
   .row, .headerRow {
-    grid-template-columns: minmax(0, 1fr) 110px 70px auto;
+    grid-template-columns: minmax(0, 1fr) 110px 90px auto;
   }
 
   .category, .hours, .date { display: none; }

@@ -11,12 +11,14 @@ A minimal anti-impulse-purchase tracker. Add things you want to buy, see how man
 - Add items with name, price, category, and an optional note
 - Calculates **net hours of work** per item, based on your pay — set as hourly, monthly, or annual, net or gross, in CAD/USD/EUR/PLN/UAH
 - Track progress toward a purchase with an optional "already saved" amount
-- Day counter on each waiting item
-- Decide: resisted it, bought it anyway, or remove it
-- Waiting list with grid or row view, plus sort/filter/group by category
+- **Cooling-off period per item** — pick "No wait", 3, 7, 14, or 30 days; a countdown badge shows days left, then flips to "ready to decide"
+- A badge on the "Waiting List" nav pill counts how many items are ready to decide right now
+- Decide: resisted it, bought it anyway, or remove it — removing shows an **Undo** toast instead of a confirm dialog
+- Changed your mind on a past decision? Move an item from History back to "still deciding"
+- Waiting list with grid or row view (locked to rows on mobile/tablet), plus sort/filter/group by category
 - History as a sortable, filterable table — with summary stats and a resistance-rate meter
-- Insights panel — resistance rate, spending by category, biggest temptations
-- Export/import your data as JSON (it's all local — this is your only backup)
+- Insights panel — resistance rate, current streak, spending by category, biggest temptations
+- Switch currency any time — existing item prices convert too, not just the symbol
 - Dark / light mode (respects system preference, persists)
 - All data in **localStorage** — no account, no server, no tracking
 - Fully responsive — works on mobile

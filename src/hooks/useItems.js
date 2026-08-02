@@ -17,6 +17,14 @@ export const DEFAULT_SETTINGS = {
 };
 
 export const DEFAULT_COOLING_OFF_DAYS = 7;
+export const MIN_COOLING_OFF_DAYS = 0;
+export const MAX_COOLING_OFF_DAYS = 60;
+
+function clampCoolingOffDays(value) {
+  const parsed = parseInt(value, 10);
+  const safe = isNaN(parsed) ? DEFAULT_COOLING_OFF_DAYS : parsed;
+  return Math.min(MAX_COOLING_OFF_DAYS, Math.max(MIN_COOLING_OFF_DAYS, safe));
+}
 
 function load(key, fallback) {
   try {
@@ -61,7 +69,7 @@ export function useItems() {
       category: item.category || 'other',
       note: item.note?.trim() || '',
       savedAmount: Math.max(0, parseFloat(item.savedAmount) || 0),
-      coolingOffDays: Math.max(1, parseInt(item.coolingOffDays, 10) || DEFAULT_COOLING_OFF_DAYS),
+      coolingOffDays: clampCoolingOffDays(item.coolingOffDays),
       addedAt: Date.now(),
       status: 'waiting', // 'waiting' | 'bought' | 'passed'
       decidedAt: null,
@@ -83,7 +91,7 @@ export function useItems() {
           // Only present when the form showed the field (item still
           // waiting) — otherwise (editing a decided item) leave it as-is.
           coolingOffDays: updates.coolingOffDays != null
-            ? Math.max(1, parseInt(updates.coolingOffDays, 10) || DEFAULT_COOLING_OFF_DAYS)
+            ? clampCoolingOffDays(updates.coolingOffDays)
             : item.coolingOffDays,
           status: updates.status ?? item.status,
           // Moved back to "still deciding" from History — it's no longer

@@ -27,6 +27,12 @@
   color: var(--text-muted);
 }
 
+.hint {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
 .input {
   padding: 10px 12px;
   background: var(--bg-card);
@@ -48,6 +54,7 @@
 
 .segmented {
   display: flex;
+  flex-wrap: wrap;
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -57,6 +64,7 @@
 
 .segment {
   flex: 1;
+  min-width: 56px;
   padding: 8px 10px;
   border: none;
   background: transparent;
