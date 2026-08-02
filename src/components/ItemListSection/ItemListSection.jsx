@@ -69,10 +69,14 @@ export function ItemListSection({
       )}
 
       {visible.length === 0 ? (
-        <>
-          {header}
+        header ? (
+          <div className="history-table">
+            {header}
+            <p className={styles.noMatches}>No items match this filter.</p>
+          </div>
+        ) : (
           <p className={styles.noMatches}>No items match this filter.</p>
-        </>
+        )
       ) : grouped ? (
         <>
           {header}
