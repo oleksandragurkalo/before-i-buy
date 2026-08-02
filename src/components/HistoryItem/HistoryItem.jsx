@@ -1,5 +1,5 @@
 import { Trash2, Pencil } from 'lucide-react';
-import { getCategory, formatPrice, formatDate, formatHours, hoursOfWork } from '../../utils';
+import { getCategory, DECISION_LABELS, formatPrice, formatDate, formatHours, hoursOfWork } from '../../utils';
 import { useItemActionDialogs } from '../../hooks/useItemActionDialogs';
 import { Button } from '../Button/Button';
 import styles from './HistoryItem.module.css';
@@ -21,7 +21,7 @@ export function HistoryItem({ item, settings, onRemove, onEdit }) {
       <span className={styles.category}>{categoryLabel}</span>
 
       <span className={`${styles.badge} ${bought ? styles.bought : styles.passed}`}>
-        {bought ? 'Bought anyway' : 'Resisted'}
+        {DECISION_LABELS[item.status]}
       </span>
 
       <span className={`${styles.price} mono`}>{priceLabel}</span>

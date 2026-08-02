@@ -12,6 +12,11 @@ export function getCategory(key) {
   return CATEGORIES[key] || CATEGORIES.other;
 }
 
+export const DECISION_LABELS = {
+  passed: 'Resisted',
+  bought: 'Bought anyway',
+};
+
 export function hoursOfWork(price, netHourlyRate) {
   return price / netHourlyRate;
 }

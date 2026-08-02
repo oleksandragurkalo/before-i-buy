@@ -1,5 +1,5 @@
 import { Rows3, LayoutGrid, List, Grid2x2 } from 'lucide-react';
-import { getCategory } from '../../utils';
+import { getCategory, DECISION_LABELS } from '../../utils';
 import { Dropdown } from '../Dropdown/Dropdown';
 import styles from './FilterBar.module.css';
 
@@ -12,8 +12,8 @@ const SORT_OPTIONS = [
 
 const DECISION_OPTIONS = [
   { value: 'all', label: 'All decisions' },
-  { value: 'passed', label: 'Resisted' },
-  { value: 'bought', label: 'Bought anyway' },
+  { value: 'passed', label: DECISION_LABELS.passed },
+  { value: 'bought', label: DECISION_LABELS.bought },
 ];
 
 export function FilterBar({
