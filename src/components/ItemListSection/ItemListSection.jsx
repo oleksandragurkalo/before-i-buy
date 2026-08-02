@@ -76,18 +76,26 @@ export function ItemListSection({
       ) : grouped ? (
         <>
           {header}
-          {groupByCategory(visible).map(group => (
-            <div className={styles.group} key={group.category}>
-              <div className={styles.groupHeader}>
-                <span aria-hidden="true">{group.emoji}</span>
-                <span>{group.label}</span>
-                <span className={styles.groupCount}>{group.items.length}</span>
-              </div>
+          {groupByCategory(visible).map(group => {
+            const list = (
               <ul className={listClass}>
                 {group.items.map(item => <li key={item.id}>{renderItem(item)}</li>)}
               </ul>
-            </div>
-          ))}
+            );
+            return (
+              <div className={styles.group} key={group.category}>
+                <div className={styles.groupHeader}>
+                  <span aria-hidden="true">{group.emoji}</span>
+                  <span>{group.label}</span>
+                  <span className={styles.groupCount}>{group.items.length}</span>
+                </div>
+                {/* Same merged-block treatment as the ungrouped History view
+                    (see "history-table" above), applied per group since each
+                    one has its own <ul> here. */}
+                {header ? <div className="history-table">{list}</div> : list}
+              </div>
+            );
+          })}
         </>
       ) : header ? (
         // A header is only ever passed for the History table view — merge it
