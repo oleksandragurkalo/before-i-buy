@@ -36,7 +36,7 @@ export function ItemCard({ item, settings, onDecide, onRemove, onEdit, view = 'r
           <Button variant="icon" onClick={() => setEditing(true)} aria-label="Edit item">
             <Pencil size={14} />
           </Button>
-          <Button variant="icon" tone="danger" onClick={() => setDecisionOpen(true)} aria-label="Remove item">
+          <Button variant="icon" tone="danger" onClick={() => setDecisionOpen(true)} aria-label="Decide on item">
             <Trash2 size={14} />
           </Button>
         </div>
