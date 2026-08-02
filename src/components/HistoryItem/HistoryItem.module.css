@@ -1,7 +1,7 @@
 .row,
 .headerRow {
   display: grid;
-  grid-template-columns: minmax(0, 1.8fr) 90px 130px 100px 85px 110px auto;
+  grid-template-columns: minmax(0, 1.8fr) 90px 130px 100px 85px 110px 62px;
   align-items: center;
   gap: 6px;
   padding: 12px 16px;
@@ -22,6 +22,40 @@
      lines up pixel-for-pixel with the rows below. */
   border: 1px solid transparent;
   padding: 0 16px 8px;
+}
+
+/* Inside the merged .history-table block (see ItemListSection.module.css):
+   the wrapper supplies the one shared outer border/radius/background, so
+   each row loses its own border/radius in favor of a thin divider line,
+   and the header/first/last rows round to match the wrapper's corners. */
+:global(.history-table) .headerRow {
+  /* Zero horizontal border (matching .row's own border:none below) so the
+     content-box widths still match exactly — only the bottom edge is
+     visible, which doesn't affect column alignment. */
+  border: none;
+  border-bottom: 1px solid var(--border);
+  padding-top: 10px;
+}
+
+:global(.history-table) .row {
+  border: none;
+  border-radius: 0;
+}
+
+:global(.history-table) .row:hover { background: var(--bg-grey); }
+
+:global(.history-table) li + li .row {
+  border-top: 1px solid var(--border);
+}
+
+:global(.history-table) li:first-child .row {
+  border-top-left-radius: var(--radius-lg);
+  border-top-right-radius: var(--radius-lg);
+}
+
+:global(.history-table) li:last-child .row {
+  border-bottom-left-radius: var(--radius-lg);
+  border-bottom-right-radius: var(--radius-lg);
 }
 
 .headerRow span {
@@ -53,6 +87,10 @@
 }
 
 .category {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
   justify-self: start;
   padding: 2px 8px;
   background: var(--bg-grey);
@@ -66,6 +104,10 @@
 }
 
 .badge {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
   justify-self: start;
   font-size: 11px;
   font-weight: 600;
@@ -99,6 +141,9 @@
 }
 
 .date {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
   font-size: 12px;
   color: var(--text-muted);
   white-space: nowrap;
@@ -117,7 +162,7 @@
    that gap. Match the breakpoint to App.module.css's 880px instead. */
 @media (max-width: 879px) {
   .row, .headerRow {
-    grid-template-columns: minmax(0, 1fr) 110px 90px auto;
+    grid-template-columns: minmax(0, 1fr) 110px 90px 62px;
   }
 
   .category, .hours, .date { display: none; }

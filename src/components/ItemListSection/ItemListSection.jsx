@@ -68,23 +68,38 @@ export function ItemListSection({
         />
       )}
 
-      {header}
-
       {visible.length === 0 ? (
-        <p className={styles.noMatches}>No items match this filter.</p>
+        <>
+          {header}
+          <p className={styles.noMatches}>No items match this filter.</p>
+        </>
       ) : grouped ? (
-        groupByCategory(visible).map(group => (
-          <div className={styles.group} key={group.category}>
-            <div className={styles.groupHeader}>
-              <span aria-hidden="true">{group.emoji}</span>
-              <span>{group.label}</span>
-              <span className={styles.groupCount}>{group.items.length}</span>
+        <>
+          {header}
+          {groupByCategory(visible).map(group => (
+            <div className={styles.group} key={group.category}>
+              <div className={styles.groupHeader}>
+                <span aria-hidden="true">{group.emoji}</span>
+                <span>{group.label}</span>
+                <span className={styles.groupCount}>{group.items.length}</span>
+              </div>
+              <ul className={listClass}>
+                {group.items.map(item => <li key={item.id}>{renderItem(item)}</li>)}
+              </ul>
             </div>
-            <ul className={listClass}>
-              {group.items.map(item => <li key={item.id}>{renderItem(item)}</li>)}
-            </ul>
-          </div>
-        ))
+          ))}
+        </>
+      ) : header ? (
+        // A header is only ever passed for the History table view — merge it
+        // with the row list into one bordered block (see "history-table" in
+        // ItemListSection.module.css / HistoryItem.module.css) instead of a
+        // floating label row sitting above a stack of separate cards.
+        <div className="history-table">
+          {header}
+          <ul className={listClass}>
+            {visible.map(item => <li key={item.id}>{renderItem(item)}</li>)}
+          </ul>
+        </div>
       ) : (
         <ul className={listClass}>
           {visible.map(item => <li key={item.id}>{renderItem(item)}</li>)}

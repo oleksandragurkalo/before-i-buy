@@ -5,6 +5,21 @@
   gap: 10px;
 }
 
+/* History's header + row list merged into one bordered block (a real
+   .history-table global class, not a CSS-module one, so HistoryItem.module.css
+   can target it too — the divider lines between rows and the header/row
+   border removal both live there). */
+:global(.history-table) {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--bg-card);
+}
+
+:global(.history-table) .list {
+  gap: 0;
+}
+
 .grid {
   list-style: none;
   display: grid;
