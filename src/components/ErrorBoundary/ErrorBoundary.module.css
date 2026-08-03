@@ -45,3 +45,13 @@
   color: var(--text-secondary);
   line-height: 1.5;
 }
+
+/* Element + class beats Button's own .primary class-only rule regardless of
+   which stylesheet happens to be injected first (equal specificity would
+   otherwise make that a coin flip across CSS module files). */
+button.reloadBtn {
+  padding: 14px;
+  font-size: 15px;
+  font-weight: 700;
+  border-radius: var(--radius-lg);
+}

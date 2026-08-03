@@ -1,8 +1,7 @@
 import styles from './Button.module.css';
 
 export function Button({
-  variant = 'primary', // 'primary' | 'secondary' | 'text' | 'icon'
-  size = 'md', // 'md' | 'lg' (only visibly styled for variant="primary")
+  variant = 'primary', // 'primary' | 'secondary' | 'text' | 'icon' | 'danger'
   tone, // 'danger' — only read when variant="icon"
   fullWidth = false,
   icon,
@@ -15,7 +14,6 @@ export function Button({
   const classes = [
     styles.btn,
     isIcon ? (tone === 'danger' ? styles.iconDanger : styles.icon) : styles[variant],
-    !isIcon && size === 'lg' ? styles.lg : '',
     fullWidth ? styles.fullWidth : '',
     className,
   ].filter(Boolean).join(' ');

@@ -12,8 +12,6 @@
 
 .btn:disabled { opacity: 0.5; cursor: default; }
 
-.fullWidth { width: 100%; }
-
 .primary {
   padding: 9px 20px;
   background: var(--accent);
@@ -24,13 +22,6 @@
 
 .primary:hover:not(:disabled) { opacity: 0.9; }
 .primary:active:not(:disabled) { transform: scale(0.98); }
-
-.primary.lg {
-  padding: 14px;
-  font-size: 15px;
-  font-weight: 700;
-  border-radius: var(--radius-lg);
-}
 
 .secondary {
   padding: 9px 16px;
@@ -56,6 +47,17 @@
 
 .text:hover:not(:disabled) { color: var(--text-secondary); }
 
+.danger {
+  padding: 9px 20px;
+  background: var(--red);
+  border: none;
+  color: #fff;
+  font-size: 13px;
+}
+
+.danger:hover:not(:disabled) { opacity: 0.9; }
+.danger:active:not(:disabled) { transform: scale(0.98); }
+
 .icon,
 .iconDanger {
   width: 28px;
@@ -68,3 +70,8 @@
 
 .icon:hover:not(:disabled) { background: var(--bg-card); color: var(--text-primary); }
 .iconDanger:hover:not(:disabled) { background: var(--red-bg); color: var(--red); }
+
+/* Declared last, and compound (.btn.fullWidth, specificity 0,2,0) so it
+   reliably beats every variant's own fixed width (e.g. icon/iconDanger)
+   regardless of which one is combined with it. */
+.btn.fullWidth { width: 100%; }

@@ -26,7 +26,7 @@ export class ErrorBoundary extends Component {
             <p className={styles.body}>
               Reloading usually fixes it.
             </p>
-            <Button size="lg" fullWidth onClick={() => window.location.reload()}>
+            <Button className={styles.reloadBtn} fullWidth onClick={() => window.location.reload()}>
               Reload
             </Button>
           </div>
