@@ -1,9 +1,9 @@
-import { Home, Clock3, ListChecks, Settings, Sun, Moon } from 'lucide-react';
+import { Clock3, ListChecks, Settings, Sun, Moon } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
+import { AccountMenu } from '../AccountMenu/AccountMenu';
 import styles from './NavBar.module.css';
 
 const DESTINATIONS = [
-  { key: 'start', label: 'Start Page', icon: Home },
   { key: 'waiting', label: 'Waiting List', icon: Clock3 },
   { key: 'history', label: 'History', icon: ListChecks },
 ];
@@ -34,25 +34,25 @@ export function NavBar({ view, onNavigate, onSettingsClick, readyCount = 0 }) {
             </button>
           ))}
         </div>
+        <button
+          type="button"
+          role="switch"
+          aria-checked={theme === 'dark'}
+          aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          className={styles.themeSwitch}
+          onClick={toggle}
+        >
+          <span className={styles.themeThumb}>
+            {theme === 'dark' ? <Moon size={11} /> : <Sun size={11} />}
+          </span>
+        </button>
+
         <button type="button" className={styles.settingsPill} onClick={onSettingsClick}>
           <Settings size={13} />
           <span>Settings</span>
         </button>
 
-        {view !== 'start' && (
-          <button
-            type="button"
-            role="switch"
-            aria-checked={theme === 'dark'}
-            aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-            className={styles.themeSwitch}
-            onClick={toggle}
-          >
-            <span className={styles.themeThumb}>
-              {theme === 'dark' ? <Moon size={11} /> : <Sun size={11} />}
-            </span>
-          </button>
-        )}
+        <AccountMenu />
       </div>
     </nav>
   );

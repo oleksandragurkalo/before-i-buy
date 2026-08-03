@@ -1,0 +1,108 @@
+import { useState } from 'react';
+import { supabase } from '../../supabaseClient';
+import { useAuth } from '../../context/AuthContext';
+import { Modal } from '../Modal/Modal';
+import { Button } from '../Button/Button';
+import styles from './DeleteAccountModal.module.css';
+
+const CONFIRM_PHRASE = 'DELETE';
+
+function friendlyError(code) {
+  switch (code) {
+    case 'invalid_credentials': return 'Current password is incorrect.';
+    case 'over_request_rate_limit': return 'Too many attempts. Try again later.';
+    default: return 'Something went wrong. Please try again.';
+  }
+}
+
+export function DeleteAccountModal({ onClose }) {
+  const { user, logOut } = useAuth();
+  const isPasswordAccount = user?.app_metadata?.provider === 'email';
+
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [confirmText, setConfirmText] = useState('');
+  const [status, setStatus] = useState(null); // { type: 'error', message }
+  const [deleting, setDeleting] = useState(false);
+
+  const canSubmit = confirmText === CONFIRM_PHRASE && (!isPasswordAccount || currentPassword.length > 0);
+
+  const handleDelete = async (e) => {
+    e.preventDefault();
+    if (!canSubmit) return;
+
+    setStatus(null);
+    setDeleting(true);
+    try {
+      // Verify the account owner actually knows the current password before
+      // doing anything destructive — the "type DELETE" field alone only
+      // guards against accidental clicks, not someone at an unattended
+      // signed-in session.
+      if (isPasswordAccount) {
+        const { error: verifyError } = await supabase.auth.signInWithPassword({
+          email: user.email,
+          password: currentPassword,
+        });
+        if (verifyError) throw verifyError;
+      }
+
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await fetch('/api/delete-account', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error || 'Delete failed');
+      }
+      // The account is gone server-side — sign out locally too so the app
+      // drops back to the sign-in screen immediately instead of waiting on
+      // the current session to eventually stop working.
+      await logOut();
+    } catch (err) {
+      setStatus({ type: 'error', message: friendlyError(err.code) });
+      setDeleting(false);
+    }
+  };
+
+  return (
+    <Modal title="Delete account" onClose={onClose} zIndex={300}>
+      <form className={styles.form} onSubmit={handleDelete}>
+        <p className={styles.warning}>
+          This permanently deletes your account and every saved item. This can't be undone.
+        </p>
+
+        {isPasswordAccount && (
+          <input
+            className={styles.input}
+            type="password"
+            placeholder="Current password"
+            value={currentPassword}
+            onChange={(e) => setCurrentPassword(e.target.value)}
+            autoComplete="current-password"
+            autoFocus
+            required
+          />
+        )}
+
+        <label className={styles.label}>
+          Type <strong>{CONFIRM_PHRASE}</strong> to confirm
+        </label>
+        <input
+          className={styles.input}
+          type="text"
+          value={confirmText}
+          onChange={(e) => setConfirmText(e.target.value)}
+          autoComplete="off"
+          autoFocus={!isPasswordAccount}
+          required
+        />
+
+        {status && <p className={styles.error}>{status.message}</p>}
+
+        <Button type="submit" variant="danger" disabled={!canSubmit || deleting} fullWidth>
+          {deleting ? 'Deleting…' : 'Delete account'}
+        </Button>
+      </form>
+    </Modal>
+  );
+}

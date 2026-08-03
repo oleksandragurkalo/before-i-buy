@@ -134,7 +134,6 @@
 }
 
 @media (max-width: 610px) {
-  .brand { display: none; }
   .pill span:not(.badge),
   .settingsPill span { display: none; }
 }
