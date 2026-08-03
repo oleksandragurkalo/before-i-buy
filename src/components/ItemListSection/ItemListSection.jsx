@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { FilterBar } from '../FilterBar/FilterBar';
-import { sortItems, groupByCategory } from '../../utils';
+import { sortItems, groupByCategory, coolingOffStatus } from '../../utils';
+import { DEFAULT_COOLING_OFF_DAYS } from '../../hooks/useItems';
 import styles from './ItemListSection.module.css';
 
 export function ItemListSection({
@@ -19,13 +20,23 @@ export function ItemListSection({
   onViewModeChange,
   decisionFilter,
   onDecisionFilterChange,
+  readinessFilter,
+  onReadinessFilterChange,
   header,
   renderItem,
 }) {
   const byDecision = !decisionFilter || decisionFilter === 'all'
     ? items
     : items.filter(i => i.status === decisionFilter);
-  const availableCategories = [...new Set(byDecision.map(i => i.category || 'other'))];
+
+  const byReadiness = !readinessFilter || readinessFilter === 'all'
+    ? byDecision
+    : byDecision.filter(i => {
+      const ready = coolingOffStatus(i, i.coolingOffDays ?? DEFAULT_COOLING_OFF_DAYS).ready;
+      return readinessFilter === 'ready' ? ready : !ready;
+    });
+
+  const availableCategories = [...new Set(byReadiness.map(i => i.category || 'other'))];
 
   // If the currently selected category no longer has any matching items
   // (e.g. they were all decided on, removed, or the decision filter changed),
@@ -46,7 +57,7 @@ export function ItemListSection({
   }
 
   const effectiveCategory = categoryIsStale ? 'all' : filterCategory;
-  const byCategory = effectiveCategory === 'all' ? byDecision : byDecision.filter(i => (i.category || 'other') === effectiveCategory);
+  const byCategory = effectiveCategory === 'all' ? byReadiness : byReadiness.filter(i => (i.category || 'other') === effectiveCategory);
   const visible = sortItems(byCategory, sortBy, dateField);
   const listClass = viewMode === 'grid' ? styles.grid : styles.list;
 
@@ -65,6 +76,8 @@ export function ItemListSection({
           onViewModeChange={onViewModeChange}
           decisionFilter={decisionFilter}
           onDecisionFilterChange={onDecisionFilterChange}
+          readinessFilter={readinessFilter}
+          onReadinessFilterChange={onReadinessFilterChange}
         />
       )}
 

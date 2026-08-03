@@ -16,10 +16,17 @@ const DECISION_OPTIONS = [
   { value: 'bought', label: DECISION_LABELS.bought },
 ];
 
+const READINESS_OPTIONS = [
+  { value: 'all', label: 'All items' },
+  { value: 'ready', label: 'Ready to decide' },
+  { value: 'waiting', label: 'Still waiting' },
+];
+
 export function FilterBar({
   sortBy, onSortChange, filterCategory, onFilterChange, availableCategories,
   grouped, onGroupToggle, viewMode, onViewModeChange,
   decisionFilter, onDecisionFilterChange,
+  readinessFilter, onReadinessFilterChange,
 }) {
   const categoryOptions = [
     { value: 'all', label: 'All categories' },
@@ -33,6 +40,9 @@ export function FilterBar({
     <div className={styles.bar}>
       {onDecisionFilterChange && (
         <Dropdown value={decisionFilter} options={DECISION_OPTIONS} onChange={onDecisionFilterChange} ariaLabel="Filter by decision" />
+      )}
+      {onReadinessFilterChange && (
+        <Dropdown value={readinessFilter} options={READINESS_OPTIONS} onChange={onReadinessFilterChange} ariaLabel="Filter by readiness" />
       )}
       <Dropdown value={sortBy} options={SORT_OPTIONS} onChange={onSortChange} ariaLabel="Sort by" />
       <Dropdown value={filterCategory} options={categoryOptions} onChange={onFilterChange} ariaLabel="Filter by category" />

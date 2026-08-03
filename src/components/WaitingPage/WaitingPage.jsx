@@ -12,6 +12,7 @@ const COMPACT_BREAKPOINT = 1024;
 export function WaitingPage({ waiting, history, settings, onDecide, onRemove, onEdit }) {
   const [sortBy, setSortBy] = useState('newest');
   const [filterCategory, setFilterCategory] = useState('all');
+  const [readinessFilter, setReadinessFilter] = useState('all');
   const [grouped, setGrouped] = useState(false);
   const [viewMode, setViewMode] = useState('grid');
   const [isCompact, setIsCompact] = useState(() => window.innerWidth < COMPACT_BREAKPOINT);
@@ -39,6 +40,8 @@ export function WaitingPage({ waiting, history, settings, onDecide, onRemove, on
         onSortChange={setSortBy}
         filterCategory={filterCategory}
         onFilterChange={setFilterCategory}
+        readinessFilter={readinessFilter}
+        onReadinessFilterChange={setReadinessFilter}
         grouped={grouped}
         onGroupToggle={setGrouped}
         viewMode={effectiveViewMode}
