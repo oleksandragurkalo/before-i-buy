@@ -82,10 +82,10 @@ export const EXCHANGE_RATES_PER_USD = {
   UAH: 41.5,
 };
 
-export function convertCurrency(amount, fromCode, toCode) {
+export function convertCurrency(amount, fromCode, toCode, rates = EXCHANGE_RATES_PER_USD) {
   if (fromCode === toCode) return amount;
-  const fromRate = EXCHANGE_RATES_PER_USD[fromCode] ?? 1;
-  const toRate = EXCHANGE_RATES_PER_USD[toCode] ?? 1;
+  const fromRate = rates[fromCode] ?? 1;
+  const toRate = rates[toCode] ?? 1;
   return (amount / fromRate) * toRate;
 }
 

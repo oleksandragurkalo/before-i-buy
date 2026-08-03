@@ -18,9 +18,9 @@ A minimal anti-impulse-purchase tracker. Add things you want to buy, see how man
 - Waiting list with grid or row view (locked to rows on mobile/tablet), plus sort/filter/group by category
 - History as a sortable, filterable table — with summary stats and a resistance-rate meter
 - Insights panel — resistance rate, current streak, spending by category, biggest temptations
-- Switch currency any time — existing item prices convert too, not just the symbol
+- Switch currency any time — existing item prices convert too, not just the symbol, using live exchange rates when available (falls back to a static table if offline)
 - Dark / light mode (respects system preference, persists)
-- All data in **localStorage** — no account, no server, no tracking
+- All data in **localStorage** — no account, no server, no tracking (the only outbound request is an optional, keyless daily fetch of exchange rates)
 - Fully responsive — works on mobile
 
 ## Tech

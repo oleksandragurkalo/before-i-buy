@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { convertCurrency, COOLING_OFF_PRESETS } from '../utils';
+import { useExchangeRates } from './useExchangeRates';
 
 const STORAGE_KEY = 'bib-items';
 const SETTINGS_KEY = 'bib-settings';
@@ -45,6 +46,7 @@ function load(key, fallback) {
 }
 
 export function useItems() {
+  const exchangeRates = useExchangeRates();
   const [items, setItems] = useState(() => {
     const loaded = load(STORAGE_KEY, []);
     const currentSettings = load(SETTINGS_KEY, DEFAULT_SETTINGS);
@@ -139,15 +141,15 @@ export function useItems() {
       const toCode = updates.currency;
       setItems(prev => prev.map(item => ({
         ...item,
-        price: Math.round(convertCurrency(item.price, fromCode, toCode) * 100) / 100,
+        price: Math.round(convertCurrency(item.price, fromCode, toCode, exchangeRates) * 100) / 100,
         savedAmount: item.savedAmount
-          ? Math.round(convertCurrency(item.savedAmount, fromCode, toCode) * 100) / 100
+          ? Math.round(convertCurrency(item.savedAmount, fromCode, toCode, exchangeRates) * 100) / 100
           : item.savedAmount,
         // Keep the frozen hourly-rate snapshot in the same currency as the
         // (now-converted) price, so hours-of-work for History items still
         // computes correctly after a currency switch.
         hourlyRateAtDecision: item.hourlyRateAtDecision != null
-          ? convertCurrency(item.hourlyRateAtDecision, fromCode, toCode)
+          ? convertCurrency(item.hourlyRateAtDecision, fromCode, toCode, exchangeRates)
           : item.hourlyRateAtDecision,
       })));
     }
