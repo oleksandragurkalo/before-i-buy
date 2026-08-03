@@ -1,0 +1,205 @@
+.backdrop {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px 48px;
+  background: linear-gradient(-59deg, #edfff5 0%, #e8f4ff 45%, #f0edff 100%);
+}
+
+:global([data-theme='dark']) .backdrop {
+  background: linear-gradient(-59deg, #0f1a15 0%, #0d1620 45%, #14101f 100%);
+}
+
+.card {
+  width: 100%;
+  max-width: 380px;
+  background: var(--bg-card);
+  border-radius: 24px;
+  box-shadow: 0 16px 32px rgba(108, 63, 212, 0.12);
+  padding: 32px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Lives inside .header as a normal flex item — margin-left: auto pushes it
+   to the row's right edge without needing any absolute positioning, so it
+   can never overlap the logo/title regardless of content size. */
+.backBtn {
+  margin-left: auto;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.backBtn:hover { background: var(--bg-grey); color: var(--text-primary); }
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.logo {
+  flex-shrink: 0;
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: var(--accent-bg);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.title {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+}
+
+.tagline {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.nameRow {
+  display: flex;
+  gap: 8px;
+}
+
+.nameRow > * { flex: 1; min-width: 0; }
+
+.input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--text-primary);
+  font-size: 14px;
+  font-family: var(--font-body);
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.input:focus {
+  border-color: var(--accent);
+}
+
+.input::placeholder {
+  color: var(--text-muted);
+}
+
+.googleBtn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 11px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 500;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.googleBtn:hover {
+  background: var(--bg-grey);
+  border-color: var(--border-strong);
+}
+
+.primaryBtn {
+  width: 100%;
+  padding: 11px 16px;
+  border: none;
+  border-radius: var(--radius);
+  background: var(--accent);
+  color: var(--accent-contrast);
+  font-size: 14px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.primaryBtn:hover { opacity: 0.88; }
+.primaryBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.toggle {
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.toggleLink {
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
+
+.error {
+  font-size: 13px;
+  color: var(--red);
+  background: var(--red-bg);
+  border-radius: var(--radius);
+  padding: 8px 12px;
+}
+
+.notice {
+  font-size: 13px;
+  color: var(--green);
+  background: var(--green-bg);
+  border-radius: var(--radius);
+  padding: 8px 12px;
+}
+
+.hint {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: -4px;
+}

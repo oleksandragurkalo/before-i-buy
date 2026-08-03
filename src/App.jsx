@@ -1,7 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useItems } from './hooks/useItems';
+import { useAuth } from './context/AuthContext';
 import { coolingOffStatus } from './utils';
 import { NavBar } from './components/NavBar/NavBar';
+import { AuthScreen } from './components/AuthScreen/AuthScreen';
 import { StartPage } from './components/StartPage/StartPage';
 import { AddItemForm } from './components/AddItemForm/AddItemForm';
 import { PageHeader } from './components/PageHeader/PageHeader';
@@ -11,8 +13,26 @@ import { SettingsModal } from './components/SettingsModal/SettingsModal';
 import { Toast } from './components/Toast/Toast';
 import styles from './App.module.css';
 
+function LoadingScreen() {
+  return (
+    <div style={{
+      minHeight: '100dvh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      background: 'var(--bg)',
+      color: 'var(--text-muted)',
+      fontSize: '14px',
+    }}>
+      Loading…
+    </div>
+  );
+}
+
 export default function App() {
-  const [view, setView] = useState('start');
+  const { user } = useAuth();
+  const [showStart, setShowStart] = useState(true);
+  const [view, setView] = useState('waiting');
   const [showSettings, setShowSettings] = useState(false);
   const [showAddItem, setShowAddItem] = useState(false);
   const [pendingUndo, setPendingUndo] = useState(null);
@@ -20,7 +40,29 @@ export default function App() {
     waiting, history,
     settings, updateSettings,
     addItem, editItem, decide, removeItem, restoreItem,
+    loading, error, clearError,
   } = useItems();
+
+  // Reset to the Waiting view on the signed-out → signed-in transition only
+  // (not on every render while already signed in, e.g. a token refresh
+  // giving a new user object) — so signing back in during the same session
+  // always lands on Waiting instead of wherever you were before signing out.
+  const wasSignedInRef = useRef(!!user);
+  useEffect(() => {
+    if (!wasSignedInRef.current && user) setView('waiting');
+    wasSignedInRef.current = !!user;
+  }, [user]);
+
+  // user === undefined means auth is still initialising
+  if (user === undefined) return <LoadingScreen />;
+  if (user === null) {
+    // "Try it" leads into sign-in/sign-up rather than straight into the
+    // app, since an account is required to use it at all now.
+    return showStart
+      ? <StartPage onGetStarted={() => setShowStart(false)} />
+      : <AuthScreen onBack={() => setShowStart(true)} />;
+  }
+  if (loading) return <LoadingScreen />;
 
   const handleRemove = (id) => {
     const removed = removeItem(id);
@@ -32,65 +74,54 @@ export default function App() {
     setPendingUndo(null);
   };
 
-  // A pending Undo snapshot is frozen at removal time, so if currency
-  // changes while it's showing, the snapshot's amounts are left in the old
-  // currency — restoring it would put a stale, inconsistent price back
-  // into an otherwise-converted list. Simplest safe fix: drop the toast.
-  useEffect(() => {
-    setPendingUndo(null);
-  }, [settings.currency]);
-
-  // Every waiting item that's currently decidable — whether it got there by
-  // waiting out its cooling-off period or started at "No wait" — counts as
-  // actionable, so all of them show up in the badge.
   const readyCount = waiting.filter(item => coolingOffStatus(item, item.coolingOffDays ?? 7).ready).length;
 
   return (
     <div className={styles.app}>
       <NavBar view={view} onNavigate={setView} onSettingsClick={() => setShowSettings(true)} readyCount={readyCount} />
 
-      {view === 'start' && <StartPage onGetStarted={() => setView('waiting')} />}
+      <main className={styles.main}>
+        <div className={styles.layout}>
+          <div className={styles.content}>
+            <PageHeader
+              waiting={waiting}
+              history={history}
+              settings={settings}
+              onTitleChange={(name) => updateSettings({ listName: name })}
+              onAddItemClick={() => setShowAddItem(true)}
+            />
 
-      {view !== 'start' && (
-        <main className={styles.main}>
-          <div className={styles.layout}>
-            <div className={styles.content}>
-              <PageHeader
+            {showAddItem && (
+              <AddItemForm
+                onAdd={(item) => { addItem(item); setView('waiting'); }}
+                onClose={() => setShowAddItem(false)}
+                symbol={settings.currencySymbol}
+              />
+            )}
+
+            {view === 'waiting' && (
+              <WaitingPage
                 waiting={waiting}
                 history={history}
                 settings={settings}
-                onTitleChange={(name) => updateSettings({ listName: name })}
-                onAddItemClick={() => setShowAddItem(true)}
+                onDecide={decide}
+                onRemove={handleRemove}
+                onEdit={editItem}
               />
+            )}
 
-              {showAddItem && (
-                <AddItemForm onAdd={addItem} onClose={() => setShowAddItem(false)} symbol={settings.currencySymbol} />
-              )}
-
-              {view === 'waiting' && (
-                <WaitingPage
-                  waiting={waiting}
-                  history={history}
-                  settings={settings}
-                  onDecide={decide}
-                  onRemove={handleRemove}
-                  onEdit={editItem}
-                />
-              )}
-
-              {view === 'history' && (
-                <HistoryPage
-                  waiting={waiting}
-                  history={history}
-                  settings={settings}
-                  onRemove={handleRemove}
-                  onEdit={editItem}
-                />
-              )}
-            </div>
+            {view === 'history' && (
+              <HistoryPage
+                waiting={waiting}
+                history={history}
+                settings={settings}
+                onRemove={handleRemove}
+                onEdit={editItem}
+              />
+            )}
           </div>
-        </main>
-      )}
+        </div>
+      </main>
 
       {showSettings && (
         <SettingsModal
@@ -106,6 +137,15 @@ export default function App() {
           actionLabel="Undo"
           onAction={handleUndo}
           onDismiss={() => setPendingUndo(null)}
+        />
+      )}
+
+      {error && (
+        <Toast
+          message={error}
+          actionLabel="Dismiss"
+          onAction={clearError}
+          onDismiss={clearError}
         />
       )}
     </div>
