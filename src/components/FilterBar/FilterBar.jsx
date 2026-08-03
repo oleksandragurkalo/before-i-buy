@@ -1,5 +1,6 @@
 import { Rows3, LayoutGrid, List, Grid2x2 } from 'lucide-react';
-import { getCategory, DECISION_LABELS } from '../../utils';
+import { getCategory } from '../../utils';
+import { DECISION_LABELS } from '../../config';
 import { Dropdown } from '../Dropdown/Dropdown';
 import styles from './FilterBar.module.css';
 

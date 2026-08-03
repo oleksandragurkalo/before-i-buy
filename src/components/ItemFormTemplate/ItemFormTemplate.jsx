@@ -1,4 +1,4 @@
-import { CATEGORIES, COOLING_OFF_PRESETS } from '../../utils';
+import { CATEGORIES, COOLING_OFF_PRESETS } from '../../config';
 import { NumberStepper } from '../NumberStepper/NumberStepper';
 import { Modal } from '../Modal/Modal';
 import { Button } from '../Button/Button';

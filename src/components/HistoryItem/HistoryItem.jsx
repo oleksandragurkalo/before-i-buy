@@ -1,5 +1,6 @@
 import { Trash2, Pencil } from 'lucide-react';
-import { getCategory, DECISION_LABELS, formatPrice, formatDate, formatHours, hoursOfWork } from '../../utils';
+import { getCategory, formatPrice, formatDate, formatHours, hoursOfWork } from '../../utils';
+import { DECISION_LABELS } from '../../config';
 import { useItemActionDialogs } from '../../hooks/useItemActionDialogs';
 import { Button } from '../Button/Button';
 import styles from './HistoryItem.module.css';

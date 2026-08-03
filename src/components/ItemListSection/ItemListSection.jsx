@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { FilterBar } from '../FilterBar/FilterBar';
 import { sortItems, groupByCategory, coolingOffStatus } from '../../utils';
-import { DEFAULT_COOLING_OFF_DAYS } from '../../hooks/useItems';
+import { DEFAULT_COOLING_OFF_DAYS } from '../../config';
 import styles from './ItemListSection.module.css';
 
 export function ItemListSection({

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { CURRENCIES, EXCHANGE_RATES_PER_USD } from '../utils';
+import { CURRENCIES, EXCHANGE_RATES_PER_USD } from '../config';
 
 const CACHE_KEY = 'bib-live-rates';
 const MAX_AGE_MS = 24 * 60 * 60 * 1000;

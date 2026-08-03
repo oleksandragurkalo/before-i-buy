@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Pencil, Scale, Trash2 } from 'lucide-react';
 import { getCategory, hoursOfWork, formatHours, formatPrice, daysAgo, daysSince, coolingOffStatus } from '../../utils';
-import { DEFAULT_COOLING_OFF_DAYS } from '../../hooks/useItems';
+import { DEFAULT_COOLING_OFF_DAYS } from '../../config';
 import { useItemActionDialogs } from '../../hooks/useItemActionDialogs';
 import { Button } from '../Button/Button';
 import { DecisionModal } from '../DecisionModal/DecisionModal';

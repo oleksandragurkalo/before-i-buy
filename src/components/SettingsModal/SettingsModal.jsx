@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { DEFAULT_SETTINGS } from '../../hooks/useItems';
-import { CURRENCIES, computeHourlyRate, convertPayAmount, defaultPayAmountFor, formatPrice } from '../../utils';
+import { DEFAULT_SETTINGS, CURRENCIES } from '../../config';
+import { computeHourlyRate, convertPayAmount, defaultPayAmountFor, formatPrice } from '../../utils';
 import { NumberStepper } from '../NumberStepper/NumberStepper';
 import { Modal } from '../Modal/Modal';
 import { Button } from '../Button/Button';

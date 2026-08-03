@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { DEFAULT_COOLING_OFF_DAYS } from './useItems';
+import { DEFAULT_COOLING_OFF_DAYS } from '../config';
 
 export function toFormState(item = {}) {
   return {
