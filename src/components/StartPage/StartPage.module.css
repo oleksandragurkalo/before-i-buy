@@ -1,5 +1,5 @@
 .backdrop {
-  flex: 1;
+  min-height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -134,3 +134,12 @@
   box-shadow: var(--shadow);
 }
 
+/* Element + class beats Button's own .primary class-only rule regardless of
+   which stylesheet happens to be injected first (equal specificity would
+   otherwise make that a coin flip across CSS module files). */
+button.tryBtn {
+  padding: 14px;
+  font-size: 15px;
+  font-weight: 700;
+  border-radius: var(--radius-lg);
+}

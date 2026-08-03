@@ -1,4 +1,4 @@
-import { ListChecks, ShoppingCart, AlarmClock, CheckCircle2, Lock, Smartphone, Sun, Moon } from 'lucide-react';
+import { ListChecks, ShoppingCart, AlarmClock, CheckCircle2, Smartphone, Sun, Moon } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { Button } from '../Button/Button';
 import styles from './StartPage.module.css';
@@ -15,6 +15,9 @@ const THEMES = [
   { value: 'dark', label: 'Dark', icon: Moon },
 ];
 
+// Shown once, pre-auth, before AuthScreen — a "Try it" CTA leads into
+// sign-in/sign-up rather than straight into the app, since an account is
+// now required to use it at all.
 export function StartPage({ onGetStarted }) {
   const { theme, setTheme } = useTheme();
 
@@ -63,7 +66,7 @@ export function StartPage({ onGetStarted }) {
           ))}
         </div>
 
-        <Button size="lg" fullWidth onClick={onGetStarted}>
+        <Button className={styles.tryBtn} fullWidth onClick={onGetStarted}>
           Try it
         </Button>
       </div>
