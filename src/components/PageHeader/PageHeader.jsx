@@ -3,6 +3,7 @@ import { Topbar } from '../Topbar/Topbar';
 import { InsightsPanel } from '../InsightsPanel/InsightsPanel';
 import { Button } from '../Button/Button';
 import layout from '../../App.module.css';
+import styles from './PageHeader.module.css';
 
 export function PageHeader({ waiting, history, settings, onTitleChange, onAddItemClick }) {
   return (
@@ -12,8 +13,8 @@ export function PageHeader({ waiting, history, settings, onTitleChange, onAddIte
         title={settings.listName || 'Waiting List'}
         onTitleChange={onTitleChange}
         actions={
-          <Button icon={<Plus size={14} />} onClick={onAddItemClick}>
-            Add Item
+          <Button className={styles.addItemBtn} icon={<Plus size={14} />} onClick={onAddItemClick}>
+            <span className={styles.addItemLabel}>Add Item</span>
           </Button>
         }
       />
