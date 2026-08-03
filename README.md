@@ -20,7 +20,7 @@ A minimal anti-impulse-purchase tracker. Add things you want to buy, see how man
 - Insights panel — resistance rate, current streak, spending by category, biggest temptations
 - Switch currency any time — existing item prices convert too, not just the symbol, using live exchange rates when available (falls back to a static table if offline)
 - Dark / light mode (respects system preference, persists)
-- All data in **localStorage** — no account, no server, no tracking (the only outbound request is an optional, keyless daily fetch of exchange rates)
+- Account required (email/password or Google) — your items and settings sync across devices via Supabase
 - Fully responsive — works on mobile
 
 ## Tech
@@ -28,9 +28,12 @@ A minimal anti-impulse-purchase tracker. Add things you want to buy, see how man
 - React 18 + Vite
 - CSS Modules
 - lucide-react (icons)
-- Zero backend
+- Supabase (Auth + Postgres + Realtime) as the backend
+- One Vercel serverless function (`/api/delete-account.js`) for account deletion, since that needs a service-role key that can't live in client code
 
 ## Run locally
+
+Needs a Supabase project — see `.env.example` for the required variables (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`). The `items` and `settings` tables + RLS policies must exist first (ask in the project for the schema SQL if you're setting this up fresh).
 
 ```bash
 npm install
@@ -39,9 +42,10 @@ npm run dev
 
 ## Deploy
 
+Deployed via Vercel (auto-detects the Vite build + `/api` serverless function — no extra config needed). Set the same three env vars above in the Vercel project settings.
+
 ```bash
 npm run build
-# drag dist/ to Vercel, Netlify, or any static host
 ```
 
 ## Settings
