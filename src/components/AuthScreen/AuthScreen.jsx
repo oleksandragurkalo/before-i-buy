@@ -27,7 +27,6 @@ export function AuthScreen({ onBack }) {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [notice, setNotice] = useState('');
 
   // Google sign-in redirects away and back instead of resolving in place —
   // any error from that flow surfaces here once the page reloads. Unlike
@@ -55,7 +54,6 @@ export function AuthScreen({ onBack }) {
   const handleEmailSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    setNotice('');
 
     if (mode === 'signup') {
       const passwordError = validatePassword(password);
@@ -66,14 +64,7 @@ export function AuthScreen({ onBack }) {
     try {
       if (mode === 'signup') {
         const fullName = `${name.trim()} ${surname.trim()}`.trim();
-        const { session } = await signUpWithEmail(email, password, fullName);
-        // No session back means the account needs email confirmation before
-        // it can sign in — the app otherwise just sits here with no
-        // feedback, since `user` stays null until that link is clicked.
-        if (!session) {
-          setNotice('Account created — check your email to confirm it, then sign in.');
-          setMode('signin');
-        }
+        await signUpWithEmail(email, password, fullName);
       } else {
         await signInWithEmail(email, password);
       }
@@ -155,7 +146,6 @@ export function AuthScreen({ onBack }) {
           {mode === 'signup' && <p className={styles.hint}>At least 8 characters, with a number.</p>}
 
           {error && <div className={styles.error}>{error}</div>}
-          {notice && <div className={styles.notice}>{notice}</div>}
 
           <button className={styles.primaryBtn} type="submit" disabled={loading}>
             {loading ? 'Please wait…' : mode === 'signup' ? 'Create account' : 'Sign in'}
@@ -169,7 +159,6 @@ export function AuthScreen({ onBack }) {
             onClick={() => {
               setMode(mode === 'signin' ? 'signup' : 'signin');
               setError('');
-              setNotice('');
             }}
           >
             {mode === 'signin' ? 'Sign up' : 'Sign in'}
