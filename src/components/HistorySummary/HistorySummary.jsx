@@ -1,5 +1,12 @@
 import { formatPrice, formatHours } from '../../utils';
+import chartResisted from '../../assets/chart-resisted.png';
+import chartSpent from '../../assets/chart-spent.png';
 import styles from './HistorySummary.module.css';
+
+const CHARTS = {
+  green: chartResisted,
+  red: chartSpent,
+};
 
 export function HistorySummary({ headerStats, currencySymbol }) {
   const { totalSaved, resistedCount, hoursSaved, totalSpent, spentCount, hoursSpent } = headerStats;
@@ -36,6 +43,7 @@ export function HistorySummary({ headerStats, currencySymbol }) {
               <span className={styles.hoursLabel}>{hoursLabel}</span>
             </div>
           </div>
+          <img src={CHARTS[tone]} className={styles.chart} alt="" aria-hidden="true" />
         </div>
       ))}
     </div>
