@@ -48,7 +48,11 @@ export function AuthProvider({ children }) {
   const signUpWithEmail = async (email, password, name) => {
     const { data, error } = await supabase.auth.signUp({
       email, password,
-      options: { data: { full_name: name } },
+      // Without this, the confirmation email link always uses Supabase's
+      // configured Site URL (pinned to the production Vercel URL) instead
+      // of wherever the signup actually happened — this makes it land back
+      // on localhost during local dev.
+      options: { data: { full_name: name }, emailRedirectTo: window.location.origin },
     });
     if (error) throw error;
     return data;
