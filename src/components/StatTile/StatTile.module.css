@@ -31,10 +31,13 @@
   position: absolute;
   bottom: 10px;
   right: 10px;
-  height: calc(100% - 20px);
+  /* Scales continuously with viewport width instead of jumping abruptly at
+     a single breakpoint — stays a small, subtle corner accent on narrow
+     screens and grows toward the tile's full height on wide ones. */
+  height: clamp(28px, 8vw, calc(100% - 20px));
   object-fit: contain;
   object-position: bottom right;
-  opacity: 0.2;
+  opacity: 0.12;
   pointer-events: none;
 }
 
