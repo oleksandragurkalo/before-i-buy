@@ -9,7 +9,7 @@ import styles from './WaitingPage.module.css';
 // meaningful rows/grid choice, so rows is forced and the toggle is hidden.
 const COMPACT_BREAKPOINT = 1024;
 
-export function WaitingPage({ waiting, history, settings, onDecide, onRemove, onEdit }) {
+export function WaitingPage({ waiting, history, settings, loading, onDecide, onRemove, onEdit }) {
   const [sortBy, setSortBy] = useState('newest');
   const [filterCategory, setFilterCategory] = useState('all');
   const [readinessFilter, setReadinessFilter] = useState('all');
@@ -32,6 +32,7 @@ export function WaitingPage({ waiting, history, settings, onDecide, onRemove, on
 
       <ItemListSection
         items={waiting}
+        loading={loading}
         dateField="addedAt"
         emptyIcon="🎉"
         emptyTitle="Nothing waiting"

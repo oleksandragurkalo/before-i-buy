@@ -7,7 +7,7 @@ import { HistoryTableHeader } from '../HistoryItem/HistoryTableHeader';
 import { computeHeaderStats, computeInsights } from '../../utils';
 import styles from './HistoryPage.module.css';
 
-export function HistoryPage({ waiting, history, settings, onRemove, onEdit }) {
+export function HistoryPage({ waiting, history, settings, loading, onRemove, onEdit }) {
   const [sortBy, setSortBy] = useState('newest');
   const [filterCategory, setFilterCategory] = useState('all');
   const [grouped, setGrouped] = useState(false);
@@ -22,6 +22,7 @@ export function HistoryPage({ waiting, history, settings, onRemove, onEdit }) {
 
       <ItemListSection
         items={history}
+        loading={loading}
         dateField="decidedAt"
         emptyIcon="📋"
         emptyTitle="No decisions yet"

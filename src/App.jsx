@@ -70,8 +70,6 @@ export default function App() {
         </Suspense>
       );
   }
-  if (loading) return <LoadingScreen />;
-
   const handleRemove = (id) => {
     const removed = removeItem(id);
     if (removed) setPendingUndo(removed);
@@ -114,6 +112,7 @@ export default function App() {
                 waiting={waiting}
                 history={history}
                 settings={settings}
+                loading={loading}
                 onDecide={decide}
                 onRemove={handleRemove}
                 onEdit={editItem}
@@ -126,6 +125,7 @@ export default function App() {
                   waiting={waiting}
                   history={history}
                   settings={settings}
+                  loading={loading}
                   onRemove={handleRemove}
                   onEdit={editItem}
                 />

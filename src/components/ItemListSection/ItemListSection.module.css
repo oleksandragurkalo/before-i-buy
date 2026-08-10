@@ -86,3 +86,19 @@
   font-size: 13px;
   color: var(--text-muted);
 }
+
+.skeletonCard {
+  height: 88px;
+  border-radius: var(--radius-lg);
+  background: var(--bg-grey);
+  animation: skeletonPulse 1.4s ease-in-out infinite;
+}
+
+@keyframes skeletonPulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeletonCard { animation: none; }
+}

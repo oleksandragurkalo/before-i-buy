@@ -6,6 +6,7 @@ import styles from './ItemListSection.module.css';
 
 export function ItemListSection({
   items,
+  loading,
   dateField,
   emptyIcon,
   emptyTitle,
@@ -45,6 +46,18 @@ export function ItemListSection({
   useEffect(() => {
     if (categoryIsStale) onFilterChange('all');
   }, [categoryIsStale, onFilterChange]);
+
+  // Data is still in flight — show a neutral placeholder shape rather than
+  // the empty state, which would otherwise flash "Nothing waiting" for a
+  // returning user who actually has items, right before they show up.
+  if (loading) {
+    const skeletonClass = viewMode === 'grid' ? styles.grid : styles.list;
+    return (
+      <ul className={skeletonClass} aria-hidden="true">
+        {Array.from({ length: 4 }, (_, i) => <li key={i} className={styles.skeletonCard} />)}
+      </ul>
+    );
+  }
 
   if (items.length === 0) {
     return (
