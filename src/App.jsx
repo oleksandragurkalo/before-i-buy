@@ -1,17 +1,21 @@
-import { useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { useItems } from './hooks/useItems';
 import { useAuth } from './context/AuthContext';
 import { coolingOffStatus } from './utils';
 import { NavBar } from './components/NavBar/NavBar';
-import { AuthScreen } from './components/AuthScreen/AuthScreen';
 import { StartPage } from './components/StartPage/StartPage';
-import { AddItemForm } from './components/AddItemForm/AddItemForm';
 import { PageHeader } from './components/PageHeader/PageHeader';
 import { WaitingPage } from './components/WaitingPage/WaitingPage';
-import { HistoryPage } from './components/HistoryPage/HistoryPage';
-import { SettingsModal } from './components/SettingsModal/SettingsModal';
 import { Toast } from './components/Toast/Toast';
 import styles from './App.module.css';
+
+// Not needed for the initial paint (only shown after a user action or on
+// the logged-out → sign-in click), so split into their own chunks to keep
+// them out of the main bundle.
+const AuthScreen = lazy(() => import('./components/AuthScreen/AuthScreen').then(m => ({ default: m.AuthScreen })));
+const AddItemForm = lazy(() => import('./components/AddItemForm/AddItemForm').then(m => ({ default: m.AddItemForm })));
+const HistoryPage = lazy(() => import('./components/HistoryPage/HistoryPage').then(m => ({ default: m.HistoryPage })));
+const SettingsModal = lazy(() => import('./components/SettingsModal/SettingsModal').then(m => ({ default: m.SettingsModal })));
 
 function LoadingScreen() {
   return (
@@ -60,7 +64,11 @@ export default function App() {
     // app, since an account is required to use it at all now.
     return showStart
       ? <StartPage onGetStarted={() => setShowStart(false)} />
-      : <AuthScreen onBack={() => setShowStart(true)} />;
+      : (
+        <Suspense fallback={<LoadingScreen />}>
+          <AuthScreen onBack={() => setShowStart(true)} />
+        </Suspense>
+      );
   }
   if (loading) return <LoadingScreen />;
 
@@ -92,11 +100,13 @@ export default function App() {
             />
 
             {showAddItem && (
-              <AddItemForm
-                onAdd={(item) => { addItem(item); setView('waiting'); }}
-                onClose={() => setShowAddItem(false)}
-                symbol={settings.currencySymbol}
-              />
+              <Suspense fallback={null}>
+                <AddItemForm
+                  onAdd={(item) => { addItem(item); setView('waiting'); }}
+                  onClose={() => setShowAddItem(false)}
+                  symbol={settings.currencySymbol}
+                />
+              </Suspense>
             )}
 
             {view === 'waiting' && (
@@ -111,24 +121,28 @@ export default function App() {
             )}
 
             {view === 'history' && (
-              <HistoryPage
-                waiting={waiting}
-                history={history}
-                settings={settings}
-                onRemove={handleRemove}
-                onEdit={editItem}
-              />
+              <Suspense fallback={null}>
+                <HistoryPage
+                  waiting={waiting}
+                  history={history}
+                  settings={settings}
+                  onRemove={handleRemove}
+                  onEdit={editItem}
+                />
+              </Suspense>
             )}
           </div>
         </div>
       </main>
 
       {showSettings && (
-        <SettingsModal
-          settings={settings}
-          onSave={updateSettings}
-          onClose={() => setShowSettings(false)}
-        />
+        <Suspense fallback={null}>
+          <SettingsModal
+            settings={settings}
+            onSave={updateSettings}
+            onClose={() => setShowSettings(false)}
+          />
+        </Suspense>
       )}
 
       {pendingUndo && (
