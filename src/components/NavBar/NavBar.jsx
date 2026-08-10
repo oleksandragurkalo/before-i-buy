@@ -16,23 +16,28 @@ export function NavBar({ view, onNavigate, onSettingsClick, readyCount = 0 }) {
       <div className={styles.inner}>
         <span className={styles.brand}>Before I Buy</span>
         <div className={styles.pills}>
-          {DESTINATIONS.map(({ key, label, icon: Icon }) => (
-            <button
-              key={key}
-              type="button"
-              className={`${styles.pill} ${view === key ? styles.pillActive : ''}`}
-              onClick={() => onNavigate(key)}
-              aria-current={view === key ? 'page' : undefined}
-            >
-              <Icon size={13} />
-              <span>{label}</span>
-              {key === 'waiting' && readyCount > 0 && (
-                <span className={styles.badge} aria-label={`${readyCount} item${readyCount === 1 ? '' : 's'} ready to decide`}>
-                  {readyCount}
-                </span>
-              )}
-            </button>
-          ))}
+          {DESTINATIONS.map(({ key, label, icon: Icon }) => {
+            const showBadge = key === 'waiting' && readyCount > 0;
+            const pillLabel = showBadge
+              ? `${label}, ${readyCount} item${readyCount === 1 ? '' : 's'} ready to decide`
+              : label;
+            return (
+              <button
+                key={key}
+                type="button"
+                className={`${styles.pill} ${view === key ? styles.pillActive : ''}`}
+                onClick={() => onNavigate(key)}
+                aria-current={view === key ? 'page' : undefined}
+                aria-label={pillLabel}
+              >
+                <Icon size={13} />
+                <span aria-hidden="true">{label}</span>
+                {showBadge && (
+                  <span className={styles.badge} aria-hidden="true">{readyCount}</span>
+                )}
+              </button>
+            );
+          })}
         </div>
         <button
           type="button"
@@ -47,9 +52,9 @@ export function NavBar({ view, onNavigate, onSettingsClick, readyCount = 0 }) {
           </span>
         </button>
 
-        <button type="button" className={styles.settingsPill} onClick={onSettingsClick}>
+        <button type="button" className={styles.settingsPill} onClick={onSettingsClick} aria-label="Settings">
           <Settings size={13} />
-          <span>Settings</span>
+          <span aria-hidden="true">Settings</span>
         </button>
 
         <AccountMenu />

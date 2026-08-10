@@ -1,6 +1,6 @@
-import chartResisted from '../../assets/chart-resisted.png';
-import chartSpent from '../../assets/chart-spent.png';
-import chartHours from '../../assets/chart-saved-hours.png';
+import chartResisted from '../../assets/chart-resisted.webp';
+import chartSpent from '../../assets/chart-spent.webp';
+import chartHours from '../../assets/chart-saved-hours.webp';
 import styles from './StatTile.module.css';
 
 const CHARTS = {

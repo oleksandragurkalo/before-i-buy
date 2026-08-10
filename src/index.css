@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
-
 :root {
   --bg: #F8F9FC;
   --bg-card: #FFFFFF;
@@ -8,8 +6,8 @@
   --border-strong: #CCCCC8;
   --text-primary: #1A1A18;
   --text-secondary: #6B6B68;
-  --text-muted: #9C9C98;
-  --green: #1F9C7C;
+  --text-muted: #6E6E6B;
+  --green: #157A5F;
   --green-bg: #E5F5F0;
   --red: #C1604A;
   --red-bg: #F8ECE6;

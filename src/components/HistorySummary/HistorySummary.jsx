@@ -1,6 +1,6 @@
 import { formatPrice, formatHours } from '../../utils';
-import chartResisted from '../../assets/chart-resisted.png';
-import chartSpent from '../../assets/chart-spent.png';
+import chartResisted from '../../assets/chart-resisted.webp';
+import chartSpent from '../../assets/chart-spent.webp';
 import styles from './HistorySummary.module.css';
 
 const CHARTS = {

@@ -13,8 +13,8 @@ export function PageHeader({ waiting, history, settings, onTitleChange, onAddIte
         title={settings.listName || 'Waiting List'}
         onTitleChange={onTitleChange}
         actions={
-          <Button className={styles.addItemBtn} icon={<Plus size={14} />} onClick={onAddItemClick}>
-            <span className={styles.addItemLabel}>Add Item</span>
+          <Button className={styles.addItemBtn} icon={<Plus size={14} />} onClick={onAddItemClick} aria-label="Add Item">
+            <span className={styles.addItemLabel} aria-hidden="true">Add Item</span>
           </Button>
         }
       />

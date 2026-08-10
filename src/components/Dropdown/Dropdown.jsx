@@ -52,9 +52,9 @@ export function Dropdown({ value, options, onChange, ariaLabel }) {
         onClick={() => setOpen(o => !o)}
         aria-haspopup="listbox"
         aria-expanded={open}
-        aria-label={ariaLabel}
+        aria-label={current?.label ? `${ariaLabel}: ${current.label}` : ariaLabel}
       >
-        <span className={styles.triggerLabel}>{current?.label}</span>
+        <span className={styles.triggerLabel} aria-hidden="true">{current?.label}</span>
       </button>
 
       {open && menuStyle && createPortal(
