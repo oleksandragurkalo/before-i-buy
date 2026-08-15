@@ -53,8 +53,9 @@ export const EXCHANGE_RATES_PER_USD = {
   UAH: 41.5,
 };
 
+export const USERNAME_PATTERN = /^[a-zA-Z0-9_]{3,20}$/;
+
 export const DEFAULT_SETTINGS = {
-  listName: 'Waiting List',
   hourlyRate: 25,
   currency: 'CAD',
   currencySymbol: '$',
