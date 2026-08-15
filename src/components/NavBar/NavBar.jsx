@@ -1,4 +1,4 @@
-import { Clock3, ListChecks, Settings, Sun, Moon } from 'lucide-react';
+import { Clock3, ListChecks, Users, Settings, Sun, Moon } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { AccountMenu } from '../AccountMenu/AccountMenu';
 import styles from './NavBar.module.css';
@@ -6,9 +6,10 @@ import styles from './NavBar.module.css';
 const DESTINATIONS = [
   { key: 'waiting', label: 'Waiting List', icon: Clock3 },
   { key: 'history', label: 'History', icon: ListChecks },
+  { key: 'friends', label: 'Friends', icon: Users },
 ];
 
-export function NavBar({ view, onNavigate, onSettingsClick, readyCount = 0 }) {
+export function NavBar({ view, onNavigate, onSettingsClick, readyCount = 0, friendRequestCount = 0, profile, updateProfile }) {
   const { theme, toggle } = useTheme();
 
   return (
@@ -17,9 +18,12 @@ export function NavBar({ view, onNavigate, onSettingsClick, readyCount = 0 }) {
         <span className={styles.brand}>Before I Buy</span>
         <div className={styles.pills}>
           {DESTINATIONS.map(({ key, label, icon: Icon }) => {
-            const showBadge = key === 'waiting' && readyCount > 0;
+            const badgeCount = key === 'waiting' ? readyCount : key === 'friends' ? friendRequestCount : 0;
+            const showBadge = badgeCount > 0;
             const pillLabel = showBadge
-              ? `${label}, ${readyCount} item${readyCount === 1 ? '' : 's'} ready to decide`
+              ? key === 'waiting'
+                ? `${label}, ${badgeCount} item${badgeCount === 1 ? '' : 's'} ready to decide`
+                : `${label}, ${badgeCount} pending request${badgeCount === 1 ? '' : 's'}`
               : label;
             return (
               <button
@@ -33,7 +37,7 @@ export function NavBar({ view, onNavigate, onSettingsClick, readyCount = 0 }) {
                 <Icon size={13} />
                 <span aria-hidden="true">{label}</span>
                 {showBadge && (
-                  <span className={styles.badge} aria-hidden="true">{readyCount}</span>
+                  <span className={styles.badge} aria-hidden="true">{badgeCount}</span>
                 )}
               </button>
             );
@@ -57,7 +61,7 @@ export function NavBar({ view, onNavigate, onSettingsClick, readyCount = 0 }) {
           <span aria-hidden="true">Settings</span>
         </button>
 
-        <AccountMenu />
+        <AccountMenu profile={profile} updateProfile={updateProfile} />
       </div>
     </nav>
   );
