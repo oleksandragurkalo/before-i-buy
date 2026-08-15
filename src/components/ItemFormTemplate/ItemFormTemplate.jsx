@@ -7,6 +7,14 @@ import styles from './ItemFormTemplate.module.css';
 
 const FORM_ID = 'item-form';
 
+// toISOString() converts to UTC first — for anyone west of UTC that rolls
+// over to tomorrow's date before local midnight, wrongly blocking "today"
+// as a target date for a good chunk of the evening.
+function todayLocalISODate() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
 const STATUS_OPTIONS = [
   { value: 'waiting', label: 'Still deciding', tone: 'wait' },
   { value: 'passed', label: "Didn't need it", tone: 'pass' },
@@ -39,6 +47,7 @@ export function ItemFormTemplate({
   showSavedAmount = true,
   showStatus = false,
   showCoolingOff = true,
+  showTargetDate = false,
   onChange,
   onPriceChange,
   onCategoryChange,
@@ -138,6 +147,19 @@ export function ItemFormTemplate({
               min={0}
               step={1}
               ariaLabel="amount already saved"
+            />
+          </Field>
+        )}
+
+        {showTargetDate && (
+          <Field label="Want it by" htmlFor="item-target-date" optional hint="See how much to save per day to hit this date">
+            <input
+              id="item-target-date"
+              className={styles.input}
+              type="date"
+              min={todayLocalISODate()}
+              value={form.targetDate}
+              onChange={onChange('targetDate')}
             />
           </Field>
         )}

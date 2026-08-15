@@ -5,9 +5,10 @@ import { DEFAULT_COOLING_OFF_DAYS } from '../../config';
 import { useItemActionDialogs } from '../../hooks/useItemActionDialogs';
 import { Button } from '../Button/Button';
 import { DecisionModal } from '../DecisionModal/DecisionModal';
+import { SavingsPace } from '../SavingsPace/SavingsPace';
 import styles from './ItemCard.module.css';
 
-export function ItemCard({ item, settings, onDecide, onRemove, onEdit, view = 'rows' }) {
+export function ItemCard({ item, settings, onDecide, onRemove, onEdit, view = 'rows', readOnly = false }) {
   const [decisionOpen, setDecisionOpen] = useState(false);
   const { setEditing, dialogs } = useItemActionDialogs({ item, settings, onEdit });
   const { emoji, label: categoryLabel } = getCategory(item.category);
@@ -33,14 +34,16 @@ export function ItemCard({ item, settings, onDecide, onRemove, onEdit, view = 'r
           {item.note && <p className={styles.note}>{item.note}</p>}
           <p className={styles.when}>{daysAgo(item.addedAt)}</p>
         </div>
-        <div className={styles.cardActions}>
-          <Button variant="icon" onClick={() => setEditing(true)} aria-label="Edit item">
-            <Pencil size={14} />
-          </Button>
-          <Button variant="icon" tone="danger" onClick={() => setDecisionOpen(true)} aria-label="Decide on item">
-            <Trash2 size={14} />
-          </Button>
-        </div>
+        {!readOnly && (
+          <div className={styles.cardActions}>
+            <Button variant="icon" onClick={() => setEditing(true)} aria-label="Edit item">
+              <Pencil size={14} />
+            </Button>
+            <Button variant="icon" tone="danger" onClick={() => setDecisionOpen(true)} aria-label="Decide on item">
+              <Trash2 size={14} />
+            </Button>
+          </div>
+        )}
         <div
           className={`${styles.dayBadge} ${ready ? styles.dayBadgeReady : ''}`}
           aria-label={ready
@@ -76,13 +79,18 @@ export function ItemCard({ item, settings, onDecide, onRemove, onEdit, view = 'r
         <div className={styles.savingsBar}>
           <div className={styles.savingsBarFill} style={{ width: `${savedPct}%` }} />
         </div>
+        <SavingsPace item={item} settings={settings} />
       </div>
 
-      <p className={styles.question}>Do you still want this?</p>
+      {!readOnly && (
+        <>
+          <p className={styles.question}>Do you still want this?</p>
 
-      <Button fullWidth icon={<Scale size={15} />} onClick={() => setDecisionOpen(true)}>
-        Decide
-      </Button>
+          <Button fullWidth icon={<Scale size={15} />} onClick={() => setDecisionOpen(true)}>
+            Decide
+          </Button>
+        </>
+      )}
 
       {decisionOpen && (
         <DecisionModal
@@ -94,7 +102,7 @@ export function ItemCard({ item, settings, onDecide, onRemove, onEdit, view = 'r
         />
       )}
 
-      {dialogs}
+      {!readOnly && dialogs}
     </article>
   );
 }
