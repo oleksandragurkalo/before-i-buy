@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { AccountSettingsModal } from '../AccountSettingsModal/AccountSettingsModal';
 import styles from './AccountMenu.module.css';
 
-export function AccountMenu() {
+export function AccountMenu({ profile, updateProfile }) {
   const { user, logOut } = useAuth();
   const [open, setOpen] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -63,7 +63,13 @@ export function AccountMenu() {
         </div>
       )}
 
-      {showSettings && <AccountSettingsModal onClose={() => setShowSettings(false)} />}
+      {showSettings && (
+        <AccountSettingsModal
+          onClose={() => setShowSettings(false)}
+          profile={profile}
+          updateProfile={updateProfile}
+        />
+      )}
     </div>
   );
 }
