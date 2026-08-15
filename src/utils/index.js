@@ -69,6 +69,32 @@ export function coolingOffStatus(item, requiredDays) {
   return { required: requiredDays, elapsed, remaining, ready: remaining === 0 };
 }
 
+// How much to save per day/week to hit an item's price by its target date.
+// Returns null when there's no target date set (caller hides the UI).
+export function savingsPace(item) {
+  if (!item.targetDate) return null;
+
+  const saved = Math.min(item.savedAmount || 0, item.price);
+  const remaining = Math.max(0, item.price - saved);
+  if (remaining <= 0) return { remaining: 0, fullySaved: true, overdue: false };
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const target = new Date(`${item.targetDate}T00:00:00`);
+  const daysLeft = Math.round((target - today) / (1000 * 60 * 60 * 24));
+
+  if (daysLeft <= 0) return { remaining, daysLeft, overdue: true, fullySaved: false };
+
+  return {
+    remaining,
+    daysLeft,
+    perDay: remaining / daysLeft,
+    perWeek: (remaining / daysLeft) * 7,
+    overdue: false,
+    fullySaved: false,
+  };
+}
+
 export function formatDate(timestamp) {
   return new Date(timestamp).toLocaleDateString('en-CA', {
     month: 'short', day: 'numeric', year: 'numeric'
