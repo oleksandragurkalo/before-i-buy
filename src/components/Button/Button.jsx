@@ -2,7 +2,7 @@ import styles from './Button.module.css';
 
 export function Button({
   variant = 'primary', // 'primary' | 'secondary' | 'text' | 'icon' | 'danger'
-  tone, // 'danger' — only read when variant="icon"
+  tone, // 'danger' — read when variant="icon" or variant="text"
   fullWidth = false,
   icon,
   children,
@@ -11,9 +11,10 @@ export function Button({
   ...rest
 }) {
   const isIcon = variant === 'icon';
+  const isDangerToned = tone === 'danger' && (isIcon || variant === 'text');
   const classes = [
     styles.btn,
-    isIcon ? (tone === 'danger' ? styles.iconDanger : styles.icon) : styles[variant],
+    isDangerToned ? (isIcon ? styles.iconDanger : styles.textDanger) : styles[variant],
     fullWidth ? styles.fullWidth : '',
     className,
   ].filter(Boolean).join(' ');

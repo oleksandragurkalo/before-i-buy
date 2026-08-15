@@ -47,6 +47,19 @@
 
 .text:hover:not(:disabled) { color: var(--text-secondary); }
 
+.textDanger {
+  padding: 4px 0;
+  background: transparent;
+  border: none;
+  color: var(--red);
+  font-size: 12px;
+  font-weight: 400;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.textDanger:hover:not(:disabled) { opacity: 0.8; }
+
 .danger {
   padding: 9px 20px;
   background: var(--red);
