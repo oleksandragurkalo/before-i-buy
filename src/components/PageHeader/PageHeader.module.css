@@ -1,11 +1,33 @@
+.readOnlyNote {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: -4px;
+}
+
+.shareLabel {
+  display: inline-flex;
+  align-items: center;
+}
+
+.sharedDot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-left: 6px;
+  border-radius: 50%;
+  background: var(--green);
+}
+
 @media (max-width: 610px) {
-  .addItemLabel {
+  .addItemLabel,
+  .shareLabel {
     display: none;
   }
 
   /* Element + class beats Button's own .primary class regardless of CSS
      module injection order, without needing !important. */
-  button.addItemBtn {
+  button.addItemBtn,
+  button.shareBtn {
     padding: 8px;
   }
 }
