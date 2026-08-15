@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../supabaseClient';
 import { useAuth } from '../context/AuthContext';
 import { convertCurrency } from '../utils';
@@ -13,10 +13,6 @@ function clampCoolingOffDays(value) {
   const parsed = parseInt(value, 10);
   const safe = isNaN(parsed) ? DEFAULT_COOLING_OFF_DAYS : parsed;
   return Math.min(MAX_COOLING_OFF_DAYS, Math.max(MIN_COOLING_OFF_DAYS, safe));
-}
-
-function autoListName(name) {
-  return name ? `${name}'s Waiting List` : DEFAULT_SETTINGS.listName;
 }
 
 // Postgres `numeric`/`bigint` columns come back from PostgREST as strings
@@ -36,13 +32,15 @@ function itemFromRow(row) {
     status: row.status,
     decidedAt: row.decided_at != null ? Number(row.decided_at) : null,
     hourlyRateAtDecision: row.hourly_rate_at_decision != null ? Number(row.hourly_rate_at_decision) : null,
+    targetDate: row.target_date ?? null,
   };
 }
 
-function itemToRow(item, userId) {
+function itemToRow(item, userId, listId) {
   return {
     id: item.id,
     user_id: userId,
+    list_id: listId,
     name: item.name,
     price: item.price,
     category: item.category,
@@ -53,12 +51,12 @@ function itemToRow(item, userId) {
     status: item.status,
     decided_at: item.decidedAt,
     hourly_rate_at_decision: item.hourlyRateAtDecision,
+    target_date: item.targetDate || null,
   };
 }
 
 function settingsFromRow(row) {
   return {
-    listName: row.list_name,
     hourlyRate: Number(row.hourly_rate),
     currency: row.currency,
     currencySymbol: row.currency_symbol,
@@ -73,7 +71,11 @@ function settingsFromRow(row) {
 function settingsToRow(settings, userId) {
   return {
     user_id: userId,
-    list_name: settings.listName,
+    // list_name is retired in favor of the `lists` table (see useLists.js)
+    // and no longer read anywhere in the app — this placeholder just keeps
+    // writes satisfying the column's existing NOT NULL constraint without
+    // resurrecting the old single-list concept.
+    list_name: 'Waiting List',
     hourly_rate: settings.hourlyRate,
     currency: settings.currency,
     currency_symbol: settings.currencySymbol,
@@ -98,7 +100,10 @@ function applyItemChange(prev, payload) {
   return copy;
 }
 
-export function useItems() {
+// `listId` scopes which list's items this hook loads/writes — account-level
+// settings (pay/currency prefs) stay keyed by user regardless of which list
+// is active.
+export function useItems(listId, readOnly = false) {
   const { user } = useAuth();
   const exchangeRates = useExchangeRates();
 
@@ -109,7 +114,12 @@ export function useItems() {
 
   // ── Initial load + realtime subscription ─────────────────────────────────
   useEffect(() => {
-    if (!user) { setLoading(false); return; }
+    if (!user) { setItems([]); setLoading(false); return; }
+    // listId hasn't resolved yet (useLists() starts it at null and sets it
+    // asynchronously) — this is a brief in-flight state, not "no items", so
+    // loading must stay true or ItemListSection flashes its empty state for
+    // a returning user who actually has items.
+    if (!listId) { setItems([]); setLoading(true); return; }
 
     setLoading(true);
     let cancelled = false;
@@ -117,7 +127,7 @@ export function useItems() {
 
     (async () => {
       const [itemsRes, settingsRes] = await Promise.all([
-        supabase.from('items').select('*').eq('user_id', user.id),
+        supabase.from('items').select('*').eq('list_id', listId),
         supabase.from('settings').select('*').eq('user_id', user.id).maybeSingle(),
       ]);
       if (cancelled) return;
@@ -135,12 +145,10 @@ export function useItems() {
       } else if (settingsRes.data) {
         setSettings(settingsFromRow(settingsRes.data));
       } else {
-        // Brand-new account, no settings row yet — seed one with a
-        // personalized list name instead of the generic default, and
-        // persist it so it isn't lost/regenerated on the next load.
-        const initial = { ...DEFAULT_SETTINGS, listName: autoListName(user.user_metadata?.full_name) };
-        setSettings(initial);
-        supabase.from('settings').insert(settingsToRow(initial, user.id)).then(({ error: seedError }) => {
+        // Brand-new account, no settings row yet — seed the defaults and
+        // persist them so they aren't lost/regenerated on the next load.
+        setSettings(DEFAULT_SETTINGS);
+        supabase.from('settings').insert(settingsToRow(DEFAULT_SETTINGS, user.id)).then(({ error: seedError }) => {
           if (seedError) console.error('seed settings error', seedError);
         });
       }
@@ -153,8 +161,8 @@ export function useItems() {
       // getting applied, and then silently overwritten when the initial
       // (now slightly stale) snapshot resolves a moment later.
       channel = supabase
-        .channel(`user-data-${user.id}`)
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'items', filter: `user_id=eq.${user.id}` },
+        .channel(`list-items-${listId}`)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'items', filter: `list_id=eq.${listId}` },
           (payload) => setItems(prev => applyItemChange(prev, payload)))
         .on('postgres_changes', { event: '*', schema: 'public', table: 'settings', filter: `user_id=eq.${user.id}` },
           (payload) => { if (payload.eventType !== 'DELETE') setSettings(settingsFromRow(payload.new)); })
@@ -165,20 +173,20 @@ export function useItems() {
       cancelled = true;
       if (channel) supabase.removeChannel(channel);
     };
-  }, [user]);
+  }, [user, listId]);
 
   // ── Helpers ──────────────────────────────────────────────────────────────
   const saveItem = useCallback(async (item) => {
-    if (!user) return;
+    if (!user || !listId) return;
     try {
       setError(null);
-      const { error: saveError } = await supabase.from('items').upsert(itemToRow(item, user.id));
+      const { error: saveError } = await supabase.from('items').upsert(itemToRow(item, user.id, listId));
       if (saveError) throw saveError;
     } catch (e) {
       console.error('saveItem error', e);
       setError('Could not save. Check your connection.');
     }
-  }, [user]);
+  }, [user, listId]);
 
   const deleteItem = useCallback(async (id) => {
     if (!user) return;
@@ -204,50 +212,6 @@ export function useItems() {
     }
   }, [user]);
 
-  // Kept fresh every render (not a dependency) purely so the effect below
-  // can read the latest settings/saveSettings without re-running whenever
-  // they change — it should only react to an actual display-name change.
-  const settingsRef = useRef(settings);
-  settingsRef.current = settings;
-  const saveSettingsRef = useRef(saveSettings);
-  saveSettingsRef.current = saveSettings;
-
-  // Baseline for detecting a genuine display-name change. Deliberately not
-  // captured at hook-mount: `settings` starts out as DEFAULT_SETTINGS before
-  // the initial load finishes, so comparing against it before `loading`
-  // clears would compare against defaults instead of the real listName and
-  // could misfire. The baseline is (re)established the first time loading
-  // clears for a given user, and reset if the signed-in account changes.
-  const syncBaselineRef = useRef({ userId: null, name: undefined, ready: false });
-
-  // If the account name changes and the list name still matches the
-  // auto-generated pattern from the *old* name (i.e. it was never manually
-  // renamed), carry the rename forward. A list name that's since been
-  // customized to something else is left untouched.
-  useEffect(() => {
-    const name = user?.user_metadata?.full_name;
-    if (loading || !user) {
-      syncBaselineRef.current = { userId: user?.id ?? null, name, ready: false };
-      return;
-    }
-
-    const baseline = syncBaselineRef.current;
-    if (baseline.userId !== user.id || !baseline.ready) {
-      syncBaselineRef.current = { userId: user.id, name, ready: true };
-      return;
-    }
-
-    const prevName = baseline.name;
-    syncBaselineRef.current = { userId: user.id, name, ready: true };
-
-    if (prevName === name) return;
-    if (settingsRef.current.listName !== autoListName(prevName)) return;
-
-    const nextSettings = { ...settingsRef.current, listName: autoListName(name) };
-    setSettings(nextSettings);
-    saveSettingsRef.current(nextSettings);
-  }, [user, loading]);
-
   // ── Public API ───────────────────────────────────────────────────────────
   const addItem = (item) => {
     const newItem = {
@@ -262,6 +226,7 @@ export function useItems() {
       status: 'waiting',
       decidedAt: null,
       hourlyRateAtDecision: null,
+      targetDate: item.targetDate || null,
     };
     setItems(prev => [...prev, newItem]);
     saveItem(newItem);
@@ -281,6 +246,7 @@ export function useItems() {
       coolingOffDays: updates.coolingOffDays != null
         ? clampCoolingOffDays(updates.coolingOffDays)
         : existing.coolingOffDays,
+      targetDate: updates.targetDate !== undefined ? (updates.targetDate || null) : existing.targetDate,
       status: updates.status ?? existing.status,
       decidedAt: updates.status === 'waiting' ? null : existing.decidedAt,
       hourlyRateAtDecision: updates.status === 'waiting' ? null : existing.hourlyRateAtDecision,
@@ -313,7 +279,11 @@ export function useItems() {
 
   const updateSettings = (updates) => {
     let nextItems = items;
-    if (updates.currency && updates.currency !== settings.currency) {
+    // Currency changes are a personal preference and should always save,
+    // but the item-rewrite side effect below must never touch a list this
+    // account doesn't own (e.g. a friend's shared list currently active) —
+    // those items belong to someone else and this account can't write them.
+    if (!readOnly && updates.currency && updates.currency !== settings.currency) {
       const fromCode = settings.currency;
       const toCode = updates.currency;
       nextItems = items.map(item => ({

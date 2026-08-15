@@ -10,6 +10,7 @@ export function toFormState(item = {}) {
     savedAmount: item.savedAmount ? String(item.savedAmount) : '',
     coolingOffDays: String(item.coolingOffDays ?? DEFAULT_COOLING_OFF_DAYS),
     status: item.status ?? 'waiting',
+    targetDate: item.targetDate ?? '',
   };
 }
 
