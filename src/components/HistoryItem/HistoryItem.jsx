@@ -5,7 +5,7 @@ import { useItemActionDialogs } from '../../hooks/useItemActionDialogs';
 import { Button } from '../Button/Button';
 import styles from './HistoryItem.module.css';
 
-export function HistoryItem({ item, settings, onRemove, onEdit }) {
+export function HistoryItem({ item, settings, onRemove, onEdit, readOnly = false }) {
   const { setEditing, dialogs } = useItemActionDialogs({ item, settings, onEdit });
   const { emoji, label: categoryLabel } = getCategory(item.category);
   const priceLabel = formatPrice(item.price, settings.currencySymbol);
@@ -29,16 +29,18 @@ export function HistoryItem({ item, settings, onRemove, onEdit }) {
       <span className={`${styles.hours} mono`}>{hrsLabel}</span>
       <span className={styles.date}>{formatDate(item.decidedAt)}</span>
 
-      <div className={styles.actions}>
-        <Button variant="icon" onClick={() => setEditing(true)} aria-label="Edit item">
-          <Pencil size={13} />
-        </Button>
-        <Button variant="icon" tone="danger" onClick={() => onRemove(item.id)} aria-label="Remove from history">
-          <Trash2 size={13} />
-        </Button>
-      </div>
+      {!readOnly && (
+        <div className={styles.actions}>
+          <Button variant="icon" onClick={() => setEditing(true)} aria-label="Edit item">
+            <Pencil size={13} />
+          </Button>
+          <Button variant="icon" tone="danger" onClick={() => onRemove(item.id)} aria-label="Remove from history">
+            <Trash2 size={13} />
+          </Button>
+        </div>
+      )}
 
-      {dialogs}
+      {!readOnly && dialogs}
     </div>
   );
 }

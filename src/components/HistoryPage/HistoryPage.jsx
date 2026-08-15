@@ -7,7 +7,7 @@ import { HistoryTableHeader } from '../HistoryItem/HistoryTableHeader';
 import { computeHeaderStats, computeInsights } from '../../utils';
 import styles from './HistoryPage.module.css';
 
-export function HistoryPage({ waiting, history, settings, loading, onRemove, onEdit }) {
+export function HistoryPage({ waiting, history, settings, loading, onRemove, onEdit, readOnly = false }) {
   const [sortBy, setSortBy] = useState('newest');
   const [filterCategory, setFilterCategory] = useState('all');
   const [grouped, setGrouped] = useState(false);
@@ -38,7 +38,7 @@ export function HistoryPage({ waiting, history, settings, loading, onRemove, onE
         onDecisionFilterChange={setDecisionFilter}
         header={<HistoryTableHeader />}
         renderItem={(item) => (
-          <HistoryItem item={item} settings={settings} onRemove={onRemove} onEdit={onEdit} />
+          <HistoryItem item={item} settings={settings} onRemove={onRemove} onEdit={onEdit} readOnly={readOnly} />
         )}
       />
 
