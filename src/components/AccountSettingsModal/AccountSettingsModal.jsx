@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { USERNAME_PATTERN } from '../../config';
 import { Modal } from '../Modal/Modal';
 import { Button } from '../Button/Button';
 import { ChangePasswordModal } from '../ChangePasswordModal/ChangePasswordModal';
@@ -16,13 +17,15 @@ function splitName(fullName) {
   return { first, rest: rest.join(' ') };
 }
 
-export function AccountSettingsModal({ onClose }) {
+export function AccountSettingsModal({ onClose, profile, updateProfile }) {
   const { user, updateDisplayName } = useAuth();
   const isPasswordAccount = user?.app_metadata?.provider === 'email';
-  const initial = splitName(user?.user_metadata?.full_name);
+  const initialFullName = (user?.user_metadata?.full_name || '').trim();
+  const initial = splitName(initialFullName);
 
   const [name, setName] = useState(initial.first);
   const [surname, setSurname] = useState(initial.rest);
+  const [username, setUsername] = useState(profile?.username || '');
   const [status, setStatus] = useState(null); // { type: 'error'|'success', message }
   const [saving, setSaving] = useState(false);
   const [showChangePassword, setShowChangePassword] = useState(false);
@@ -31,10 +34,27 @@ export function AccountSettingsModal({ onClose }) {
   const handleSave = async () => {
     const trimmedName = name.trim();
     if (!trimmedName) { setStatus({ type: 'error', message: 'Name can’t be empty.' }); return; }
+
+    const trimmedUsername = username.trim();
+    const usernameChanged = trimmedUsername !== profile?.username;
+    if (usernameChanged && !USERNAME_PATTERN.test(trimmedUsername)) {
+      setStatus({ type: 'error', message: 'Username must be 3-20 characters: letters, numbers, and underscores only.' });
+      return;
+    }
+
+    const fullName = `${trimmedName} ${surname.trim()}`.trim();
+    const nameChanged = fullName !== initialFullName;
+
     setSaving(true);
     setStatus(null);
     try {
-      await updateDisplayName(`${trimmedName} ${surname.trim()}`.trim());
+      // Keep profiles.display_name (used for friend search) in sync
+      // whenever either the username or the name/surname changes.
+      if (usernameChanged || nameChanged) {
+        const { error: profileError } = await updateProfile(trimmedUsername, fullName);
+        if (profileError) { setStatus({ type: 'error', message: profileError }); return; }
+      }
+      if (nameChanged) await updateDisplayName(fullName);
       setStatus({ type: 'success', message: 'Saved.' });
     } catch {
       setStatus({ type: 'error', message: 'Could not save. Try again.' });
@@ -64,6 +84,21 @@ export function AccountSettingsModal({ onClose }) {
         }
       >
         <div className={styles.fields}>
+          <div className={styles.field}>
+            <label className={styles.label} htmlFor="account-username">Username</label>
+            <input
+              id="account-username"
+              className={styles.input}
+              type="text"
+              placeholder="username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              autoComplete="off"
+              maxLength={20}
+            />
+            <p className={styles.hint}>So friends can find you and share lists with you.</p>
+          </div>
+
           <div className={styles.field}>
             <label className={styles.label}>Name</label>
             <div className={styles.row}>
