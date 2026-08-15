@@ -20,6 +20,7 @@ export function AddItemForm({ onAdd, onClose, symbol = '$' }) {
       form={form}
       error={error}
       showSavedAmount
+      showTargetDate
       onChange={set}
       onPriceChange={setField('price')}
       onCategoryChange={setField('category')}
