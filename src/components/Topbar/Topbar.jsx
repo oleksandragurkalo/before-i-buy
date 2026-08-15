@@ -3,7 +3,7 @@ import { Pencil, Check, X } from 'lucide-react';
 import { Button } from '../Button/Button';
 import styles from './Topbar.module.css';
 
-export function Topbar({ icon, title, onTitleChange, actions }) {
+export function Topbar({ icon, title, onTitleChange, titleAdornment, actions }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(title);
   const [inputWidth, setInputWidth] = useState(0);
@@ -57,6 +57,7 @@ export function Topbar({ icon, title, onTitleChange, actions }) {
                 <Pencil size={13} />
               </Button>
             )}
+            {titleAdornment}
           </>
         )}
       </div>
