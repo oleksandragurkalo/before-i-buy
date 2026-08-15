@@ -24,6 +24,7 @@ export function EditItemModal({ item, settings, onSave, onClose }) {
       showSavedAmount={item.status === 'waiting'}
       showStatus={item.status !== 'waiting'}
       showCoolingOff={item.status === 'waiting'}
+      showTargetDate={item.status === 'waiting'}
       onChange={set}
       onPriceChange={setField('price')}
       onCategoryChange={setField('category')}
