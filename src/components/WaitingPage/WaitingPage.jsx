@@ -9,7 +9,7 @@ import styles from './WaitingPage.module.css';
 // meaningful rows/grid choice, so rows is forced and the toggle is hidden.
 const COMPACT_BREAKPOINT = 1024;
 
-export function WaitingPage({ waiting, history, settings, loading, onDecide, onRemove, onEdit }) {
+export function WaitingPage({ waiting, history, settings, loading, onDecide, onRemove, onEdit, readOnly = false }) {
   const [sortBy, setSortBy] = useState('newest');
   const [filterCategory, setFilterCategory] = useState('all');
   const [readinessFilter, setReadinessFilter] = useState('all');
@@ -48,7 +48,7 @@ export function WaitingPage({ waiting, history, settings, loading, onDecide, onR
         viewMode={effectiveViewMode}
         onViewModeChange={isCompact ? undefined : setViewMode}
         renderItem={(item) => (
-          <ItemCard item={item} settings={settings} onDecide={onDecide} onRemove={onRemove} onEdit={onEdit} view={effectiveViewMode} />
+          <ItemCard item={item} settings={settings} onDecide={onDecide} onRemove={onRemove} onEdit={onEdit} view={effectiveViewMode} readOnly={readOnly} />
         )}
       />
     </section>
