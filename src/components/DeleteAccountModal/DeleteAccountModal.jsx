@@ -7,11 +7,15 @@ import styles from './DeleteAccountModal.module.css';
 
 const CONFIRM_PHRASE = 'DELETE';
 
-function friendlyError(code) {
-  switch (code) {
+// `code` is only set on Supabase AuthErrors (the password-verification
+// step) — errors from the /api/delete-account call are plain Errors whose
+// .message already carries the server's actual reason, so surface that
+// instead of masking it with a generic string.
+function friendlyError(err) {
+  switch (err.code) {
     case 'invalid_credentials': return 'Current password is incorrect.';
     case 'over_request_rate_limit': return 'Too many attempts. Try again later.';
-    default: return 'Something went wrong. Please try again.';
+    default: return err.message || 'Something went wrong. Please try again.';
   }
 }
 
@@ -24,7 +28,7 @@ export function DeleteAccountModal({ onClose }) {
   const [status, setStatus] = useState(null); // { type: 'error', message }
   const [deleting, setDeleting] = useState(false);
 
-  const canSubmit = confirmText === CONFIRM_PHRASE && (!isPasswordAccount || currentPassword.length > 0);
+  const canSubmit = confirmText.trim() === CONFIRM_PHRASE && (!isPasswordAccount || currentPassword.length > 0);
 
   const handleDelete = async (e) => {
     e.preventDefault();
@@ -59,7 +63,7 @@ export function DeleteAccountModal({ onClose }) {
       // the current session to eventually stop working.
       await logOut();
     } catch (err) {
-      setStatus({ type: 'error', message: friendlyError(err.code) });
+      setStatus({ type: 'error', message: friendlyError(err) });
       setDeleting(false);
     }
   };
