@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { supabase } from '../supabaseClient';
 
 const AuthContext = createContext(null);
@@ -85,12 +85,21 @@ export function AuthProvider({ children }) {
     if (error) throw error;
   };
 
+  // Without this, every AuthProvider render hands consumers a new object
+  // identity, re-rendering everything that calls useAuth() regardless of
+  // whether `user`/`authError` actually changed. The methods below only
+  // close over `user` (already a dependency) and stable setters/the
+  // supabase client, so recomputing them in lockstep with `user`/`authError`
+  // is correct.
+  const value = useMemo(() => ({
+    user, authError, clearAuthError: () => setAuthError(''),
+    signInWithGoogle, signUpWithEmail, signInWithEmail, logOut,
+    updateDisplayName, changePassword,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }), [user, authError]);
+
   return (
-    <AuthContext.Provider value={{
-      user, authError, clearAuthError: () => setAuthError(''),
-      signInWithGoogle, signUpWithEmail, signInWithEmail, logOut,
-      updateDisplayName, changePassword,
-    }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );
