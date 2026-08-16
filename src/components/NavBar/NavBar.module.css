@@ -7,7 +7,7 @@
 }
 
 .inner {
-  max-width: 640px;
+  max-width: 670px;
   margin: 0 auto;
   padding: 12px 16px;
   display: flex;
@@ -133,7 +133,8 @@
   color: var(--accent);
 }
 
-@media (max-width: 610px) {
+@media (max-width: 655px) {
   .pill span:not(.badge),
   .settingsPill span { display: none; }
+  .brand { display: none; }
 }
