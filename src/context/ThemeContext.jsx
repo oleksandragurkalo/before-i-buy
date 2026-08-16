@@ -1,4 +1,4 @@
-import { createContext, useContext, useLayoutEffect, useState } from 'react';
+import { createContext, useContext, useLayoutEffect, useMemo, useState } from 'react';
 
 const ThemeContext = createContext(null);
 
@@ -20,8 +20,13 @@ export function ThemeProvider({ children }) {
 
   const toggle = () => setTheme(t => t === 'dark' ? 'light' : 'dark');
 
+  // Without this, every ThemeProvider render (even ones unrelated to theme)
+  // hands consumers a new object identity, re-rendering everything that
+  // calls useTheme() regardless of whether `theme` actually changed.
+  const value = useMemo(() => ({ theme, toggle, setTheme }), [theme]);
+
   return (
-    <ThemeContext.Provider value={{ theme, toggle, setTheme }}>
+    <ThemeContext.Provider value={value}>
       {children}
     </ThemeContext.Provider>
   );
