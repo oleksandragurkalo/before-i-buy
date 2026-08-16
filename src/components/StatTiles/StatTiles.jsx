@@ -2,7 +2,7 @@ import { StatTile } from '../StatTile/StatTile.jsx';
 import { formatHours, formatPrice } from '../../utils/index.js';
 
 export function StatTiles( { headerStats, currencySymbol, className }) {
-  const { totalSaved, totalSpent, resistedCount, spentCount, resistedSeries, spentSeries, hoursSaved, hoursSeries } = headerStats;
+  const { totalSaved, totalSpent, resistedCount, spentCount, hoursSaved } = headerStats;
 
   const tiles = [
     {
@@ -10,21 +10,18 @@ export function StatTiles( { headerStats, currencySymbol, className }) {
       label: 'Resisted',
       value: formatPrice(totalSaved, currencySymbol),
       sublabel: `${resistedCount} item${resistedCount === 1 ? '' : 's'}`,
-      series: resistedSeries
     },
     {
       tone: "red",
       label: 'Spent anyway',
       value: formatPrice(totalSpent, currencySymbol),
       sublabel: `${spentCount} item${spentCount === 1 ? '' : 's'}`,
-      series: spentSeries
     },
     {
       tone: "blue",
       label: 'Hours saved',
       value: formatHours(hoursSaved),
       sublabel: 'per resisted item',
-      series: hoursSeries
     },
   ];
 
