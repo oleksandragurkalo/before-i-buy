@@ -70,12 +70,12 @@ export function PageHeader({
 
       {readOnly && currentList && (
         <p className={styles.readOnlyNote}>
-          Viewing @{currentList.ownerUsername}'s list — read only. Amounts shown are in their currency.
+          Viewing @{currentList.ownerUsername}'s list — read only. Prices reflect their currency, not yours.
         </p>
       )}
 
       <aside className={layout.aside}>
-        <InsightsPanel waiting={waiting} history={history} settings={settings} />
+        <InsightsPanel waiting={waiting} history={history} settings={settings} readOnly={readOnly} />
       </aside>
     </>
   );
