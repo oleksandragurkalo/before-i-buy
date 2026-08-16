@@ -2,7 +2,7 @@ import { useItemForm, toFormState } from '../../hooks/useItemForm';
 import { ItemFormTemplate } from '../ItemFormTemplate/ItemFormTemplate';
 
 export function AddItemForm({ onAdd, onClose, symbol = '$' }) {
-  const { form, error, set, setField, validate } = useItemForm(toFormState, onClose);
+  const { form, error, set, setField, validate } = useItemForm(toFormState);
 
   const submit = (e) => {
     e.preventDefault();
