@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { supabase } from '../../supabaseClient';
 import { useAuth } from '../../context/AuthContext';
-import { Modal } from '../Modal/Modal';
+import { Modal, NESTED_MODAL_Z_INDEX } from '../Modal/Modal';
 import { Button } from '../Button/Button';
 import styles from './DeleteAccountModal.module.css';
 
@@ -50,6 +50,7 @@ export function DeleteAccountModal({ onClose }) {
       }
 
       const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('Your session has expired. Please sign in again and retry.');
       const res = await fetch('/api/delete-account', {
         method: 'POST',
         headers: { Authorization: `Bearer ${session.access_token}` },
@@ -69,7 +70,7 @@ export function DeleteAccountModal({ onClose }) {
   };
 
   return (
-    <Modal title="Delete account" onClose={onClose} zIndex={300}>
+    <Modal title="Delete account" onClose={onClose} zIndex={NESTED_MODAL_Z_INDEX}>
       <form className={styles.form} onSubmit={handleDelete}>
         <p className={styles.warning}>
           This permanently deletes your account and every saved item. This can't be undone.

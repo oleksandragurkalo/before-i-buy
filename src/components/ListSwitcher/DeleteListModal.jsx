@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../../supabaseClient';
-import { Modal } from '../Modal/Modal';
+import { Modal, NESTED_MODAL_Z_INDEX } from '../Modal/Modal';
 import { Button } from '../Button/Button';
 import styles from './ListSwitcher.module.css';
 
@@ -34,7 +34,7 @@ export function DeleteListModal({ list, onConfirm, onClose }) {
   };
 
   return (
-    <Modal title={`Delete "${list.name}"?`} onClose={onClose} zIndex={300}>
+    <Modal title={`Delete "${list.name}"?`} onClose={onClose} zIndex={NESTED_MODAL_Z_INDEX}>
       <div className={styles.deleteBody}>
         <p className={styles.deleteWarning}>
           {countError
