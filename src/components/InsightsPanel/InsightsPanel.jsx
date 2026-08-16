@@ -1,12 +1,15 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { TrendingUp, Flame } from 'lucide-react';
 import { computeInsights, computeStreak, formatPrice, formatHours, hoursOfWork } from '../../utils';
 import styles from './InsightsPanel.module.css';
 import dropdownIcon from '../../assets/icon-arrow-down.svg';
 
-export function InsightsPanel({ waiting, history, settings }) {
-  const { resistanceRate, categoryBreakdown, topTemptations, totalItems } = computeInsights(waiting, history);
-  const streak = computeStreak(history);
+export function InsightsPanel({ waiting, history, settings, readOnly = false }) {
+  const { resistanceRate, categoryBreakdown, topTemptations, totalItems } = useMemo(
+    () => computeInsights(waiting, history),
+    [waiting, history]
+  );
+  const streak = useMemo(() => computeStreak(history), [history]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const maxCategoryTotal = categoryBreakdown[0]?.total || 1;
@@ -99,7 +102,15 @@ export function InsightsPanel({ waiting, history, settings }) {
                     {topTemptations.map(item => (
                       <div className={styles.temptationRow} key={item.id}>
                         <span className={styles.temptationName}>{item.name}</span>
-                        <span className={`${styles.temptationHours} mono`}>{formatHours(hoursOfWork(item.price, settings.hourlyRate))}</span>
+                        {/* On a shared/read-only list, settings.hourlyRate is the
+                            owner's real rate — showing hours here (next to price,
+                            already visible on the item's own card) would let a
+                            viewer back it out via price ÷ hours, so price is
+                            shown here instead, which is what a friend deciding
+                            what to buy for them actually wants anyway. */}
+                        <span className={`${styles.temptationHours} mono`}>
+                          {readOnly ? formatPrice(item.price, settings.currencySymbol) : formatHours(hoursOfWork(item.price, settings.hourlyRate))}
+                        </span>
                       </div>
                     ))}
                   </div>

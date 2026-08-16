@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { FilterBar } from '../FilterBar/FilterBar';
 import { sortItems, groupByCategory, coolingOffStatus } from '../../utils';
 import { DEFAULT_COOLING_OFF_DAYS } from '../../config';
@@ -26,18 +26,27 @@ export function ItemListSection({
   header,
   renderItem,
 }) {
-  const byDecision = !decisionFilter || decisionFilter === 'all'
-    ? items
-    : items.filter(i => i.status === decisionFilter);
+  // Chained filter/sort derivation — memoized so it only recomputes when
+  // the items or filter/sort inputs actually change, not on every render of
+  // this component (e.g. from unrelated parent state like a dropdown toggle).
+  const byDecision = useMemo(() => (
+    !decisionFilter || decisionFilter === 'all'
+      ? items
+      : items.filter(i => i.status === decisionFilter)
+  ), [items, decisionFilter]);
 
-  const byReadiness = !readinessFilter || readinessFilter === 'all'
-    ? byDecision
-    : byDecision.filter(i => {
-      const ready = coolingOffStatus(i, i.coolingOffDays ?? DEFAULT_COOLING_OFF_DAYS).ready;
-      return readinessFilter === 'ready' ? ready : !ready;
-    });
+  const byReadiness = useMemo(() => (
+    !readinessFilter || readinessFilter === 'all'
+      ? byDecision
+      : byDecision.filter(i => {
+        const ready = coolingOffStatus(i, i.coolingOffDays ?? DEFAULT_COOLING_OFF_DAYS).ready;
+        return readinessFilter === 'ready' ? ready : !ready;
+      })
+  ), [byDecision, readinessFilter]);
 
-  const availableCategories = [...new Set(byReadiness.map(i => i.category || 'other'))];
+  const availableCategories = useMemo(() => (
+    [...new Set(byReadiness.map(i => i.category || 'other'))]
+  ), [byReadiness]);
 
   // If the currently selected category no longer has any matching items
   // (e.g. they were all decided on, removed, or the decision filter changed),
@@ -46,6 +55,12 @@ export function ItemListSection({
   useEffect(() => {
     if (categoryIsStale) onFilterChange('all');
   }, [categoryIsStale, onFilterChange]);
+
+  const effectiveCategory = categoryIsStale ? 'all' : filterCategory;
+  const byCategory = useMemo(() => (
+    effectiveCategory === 'all' ? byReadiness : byReadiness.filter(i => (i.category || 'other') === effectiveCategory)
+  ), [byReadiness, effectiveCategory]);
+  const visible = useMemo(() => sortItems(byCategory, sortBy, dateField), [byCategory, sortBy, dateField]);
 
   // Data is still in flight — show a neutral placeholder shape rather than
   // the empty state, which would otherwise flash "Nothing waiting" for a
@@ -69,9 +84,6 @@ export function ItemListSection({
     );
   }
 
-  const effectiveCategory = categoryIsStale ? 'all' : filterCategory;
-  const byCategory = effectiveCategory === 'all' ? byReadiness : byReadiness.filter(i => (i.category || 'other') === effectiveCategory);
-  const visible = sortItems(byCategory, sortBy, dateField);
   const listClass = viewMode === 'grid' ? styles.grid : styles.list;
 
   return (
