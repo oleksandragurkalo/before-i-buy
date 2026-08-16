@@ -1,7 +1,7 @@
 import { Check } from 'lucide-react';
 import { supabase } from '../../supabaseClient';
 import { useShareToggles } from '../../hooks/useShareToggles';
-import { Modal } from '../Modal/Modal';
+import { Modal, NESTED_MODAL_Z_INDEX } from '../Modal/Modal';
 import { Button } from '../Button/Button';
 import styles from './ListSwitcher.module.css';
 
@@ -19,7 +19,7 @@ export function ShareListModal({ list, friends, onShare, onUnshare, onClose }) {
   });
 
   return (
-    <Modal title={`Share "${list.name}"`} onClose={onClose} zIndex={300}>
+    <Modal title={`Share "${list.name}"`} onClose={onClose} zIndex={NESTED_MODAL_Z_INDEX}>
       <div className={styles.deleteBody}>
         <p className={styles.deleteWarning}>
           Friends you share this list with can view its items — they can't edit or decide on them.
