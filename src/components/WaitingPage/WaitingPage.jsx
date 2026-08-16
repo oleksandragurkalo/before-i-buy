@@ -24,7 +24,10 @@ export function WaitingPage({ waiting, history, settings, loading, onDecide, onR
   }, []);
 
   const effectiveViewMode = isCompact ? 'rows' : viewMode;
-  const headerStats = computeHeaderStats(waiting, history, settings.hourlyRate);
+  // `history` here is always this account's own (see useItems.js), so
+  // these stats are this account's own resisted/spent totals regardless of
+  // whether the list currently being browsed is a friend's.
+  const headerStats = computeHeaderStats(history, settings.hourlyRate);
 
   return (
     <section className={styles.section} aria-label="Items waiting">
