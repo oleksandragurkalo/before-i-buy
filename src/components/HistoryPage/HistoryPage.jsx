@@ -7,14 +7,18 @@ import { HistoryTableHeader } from '../HistoryItem/HistoryTableHeader';
 import { computeHeaderStats, computeInsights } from '../../utils';
 import styles from './HistoryPage.module.css';
 
-export function HistoryPage({ waiting, history, settings, loading, onRemove, onEdit, readOnly = false }) {
+// History is always this account's own decisions, account-wide across
+// every list — never a friend's, and never divided by which list happens
+// to be active elsewhere in the app (see useItems.js) — so unlike
+// WaitingPage/ItemCard there's no read-only mode or per-list context here.
+export function HistoryPage({ history, settings, loading, onRemove, onEdit }) {
   const [sortBy, setSortBy] = useState('newest');
   const [filterCategory, setFilterCategory] = useState('all');
   const [grouped, setGrouped] = useState(false);
   const [decisionFilter, setDecisionFilter] = useState('all');
 
-  const headerStats = computeHeaderStats(waiting, history, settings.hourlyRate);
-  const { resistanceRate } = computeInsights(waiting, history);
+  const headerStats = computeHeaderStats(history, settings.hourlyRate);
+  const { resistanceRate } = computeInsights([], history);
 
   return (
     <section className={styles.section} aria-label="Decision history">
@@ -38,7 +42,7 @@ export function HistoryPage({ waiting, history, settings, loading, onRemove, onE
         onDecisionFilterChange={setDecisionFilter}
         header={<HistoryTableHeader />}
         renderItem={(item) => (
-          <HistoryItem item={item} settings={settings} onRemove={onRemove} onEdit={onEdit} readOnly={readOnly} />
+          <HistoryItem item={item} settings={settings} onRemove={onRemove} onEdit={onEdit} />
         )}
       />
 

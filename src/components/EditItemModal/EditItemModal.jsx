@@ -4,7 +4,7 @@ import { ItemFormTemplate } from '../ItemFormTemplate/ItemFormTemplate';
 export function EditItemModal({ item, settings, onSave, onClose }) {
   const symbol = settings?.currencySymbol || '$';
 
-  const { form, error, set, setField, validate } = useItemForm(() => toFormState(item), onClose);
+  const { form, error, set, setField, validate } = useItemForm(() => toFormState(item));
 
   const save = (e) => {
     e.preventDefault();
