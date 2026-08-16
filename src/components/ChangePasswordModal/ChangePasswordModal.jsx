@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useAuth, validatePassword } from '../../context/AuthContext';
-import { Modal } from '../Modal/Modal';
+import { Modal, NESTED_MODAL_Z_INDEX } from '../Modal/Modal';
 import { Button } from '../Button/Button';
 import styles from './ChangePasswordModal.module.css';
 
@@ -35,7 +35,7 @@ export function ChangePasswordModal({ onClose }) {
   };
 
   return (
-    <Modal title="Change password" onClose={onClose} zIndex={300}>
+    <Modal title="Change password" onClose={onClose} zIndex={NESTED_MODAL_Z_INDEX}>
       <form className={styles.form} onSubmit={handleSubmit}>
         <input
           className={styles.input}
