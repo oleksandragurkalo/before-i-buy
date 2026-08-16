@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Modal } from '../Modal/Modal';
+import { Modal, NESTED_MODAL_Z_INDEX } from '../Modal/Modal';
 import { Button } from '../Button/Button';
 import styles from '../ListSwitcher/ListSwitcher.module.css';
 
@@ -17,7 +17,7 @@ export function RemoveFriendModal({ friend, onConfirm, onClose }) {
   };
 
   return (
-    <Modal title={`Remove @${friend.username}?`} onClose={onClose} zIndex={300}>
+    <Modal title={`Remove @${friend.username}?`} onClose={onClose} zIndex={NESTED_MODAL_Z_INDEX}>
       <div className={styles.deleteBody}>
         <p className={styles.deleteWarning}>
           You'll stop being friends. They'll need to send a new friend request if you want to reconnect later.
