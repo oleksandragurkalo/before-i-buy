@@ -164,37 +164,23 @@ export function computeStreak(history) {
   return streak;
 }
 
-function series(items, valueFn, cap = 8) {
-  const values = items.map(valueFn);
-  return values.length >= 2 ? values.slice(-cap) : null;
-}
-
-export function computeHeaderStats(waiting, history, hourlyRate) {
-  const passed = [...history.filter(i => i.status === 'passed')].sort((a, b) => a.decidedAt - b.decidedAt);
-  const bought = [...history.filter(i => i.status === 'bought')].sort((a, b) => a.decidedAt - b.decidedAt);
-
-  let runningSaved = 0;
-  const resistedSeries = series(passed, i => (runningSaved += i.price));
-  runningSaved = 0;
-
-  let runningSpent = 0;
-  const spentSeries = series(bought, i => (runningSpent += i.price));
-  runningSpent = 0;
+// `history` is always this account's own decisions (see useItems.js) — an
+// item's stored `hourlyRateAtDecision`, or `hourlyRate` as its fallback,
+// is therefore always this account's own rate too, never a friend's.
+export function computeHeaderStats(history, hourlyRate) {
+  const passed = history.filter(i => i.status === 'passed');
+  const bought = history.filter(i => i.status === 'bought');
 
   const hoursForItem = (item) => hoursOfWork(item.price, item.hourlyRateAtDecision ?? hourlyRate);
-  const hoursSeries = series(passed, hoursForItem);
   const hoursSaved = passed.reduce((sum, i) => sum + hoursForItem(i), 0);
   const hoursSpent = bought.reduce((sum, i) => sum + hoursForItem(i), 0);
 
   return {
     totalSaved: passed.reduce((sum, i) => sum + i.price, 0),
     resistedCount: passed.length,
-    resistedSeries,
     totalSpent: bought.reduce((sum, i) => sum + i.price, 0),
     spentCount: bought.length,
-    spentSeries,
     hoursSaved,
     hoursSpent,
-    hoursSeries,
   };
 }
