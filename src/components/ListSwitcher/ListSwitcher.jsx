@@ -1,9 +1,20 @@
 import { useEffect, useRef, useState } from 'react';
 import { ChevronDown, Check, Pencil, Plus, Share2, Trash2, X } from 'lucide-react';
+import { supabase } from '../../supabaseClient';
 import { Button } from '../Button/Button';
 import { DeleteListModal } from './DeleteListModal';
 import { ShareListModal } from './ShareListModal';
 import styles from './ListSwitcher.module.css';
+
+// No "Shared with" prefix — the adjacent "Shared" badge already says that,
+// and the menu is only ~240-300px wide, so every character here competes
+// directly with how many usernames actually fit before truncating.
+function formatSharedWith(friendsForList) {
+  if (!friendsForList || friendsForList.length === 0) return null;
+  const names = friendsForList.map(f => `@${f.username}`);
+  if (names.length <= 3) return names.join(', ');
+  return `${names.slice(0, 3).join(', ')} +${names.length - 3} more`;
+}
 
 export function ListSwitcher({
   lists, sharedLists = [], currentListId, onSelect, onCreate, onRename, onDelete,
@@ -18,6 +29,11 @@ export function ListSwitcher({
   const [shareTarget, setShareTarget] = useState(null);
   const [error, setError] = useState('');
   const [creatingPending, setCreatingPending] = useState(false);
+  // listId -> array of friend objects it's shared with, loaded lazily (only
+  // once the menu is opened) and only for lists already flagged `public` —
+  // a `private` list is kept in sync to have zero shares (see useLists.js),
+  // so there's nothing to fetch for the common case of an unshared list.
+  const [shareMap, setShareMap] = useState({});
   const wrapperRef = useRef(null);
 
   useEffect(() => {
@@ -33,6 +49,57 @@ export function ListSwitcher({
       window.removeEventListener('keydown', onKey);
     };
   }, [open]);
+
+  // Reloads on every open (not just once) so a share change made elsewhere
+  // (another tab, or the ShareListModal on a previous open) is reflected —
+  // mirrors ShareListModal's own "reload each time it's opened" pattern.
+  useEffect(() => {
+    if (!open) return;
+    const publicListIds = lists.filter(l => l.visibility === 'public').map(l => l.id);
+    if (publicListIds.length === 0) { setShareMap({}); return; }
+    let cancelled = false;
+    supabase.from('list_shares').select('list_id, shared_with_user_id').in('list_id', publicListIds)
+      .then(({ data, error: sharesError }) => {
+        if (cancelled) return;
+        if (sharesError) { console.error('list shares load error', sharesError); return; }
+        const map = {};
+        data.forEach(row => {
+          const friend = friends.find(f => f.userId === row.shared_with_user_id);
+          if (!friend) return;
+          (map[row.list_id] ??= []).push(friend);
+        });
+        setShareMap(map);
+      })
+      .catch((err) => { if (!cancelled) console.error('list shares load error', err); });
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
+  // Keeps the inline "Shared with …" line in sync immediately after a
+  // toggle in ShareListModal, without waiting for the menu to be reopened.
+  const updateShareMap = (listId, friendUserId, added) => {
+    setShareMap(prev => {
+      const current = prev[listId] || [];
+      if (added) {
+        if (current.some(f => f.userId === friendUserId)) return prev;
+        const friend = friends.find(f => f.userId === friendUserId);
+        return friend ? { ...prev, [listId]: [...current, friend] } : prev;
+      }
+      return { ...prev, [listId]: current.filter(f => f.userId !== friendUserId) };
+    });
+  };
+
+  const handleShare = async (listId, friendUserId) => {
+    const result = await onShare(listId, friendUserId);
+    if (!result.error) updateShareMap(listId, friendUserId, true);
+    return result;
+  };
+
+  const handleUnshare = async (listId, friendUserId) => {
+    const result = await onUnshare(listId, friendUserId);
+    if (!result.error) updateShareMap(listId, friendUserId, false);
+    return result;
+  };
 
   const closeMenu = () => {
     setOpen(false);
@@ -138,7 +205,14 @@ export function ListSwitcher({
                     <span className={styles.check} aria-hidden="true">
                       {list.id === currentListId && <Check size={13} />}
                     </span>
-                    <span className={styles.itemName}>{list.name}</span>
+                    <span className={styles.itemTextBlock}>
+                      <span className={styles.itemName}>{list.name}</span>
+                      {list.visibility === 'public' && shareMap[list.id]?.length > 0 && (
+                        <span className={styles.shareInfo} title={formatSharedWith(shareMap[list.id])}>
+                          {formatSharedWith(shareMap[list.id])}
+                        </span>
+                      )}
+                    </span>
                     {list.visibility === 'public' && <span className={styles.badge}>Shared</span>}
                   </button>
                   <div className={styles.rowActions}>
@@ -219,8 +293,8 @@ export function ListSwitcher({
         <ShareListModal
           list={shareTarget}
           friends={friends}
-          onShare={onShare}
-          onUnshare={onUnshare}
+          onShare={handleShare}
+          onUnshare={handleUnshare}
           onClose={() => setShareTarget(null)}
         />
       )}
