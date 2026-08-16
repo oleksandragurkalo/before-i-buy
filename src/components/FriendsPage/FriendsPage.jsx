@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, UserPlus, UserX, Check, X, Users, Share2 } from 'lucide-react';
+import { Search, UserPlus, UserX, Check, X, Users, Share2, List } from 'lucide-react';
 import { Button } from '../Button/Button';
 import { ShareWithFriendModal } from './ShareWithFriendModal';
 import { RemoveFriendModal } from './RemoveFriendModal';
@@ -16,6 +16,7 @@ export function FriendsPage({
   friends, incomingRequests, outgoingRequests, loading,
   searchUsers, sendRequest, acceptRequest, declineRequest, cancelRequest, removeFriend,
   lists = [], onShare, onUnshare,
+  sharedLists = [], onViewList,
 }) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState(null);
@@ -169,28 +170,44 @@ export function FriendsPage({
             <p className={styles.muted}>Search for a username above to send a friend request.</p>
           </div>
         )}
-        {friends.map(friend => (
-          <div key={friend.userId} className={styles.row}>
-            <span className={styles.username}>@{friend.username}</span>
-            <div className={styles.rowActions}>
-              <Button
-                variant="text"
-                icon={<Share2 size={13} />}
-                onClick={() => setShareTarget(friend)}
-              >
-                Share a list
-              </Button>
-              <Button
-                variant="icon"
-                tone="danger"
-                onClick={() => setRemoveTarget(friend)}
-                aria-label={`Remove ${friend.username}`}
-              >
-                <UserX size={13} />
-              </Button>
+        {friends.map(friend => {
+          const friendLists = sharedLists.filter(l => l.ownerUserId === friend.userId);
+          return (
+            <div key={friend.userId} className={styles.row}>
+              <div className={styles.friendIdentity}>
+                <span className={styles.username}>@{friend.username}</span>
+                {friendLists.map(list => (
+                  <button
+                    key={list.id}
+                    type="button"
+                    className={styles.listLink}
+                    onClick={() => onViewList(list.id)}
+                  >
+                    <List size={11} aria-hidden="true" />
+                    {list.name}
+                  </button>
+                ))}
+              </div>
+              <div className={styles.rowActions}>
+                <Button
+                  variant="text"
+                  icon={<Share2 size={13} />}
+                  onClick={() => setShareTarget(friend)}
+                >
+                  Share a list
+                </Button>
+                <Button
+                  variant="icon"
+                  tone="danger"
+                  onClick={() => setRemoveTarget(friend)}
+                  aria-label={`Remove ${friend.username}`}
+                >
+                  <UserX size={13} />
+                </Button>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {shareTarget && (

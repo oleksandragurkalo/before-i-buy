@@ -77,6 +77,39 @@
 
 .row:first-of-type { border-top: none; }
 
+.friendIdentity {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+}
+
+.listLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 160px;
+  padding: 3px 8px;
+  border: none;
+  border-radius: var(--radius);
+  background: var(--bg-grey);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: color 0.15s, background-color 0.15s;
+}
+
+.listLink:hover {
+  color: var(--accent);
+  background: var(--accent-bg);
+}
+
 .username {
   font-size: 14px;
   font-weight: 500;
