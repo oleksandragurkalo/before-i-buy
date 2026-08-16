@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../supabaseClient';
 import { useAuth } from '../context/AuthContext';
+import { loadResource } from './loadResource';
 
 function profileFromRow(row) {
   return { userId: row.user_id, username: row.username, displayName: row.display_name };
@@ -33,7 +34,18 @@ export function useProfile() {
   // user back through the "pick a username" gate, and resubmitting their
   // real username then fails on the user_id unique constraint (not the
   // username one), surfacing a confusing "That username is taken."
+  //
+  // A boolean here, not a message string like useLists/useFriends'
+  // `loadError` — deliberately not part of that convention, and not wired
+  // into App.jsx's global Toast chain either. Profile load failure is a
+  // blocking-gate condition (App.jsx returns a dedicated
+  // ProfileLoadErrorScreen with its own Retry button before anything else
+  // in the app renders), not a background load a toast can just sit on top
+  // of — createProfile/updateProfile below, on the other hand, *do* follow
+  // the usual inline-`{error}` convention (ChooseUsernameScreen and
+  // AccountSettingsModal both await them and show the message right there).
   const [loadFailed, setLoadFailed] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     if (!user) { setProfile(null); setLoading(false); setLoadFailed(false); return; }
@@ -41,49 +53,53 @@ export function useProfile() {
     let cancelled = false;
     setLoading(true);
     setLoadFailed(false);
-    supabase.from('profiles').select('*').eq('user_id', user.id).maybeSingle()
-      .then(({ data, error }) => {
-        if (cancelled) return;
-        if (error) {
-          console.error('profile load error', error);
-          setLoadFailed(true);
-          setLoading(false);
-          return;
-        }
 
-        const loaded = data ? profileFromRow(data) : null;
-        setProfile(loaded);
-        setLoading(false);
-
-        // Self-healing backfill: accounts that set their name before
-        // display_name existed as a synced field (i.e. everyone, before
-        // this shipped) would otherwise never get it populated — nothing
-        // else ever revisits an unedited name, so friend search-by-name
-        // would silently find no one. Runs quietly on every load where the
-        // two are out of sync, no user action required.
-        const authName = (user.user_metadata?.full_name || '').trim() || null;
-        if (loaded && authName && loaded.displayName !== authName) {
-          supabase.from('profiles').update({ display_name: authName }).eq('user_id', user.id)
-            .then(({ error: syncError }) => {
-              if (cancelled) return;
-              if (syncError) { console.error('display_name backfill error', syncError); return; }
-              setProfile(prev => prev ? { ...prev, displayName: authName } : prev);
-            });
-        }
-      })
-      .catch((err) => {
-        // A genuine rejection (not a returned {error}) would otherwise
-        // leave loading stuck true forever — and since App.jsx blocks its
-        // entire render on profileLoading, that freezes the whole app on
-        // the loading screen for this user, not just this hook.
-        if (cancelled) return;
-        console.error('profile load error', err);
+    loadResource(async () => {
+      const { data, error } = await supabase.from('profiles').select('*').eq('user_id', user.id).maybeSingle();
+      if (cancelled) return;
+      if (error) {
+        console.error('profile load error', error);
         setLoadFailed(true);
         setLoading(false);
-      });
+        return;
+      }
+
+      const loaded = data ? profileFromRow(data) : null;
+      setProfile(loaded);
+      setLoading(false);
+
+      // Self-healing backfill: accounts that set their name before
+      // display_name existed as a synced field (i.e. everyone, before
+      // this shipped) would otherwise never get it populated — nothing
+      // else ever revisits an unedited name, so friend search-by-name
+      // would silently find no one. Runs quietly on every load where the
+      // two are out of sync, no user action required.
+      const authName = (user.user_metadata?.full_name || '').trim() || null;
+      if (loaded && authName && loaded.displayName !== authName) {
+        supabase.from('profiles').update({ display_name: authName }).eq('user_id', user.id)
+          .then(({ error: syncError }) => {
+            if (cancelled) return;
+            if (syncError) { console.error('display_name backfill error', syncError); return; }
+            setProfile(prev => prev ? { ...prev, displayName: authName } : prev);
+          });
+      }
+    }, {
+      setLoading,
+      // A genuine rejection (not a returned {error}) would otherwise leave
+      // loading stuck true forever — and since App.jsx blocks its entire
+      // render on profileLoading, that freezes the whole app on the loading
+      // screen for this user, not just this hook. loadFailed is a boolean
+      // here (not a message string like the other hooks' error state), so
+      // the errorMessage argument is unused — setError just flips it.
+      setError: () => setLoadFailed(true),
+      errorMessage: null,
+      isCancelled: () => cancelled,
+    });
 
     return () => { cancelled = true; };
-  }, [user]);
+  }, [user, reloadKey]);
+
+  const retryProfile = useCallback(() => setReloadKey(k => k + 1), []);
 
   const createProfile = useCallback(async (username, displayName) => {
     if (!user) return { error: 'Not signed in.' };
@@ -123,6 +139,8 @@ export function useProfile() {
     // Also requires the load to have actually succeeded — a failed fetch
     // is not evidence the profile doesn't exist.
     needsUsername: !loading && !!user && !profile && !loadFailed,
+    loadFailed,
+    retryProfile,
     createProfile,
     updateProfile,
   };

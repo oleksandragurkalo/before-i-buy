@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '../supabaseClient';
 import { useAuth } from '../context/AuthContext';
 import { fetchProfilesByUserIds } from './useProfile';
+import { loadResource } from './loadResource';
 
 function listFromRow(row) {
   return {
@@ -69,13 +70,25 @@ export function useLists() {
   const [sharedLists, setSharedLists] = useState([]);
   const [currentListId, setCurrentListIdState] = useState(null);
   const [loading, setLoading] = useState(true);
+  // Only the *initial load* surfaces here (and via App.jsx's global Toast)
+  // — deliberately not the actions below (createList/renameList/deleteList/
+  // shareList/unshareList). Those are all awaited by whichever dialog
+  // triggers them (ListSwitcher, ShareListModal, ...), which stays open
+  // long enough to show the returned `{error}` right next to the field the
+  // user was using — a global toast at the bottom of the screen would be
+  // strictly worse feedback for a rename/create/share failure than the
+  // inline message already sitting right there. useFriends.js follows the
+  // same split, for the same reason.
+  const [loadError, setLoadError] = useState(null);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
-    if (!user) { setLists([]); setSharedLists([]); setCurrentListIdState(null); setLoading(false); return; }
+    if (!user) { setLists([]); setSharedLists([]); setCurrentListIdState(null); setLoading(false); setLoadError(null); return; }
 
     let cancelled = false;
     let channel = null;
     setLoading(true);
+    setLoadError(null);
 
     // A realtime list_shares event can fire again before the previous
     // reload resolves — without this, a slower earlier call can resolve
@@ -85,61 +98,103 @@ export function useLists() {
     const reloadSharedLists = async () => {
       const loadId = ++latestSharedLoadId;
       const shared = await loadSharedLists(user.id);
-      if (cancelled || loadId !== latestSharedLoadId) return;
+      if (cancelled || loadId !== latestSharedLoadId) return shared;
       setSharedLists(shared);
+      return shared;
     };
 
-    (async () => {
-      try {
-        const { data, error } = await supabase.from('lists').select('*').eq('user_id', user.id).order('created_at');
-        if (cancelled) return;
-        if (error) { console.error('lists load error', error); setLoading(false); return; }
-
-        let rows = data;
-        if (rows.length === 0) {
-          // Shouldn't happen for any account that existed before this feature
-          // shipped (the 0003 migration backfills a default list for those) —
-          // this only seeds a fresh one for a brand-new signup afterward.
-          const seeded = {
-            user_id: user.id,
-            name: autoListName(user.user_metadata?.full_name),
-            is_default: true,
-          };
-          const { data: created, error: seedError } = await supabase.from('lists').insert(seeded).select().single();
-          if (cancelled) return;
-          if (seedError) { console.error('seed list error', seedError); setLoading(false); return; }
-          rows = [created];
-        }
-
-        const mapped = rows.map(listFromRow);
-        setLists(mapped);
-        await reloadSharedLists();
-        if (cancelled) return;
-
-        const savedId = localStorage.getItem(currentListStorageKey(user.id));
-        const initial = mapped.find(l => l.id === savedId) || mapped.find(l => l.isDefault) || mapped[0];
-        setCurrentListIdState(initial.id);
+    loadResource(async () => {
+      // Neither query depends on the other's result (both only need
+      // `user.id`) — running them together instead of one-after-the-other
+      // saves a full network round-trip on every load.
+      const [{ data, error }, shared] = await Promise.all([
+        supabase.from('lists').select('*').eq('user_id', user.id).order('created_at'),
+        reloadSharedLists(),
+      ]);
+      if (cancelled) return;
+      if (error) {
+        console.error('lists load error', error);
+        setLoadError('Could not load your lists. Check your connection.');
         setLoading(false);
-        if (cancelled) return;
-
-        channel = supabase
-          .channel(`user-lists-${user.id}`)
-          .on('postgres_changes', { event: '*', schema: 'public', table: 'lists', filter: `user_id=eq.${user.id}` },
-            (payload) => setLists(prev => applyListChange(prev, payload)))
-          .on('postgres_changes', { event: '*', schema: 'public', table: 'list_shares', filter: `shared_with_user_id=eq.${user.id}` },
-            reloadSharedLists)
-          .subscribe();
-      } catch (err) {
-        console.error('lists load error', err);
-        if (!cancelled) setLoading(false);
+        return;
       }
-    })();
+
+      let rows = data;
+      if (rows.length === 0) {
+        // Shouldn't happen for any account that existed before this feature
+        // shipped (the 0003 migration backfills a default list for those) —
+        // this only seeds a fresh one for a brand-new signup afterward.
+        const seeded = {
+          user_id: user.id,
+          name: autoListName(user.user_metadata?.full_name),
+          is_default: true,
+        };
+        const { data: created, error: seedError } = await supabase.from('lists').insert(seeded).select().single();
+        if (cancelled) return;
+        if (seedError) {
+          console.error('seed list error', seedError);
+          setLoadError('Could not set up your list. Check your connection.');
+          setLoading(false);
+          return;
+        }
+        rows = [created];
+      }
+
+      const mapped = rows.map(listFromRow);
+      setLists(mapped);
+
+      // A saved id may belong to a list shared *with* this user rather
+      // than one they own — check both, otherwise reloading while viewing
+      // a friend's shared list silently bounces back to your own default.
+      const savedId = localStorage.getItem(currentListStorageKey(user.id));
+      const initial = mapped.find(l => l.id === savedId) || (shared || []).find(l => l.id === savedId)
+        || mapped.find(l => l.isDefault) || mapped[0];
+      setCurrentListIdState(initial.id);
+      setLoading(false);
+      if (cancelled) return;
+
+      channel = supabase
+        .channel(`user-lists-${user.id}`)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'lists', filter: `user_id=eq.${user.id}` },
+          (payload) => setLists(prev => applyListChange(prev, payload)))
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'list_shares', filter: `shared_with_user_id=eq.${user.id}` },
+          reloadSharedLists)
+        .subscribe();
+    }, {
+      setLoading, setError: setLoadError,
+      errorMessage: 'Could not load your lists. Check your connection.',
+      isCancelled: () => cancelled,
+    });
 
     return () => {
       cancelled = true;
       if (channel) supabase.removeChannel(channel);
     };
-  }, [user]);
+  }, [user, reloadKey]);
+
+  // Lets App.jsx offer a real "Retry" when the initial load (including the
+  // zero-lists seed-insert above) fails, instead of only a page reload — see
+  // ListsLoadErrorScreen. Mirrors useProfile.js's retryProfile.
+  const retryLists = useCallback(() => setReloadKey(k => k + 1), []);
+
+  // The `lists` subscription above is filtered to rows this user owns, so it
+  // never sees an owner's edit (e.g. a rename) to a list shared *with* this
+  // user — subscribe separately to just those rows, re-subscribing whenever
+  // the set of shared list ids changes.
+  const sharedListIds = sharedLists.map(l => l.id).join(',');
+  useEffect(() => {
+    if (!user || !sharedListIds) return;
+    const ids = sharedListIds.split(',');
+    const channel = supabase
+      .channel(`shared-lists-${user.id}-${sharedListIds}`)
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'lists', filter: `id=in.(${ids.join(',')})` },
+        (payload) => {
+          const next = listFromRow(payload.new);
+          setSharedLists(prev => prev.map(l => l.id === next.id ? { ...l, name: next.name } : l));
+        })
+      .subscribe();
+    return () => supabase.removeChannel(channel);
+  }, [user, sharedListIds]);
 
   const setCurrentListId = useCallback((id) => {
     setCurrentListIdState(id);
@@ -230,7 +285,6 @@ export function useLists() {
   // matches the auto-generated pattern from the *old* name (i.e. it was
   // never manually renamed), carry the rename forward. A default list
   // that's since been customized to something else is left untouched.
-  // Mirrors the same sync useItems.js used to do for settings.listName.
   const listsRef = useRef(lists);
   listsRef.current = lists;
   const renameListRef = useRef(renameList);
@@ -260,8 +314,9 @@ export function useLists() {
     renameListRef.current(defaultList.id, autoListName(name));
   }, [user, loading]);
 
-  const currentList = lists.find(l => l.id === currentListId)
-    ? { ...lists.find(l => l.id === currentListId), isOwner: true }
+  const ownedCurrentList = lists.find(l => l.id === currentListId);
+  const currentList = ownedCurrentList
+    ? { ...ownedCurrentList, isOwner: true }
     : sharedLists.find(l => l.id === currentListId) ?? null;
 
   return {
@@ -276,5 +331,8 @@ export function useLists() {
     shareList,
     unshareList,
     loading,
+    loadError,
+    clearLoadError: () => setLoadError(null),
+    retryLists,
   };
 }

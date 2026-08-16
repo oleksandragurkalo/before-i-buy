@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { DEFAULT_COOLING_OFF_DAYS } from '../config';
 
 export function toFormState(item = {}) {
@@ -14,15 +14,9 @@ export function toFormState(item = {}) {
   };
 }
 
-export function useItemForm(initial, onClose) {
+export function useItemForm(initial) {
   const [form, setForm] = useState(initial);
   const [error, setError] = useState('');
-
-  useEffect(() => {
-    const onKey = (e) => { if (e.key === 'Escape') onClose(); };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [onClose]);
 
   const setHandlers = useRef({});
   const setFieldHandlers = useRef({});
@@ -50,7 +44,7 @@ export function useItemForm(initial, onClose) {
   const validate = () => {
     if (!form.name.trim()) { setError('Give it a name'); return null; }
     const price = parseFloat(form.price);
-    if (!form.price || isNaN(price) || price <= 0) { setError('Enter a valid price'); return null; }
+    if (isNaN(price) || price <= 0) { setError('Enter a valid price'); return null; }
     return { ...form, price };
   };
 

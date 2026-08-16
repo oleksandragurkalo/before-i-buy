@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../supabaseClient';
 import { useAuth } from '../context/AuthContext';
 import { fetchProfilesByUserIds } from './useProfile';
+import { loadResource } from './loadResource';
 
 function requestFromRow(row) {
   return {
@@ -18,6 +19,15 @@ export function useFriends() {
   const [requests, setRequests] = useState([]);
   const [profilesById, setProfilesById] = useState(new Map());
   const [loading, setLoading] = useState(true);
+  // Only the *initial load* surfaces here (and via App.jsx's global Toast)
+  // — deliberately not the actions below (sendRequest/acceptRequest/
+  // declineRequest/cancelRequest/removeFriend). Those are all awaited by
+  // whichever component triggers them (FriendsPage's search results/
+  // request rows), which stays rendered long enough to show the returned
+  // `{error}` right next to the row the user was acting on — see the same
+  // note in useLists.js's `loadError`, which follows this split for the
+  // same reason.
+  const [loadError, setLoadError] = useState(null);
 
   useEffect(() => {
     if (!user) { setRequests([]); setProfilesById(new Map()); setLoading(false); return; }
@@ -36,7 +46,12 @@ export function useFriends() {
         .select('*')
         .or(`from_user_id.eq.${user.id},to_user_id.eq.${user.id}`);
       if (cancelled || loadId !== latestLoadId) return;
-      if (error) { console.error('friend_requests load error', error); return; }
+      if (error) {
+        console.error('friend_requests load error', error);
+        setLoadError('Could not load your friends. Check your connection.');
+        return;
+      }
+      setLoadError(null);
 
       const rows = data.map(requestFromRow);
       setRequests(rows);
@@ -48,12 +63,8 @@ export function useFriends() {
     };
 
     setLoading(true);
-    (async () => {
-      try {
-        await load();
-      } catch (err) {
-        console.error('friend_requests load error', err);
-      }
+    loadResource(async () => {
+      await load();
       if (cancelled) return;
       setLoading(false);
 
@@ -66,7 +77,11 @@ export function useFriends() {
         .on('postgres_changes', { event: '*', schema: 'public', table: 'friend_requests', filter: `from_user_id=eq.${user.id}` }, load)
         .on('postgres_changes', { event: '*', schema: 'public', table: 'friend_requests', filter: `to_user_id=eq.${user.id}` }, load)
         .subscribe();
-    })();
+    }, {
+      setLoading, setError: setLoadError,
+      errorMessage: 'Could not load your friends. Check your connection.',
+      isCancelled: () => cancelled,
+    });
 
     return () => {
       cancelled = true;
@@ -83,10 +98,19 @@ export function useFriends() {
     // search term containing those characters (plausible for a name search,
     // e.g. "Smith, Jo") would corrupt the query instead of just matching
     // nothing.
-    const base = () => supabase.from('profiles').select('user_id, username, display_name').neq('user_id', user.id).limit(20);
+    //
+    // .order('username') matters here specifically because of the .limit(20)
+    // below it — without an explicit order, Postgres gives no guarantee
+    // about *which* 20 rows come back when a search matches more than that,
+    // so identical repeated searches could silently surface a different
+    // top-20 (and in a different order) each time.
+    const base = () => supabase.from('profiles').select('user_id, username, display_name').neq('user_id', user.id).order('username').limit(20);
+    // Escape LIKE/ILIKE wildcards so a literal '%' or '_' in the query (e.g.
+    // a username containing '_') is matched as text, not as a pattern.
+    const escaped = trimmed.replace(/[\\%_]/g, '\\$&');
     const [byUsername, byName] = await Promise.all([
-      base().ilike('username', `%${trimmed}%`),
-      base().ilike('display_name', `%${trimmed}%`),
+      base().ilike('username', `%${escaped}%`),
+      base().ilike('display_name', `%${escaped}%`),
     ]);
     if (byUsername.error) console.error('searchUsers error', byUsername.error);
     if (byName.error) console.error('searchUsers error', byName.error);
@@ -122,19 +146,18 @@ export function useFriends() {
     return { error: null };
   }, []);
 
-  const cancelRequest = useCallback(async (requestId) => {
+  // cancelRequest (an outgoing request) and removeFriend (an accepted one)
+  // are the same operation on the same table — kept as two names since
+  // that's what reads naturally at each call site.
+  const deleteFriendRequest = useCallback(async (requestId, errorMessage) => {
     const { error } = await supabase.from('friend_requests').delete().eq('id', requestId);
-    if (error) { console.error('cancelRequest error', error); return { error: 'Could not cancel request.' }; }
+    if (error) { console.error('deleteFriendRequest error', error); return { error: errorMessage }; }
     setRequests(prev => prev.filter(r => r.id !== requestId));
     return { error: null };
   }, []);
 
-  const removeFriend = useCallback(async (requestId) => {
-    const { error } = await supabase.from('friend_requests').delete().eq('id', requestId);
-    if (error) { console.error('removeFriend error', error); return { error: 'Could not remove friend.' }; }
-    setRequests(prev => prev.filter(r => r.id !== requestId));
-    return { error: null };
-  }, []);
+  const cancelRequest = useCallback((requestId) => deleteFriendRequest(requestId, 'Could not cancel request.'), [deleteFriendRequest]);
+  const removeFriend = useCallback((requestId) => deleteFriendRequest(requestId, 'Could not remove friend.'), [deleteFriendRequest]);
 
   const sendRequest = useCallback(async (targetUserId) => {
     if (!user) return { error: 'Not signed in.' };
@@ -197,6 +220,8 @@ export function useFriends() {
     incomingRequests,
     outgoingRequests,
     loading,
+    loadError,
+    clearLoadError: () => setLoadError(null),
     searchUsers,
     sendRequest,
     acceptRequest,

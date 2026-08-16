@@ -4,6 +4,8 @@ import { useAuth } from '../context/AuthContext';
 import { convertCurrency } from '../utils';
 import { DEFAULT_SETTINGS, DEFAULT_COOLING_OFF_DAYS, COOLING_OFF_PRESETS } from '../config';
 import { useExchangeRates } from './useExchangeRates';
+import { settingsFromRow } from './useSettings';
+import { loadResource } from './loadResource';
 
 const COOLING_OFF_VALUES = COOLING_OFF_PRESETS.map(p => p.value);
 const MIN_COOLING_OFF_DAYS = Math.min(...COOLING_OFF_VALUES);
@@ -22,6 +24,7 @@ function clampCoolingOffDays(value) {
 function itemFromRow(row) {
   return {
     id: row.id,
+    listId: row.list_id,
     name: row.name,
     price: Number(row.price),
     category: row.category,
@@ -55,38 +58,6 @@ function itemToRow(item, userId, listId) {
   };
 }
 
-function settingsFromRow(row) {
-  return {
-    hourlyRate: Number(row.hourly_rate),
-    currency: row.currency,
-    currencySymbol: row.currency_symbol,
-    payPeriod: row.pay_period,
-    payAmount: Number(row.pay_amount),
-    payType: row.pay_type,
-    taxRate: Number(row.tax_rate),
-    hoursPerWeek: Number(row.hours_per_week),
-  };
-}
-
-function settingsToRow(settings, userId) {
-  return {
-    user_id: userId,
-    // list_name is retired in favor of the `lists` table (see useLists.js)
-    // and no longer read anywhere in the app — this placeholder just keeps
-    // writes satisfying the column's existing NOT NULL constraint without
-    // resurrecting the old single-list concept.
-    list_name: 'Waiting List',
-    hourly_rate: settings.hourlyRate,
-    currency: settings.currency,
-    currency_symbol: settings.currencySymbol,
-    pay_period: settings.payPeriod,
-    pay_amount: settings.payAmount,
-    pay_type: settings.payType,
-    tax_rate: settings.taxRate,
-    hours_per_week: settings.hoursPerWeek,
-  };
-}
-
 // Folds a Realtime postgres_changes payload into the current items array.
 function applyItemChange(prev, payload) {
   if (payload.eventType === 'DELETE') {
@@ -100,57 +71,62 @@ function applyItemChange(prev, payload) {
   return copy;
 }
 
-// `listId` scopes which list's items this hook loads/writes — account-level
-// settings (pay/currency prefs) stay keyed by user regardless of which list
-// is active.
-export function useItems(listId, readOnly = false) {
+// `listId` is the *active* list — it scopes `waiting` (and where a new item
+// is added/saved to) but never `history`: decision history is account-wide
+// by design (a user's track record of resisting/buying isn't really "per
+// list", and never someone else's — see the two load effects below) and
+// `onImportSettings` lets importData() restore a full settings object on
+// top of it. `ownerId` is the list owner's user id, needed only for a
+// read-only (shared) list — see the ownerSettings effect below.
+export function useItems(listId, {
+  readOnly = false,
+  ownerId = null,
+  accountSettings = DEFAULT_SETTINGS,
+  onImportSettings = () => {},
+} = {}) {
   const { user } = useAuth();
   const exchangeRates = useExchangeRates();
 
+  // Always this account's own items, across every list it owns — never a
+  // friend's, and independent of which list is active. Powers `history`
+  // unconditionally, and `waiting` whenever this account owns the active
+  // list (i.e. not viewing a friend's shared list — see `friendItems`
+  // below for that case).
   const [items, setItems] = useState([]);
-  const [settings, setSettings] = useState(DEFAULT_SETTINGS);
   const [loading, setLoading] = useState(true);
+  // One shared error string for both the initial load and every action
+  // below (add/edit/decide/remove/...), surfaced via App.jsx's global
+  // Toast — intentional, not an inconsistency with useLists/useFriends'
+  // split shape. This hook's actions are optimistic and fire-and-forget
+  // (e.g. addItem/editItem update local state and close their form
+  // immediately, without awaiting the save) — by the time a failure could
+  // happen, the triggering UI is usually already gone, so there's no
+  // inline location left to show it. useLists/useFriends' actions are
+  // awaited by their caller instead, which keeps the triggering dialog
+  // open long enough to show the error right there — see the loadError
+  // comment in those hooks.
   const [error, setError] = useState(null);
+  const [ownerSettings, setOwnerSettings] = useState(null);
+  // Tracks which owner `ownerSettings` was actually fetched for, so a stale
+  // read from a previous owner can never be shown against a new one — see
+  // the effect below.
+  const [ownerSettingsOwnerId, setOwnerSettingsOwnerId] = useState(null);
 
-  // ── Initial load + realtime subscription ─────────────────────────────────
   useEffect(() => {
     if (!user) { setItems([]); setLoading(false); return; }
-    // listId hasn't resolved yet (useLists() starts it at null and sets it
-    // asynchronously) — this is a brief in-flight state, not "no items", so
-    // loading must stay true or ItemListSection flashes its empty state for
-    // a returning user who actually has items.
-    if (!listId) { setItems([]); setLoading(true); return; }
-
     setLoading(true);
     let cancelled = false;
     let channel = null;
 
-    (async () => {
-      const [itemsRes, settingsRes] = await Promise.all([
-        supabase.from('items').select('*').eq('list_id', listId),
-        supabase.from('settings').select('*').eq('user_id', user.id).maybeSingle(),
-      ]);
+    loadResource(async () => {
+      const { data, error: itemsError } = await supabase.from('items').select('*').eq('user_id', user.id);
       if (cancelled) return;
 
-      if (itemsRes.error) {
-        console.error('items load error', itemsRes.error);
+      if (itemsError) {
+        console.error('items load error', itemsError);
         setError('Could not load your items. Check your connection.');
       } else {
-        setItems(itemsRes.data.map(itemFromRow));
-      }
-
-      if (settingsRes.error) {
-        console.error('settings load error', settingsRes.error);
-        setError('Could not load your settings. Check your connection.');
-      } else if (settingsRes.data) {
-        setSettings(settingsFromRow(settingsRes.data));
-      } else {
-        // Brand-new account, no settings row yet — seed the defaults and
-        // persist them so they aren't lost/regenerated on the next load.
-        setSettings(DEFAULT_SETTINGS);
-        supabase.from('settings').insert(settingsToRow(DEFAULT_SETTINGS, user.id)).then(({ error: seedError }) => {
-          if (seedError) console.error('seed settings error', seedError);
-        });
+        setItems(data.map(itemFromRow));
       }
 
       setLoading(false);
@@ -161,26 +137,116 @@ export function useItems(listId, readOnly = false) {
       // getting applied, and then silently overwritten when the initial
       // (now slightly stale) snapshot resolves a moment later.
       channel = supabase
-        .channel(`list-items-${listId}`)
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'items', filter: `list_id=eq.${listId}` },
+        .channel(`user-items-${user.id}`)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'items', filter: `user_id=eq.${user.id}` },
           (payload) => setItems(prev => applyItemChange(prev, payload)))
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'settings', filter: `user_id=eq.${user.id}` },
-          (payload) => { if (payload.eventType !== 'DELETE') setSettings(settingsFromRow(payload.new)); })
         .subscribe();
-    })();
+    }, {
+      setLoading, setError,
+      errorMessage: 'Could not load your items. Check your connection.',
+      isCancelled: () => cancelled,
+    });
 
     return () => {
       cancelled = true;
       if (channel) supabase.removeChannel(channel);
     };
-  }, [user, listId]);
+  }, [user]);
+
+  // ── A friend's shared list, for the read-only Waiting view ────────────────
+  // Only fetched while actually viewing a friend's list. `waiting` reads
+  // from here instead of `items` in that case — `history` never does: it's
+  // always this account's own decisions, regardless of which list (yours or
+  // a friend's) happens to be active.
+  const [friendItems, setFriendItems] = useState([]);
+  const [friendLoading, setFriendLoading] = useState(false);
+  // Tracks which list `friendItems` was actually fetched for, so a stale
+  // read from a previous friend's list can never be shown against a new
+  // one — mirrors the `ownerSettingsOwnerId` guard below.
+  const [friendItemsListId, setFriendItemsListId] = useState(null);
+
+  useEffect(() => {
+    if (!readOnly || !listId) { setFriendItems([]); setFriendItemsListId(null); setFriendLoading(false); return; }
+    setFriendLoading(true);
+    let cancelled = false;
+    let channel = null;
+
+    loadResource(async () => {
+      const { data, error: itemsError } = await supabase.from('items').select('*').eq('list_id', listId);
+      if (cancelled) return;
+
+      if (itemsError) {
+        console.error('friend items load error', itemsError);
+        setError('Could not load this list. Check your connection.');
+        setFriendItems([]);
+      } else {
+        setFriendItems(data.map(itemFromRow));
+      }
+      setFriendItemsListId(listId);
+
+      setFriendLoading(false);
+      if (cancelled) return;
+
+      channel = supabase
+        .channel(`list-items-${listId}`)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'items', filter: `list_id=eq.${listId}` },
+          (payload) => setFriendItems(prev => applyItemChange(prev, payload)))
+        .subscribe();
+    }, {
+      setLoading: setFriendLoading, setError,
+      errorMessage: 'Could not load this list. Check your connection.',
+      isCancelled: () => cancelled,
+    });
+
+    return () => {
+      cancelled = true;
+      if (channel) supabase.removeChannel(channel);
+    };
+  }, [readOnly, listId]);
+
+  // ── Owner settings, for shared/read-only lists ────────────────────────────
+  // An item's `price` is the list owner's raw number, in the owner's
+  // currency — computing "hours of work" or formatting it with the
+  // *viewer's* hourlyRate/currency (accountSettings) silently mixes two
+  // accounts' numbers into something meaningless. Requires an RLS policy on
+  // `settings` that lets a user with an accepted list_shares row read the
+  // owner's settings row — without it this falls back to the viewer's own
+  // settings, same as before this fix.
+  useEffect(() => {
+    if (!readOnly || !ownerId) { setOwnerSettings(null); setOwnerSettingsOwnerId(null); return; }
+    let cancelled = false;
+    supabase.from('settings').select('*').eq('user_id', ownerId).maybeSingle()
+      .then(({ data, error: ownerError }) => {
+        if (cancelled) return;
+        if (ownerError) console.error('owner settings load error', ownerError);
+        // `data` is also null when RLS blocks the row (not just when it
+        // genuinely doesn't exist) — PostgREST can't distinguish the two.
+        // Falling back to null here (not DEFAULT_SETTINGS) lets displaySettings
+        // fall through to the viewer's own accountSettings in either case,
+        // instead of silently showing fabricated numbers no one actually has.
+        setOwnerSettings(!ownerError && data ? settingsFromRow(data) : null);
+        setOwnerSettingsOwnerId(ownerId);
+      })
+      .catch((err) => { if (!cancelled) { console.error('owner settings load error', err); setOwnerSettingsOwnerId(ownerId); } });
+    return () => { cancelled = true; };
+  }, [readOnly, ownerId]);
+
+  // Guarding on `ownerSettingsOwnerId === ownerId` (not just truthy
+  // `ownerSettings`) means that when `ownerId` changes to a different owner,
+  // the still-in-flight fetch's stale result from the *previous* owner can
+  // never be shown against the new owner's items — this falls through to
+  // the viewer's own accountSettings (same fallback as the RLS-blocked case
+  // above) until the new owner's settings actually land.
+  const displaySettings = readOnly && ownerSettings && ownerSettingsOwnerId === ownerId
+    ? ownerSettings
+    : accountSettings;
 
   // ── Helpers ──────────────────────────────────────────────────────────────
-  const saveItem = useCallback(async (item) => {
-    if (!user || !listId) return;
+  const saveItem = useCallback(async (item, targetListId = listId) => {
+    if (!user || !targetListId) return;
     try {
       setError(null);
-      const { error: saveError } = await supabase.from('items').upsert(itemToRow(item, user.id, listId));
+      const { error: saveError } = await supabase.from('items').upsert(itemToRow(item, user.id, targetListId));
       if (saveError) throw saveError;
     } catch (e) {
       console.error('saveItem error', e);
@@ -200,22 +266,16 @@ export function useItems(listId, readOnly = false) {
     }
   }, [user]);
 
-  const saveSettings = useCallback(async (next) => {
-    if (!user) return;
-    try {
-      setError(null);
-      const { error: saveError } = await supabase.from('settings').upsert(settingsToRow(next, user.id));
-      if (saveError) throw saveError;
-    } catch (e) {
-      console.error('saveSettings error', e);
-      setError('Could not save settings. Check your connection.');
-    }
-  }, [user]);
-
   // ── Public API ───────────────────────────────────────────────────────────
-  const addItem = (item) => {
+  // Wrapped in useCallback (not just for its own sake, but because these
+  // are handed straight to ItemCard/HistoryItem as onDecide/onRemove/onEdit
+  // — those are wrapped in React.memo, and a memo is only as good as the
+  // stability of the props it's comparing. A fresh closure here on every
+  // render would make every card re-render every time regardless.
+  const addItem = useCallback((item) => {
     const newItem = {
       id: crypto.randomUUID(),
+      listId,
       name: item.name.trim(),
       price: parseFloat(item.price),
       category: item.category || 'other',
@@ -231,9 +291,9 @@ export function useItems(listId, readOnly = false) {
     setItems(prev => [...prev, newItem]);
     saveItem(newItem);
     return newItem.id;
-  };
+  }, [listId, saveItem]);
 
-  const editItem = (id, updates) => {
+  const editItem = useCallback((id, updates) => {
     const existing = items.find(i => i.id === id);
     if (!existing) return;
     const updated = {
@@ -252,80 +312,119 @@ export function useItems(listId, readOnly = false) {
       hourlyRateAtDecision: updates.status === 'waiting' ? null : existing.hourlyRateAtDecision,
     };
     setItems(prev => prev.map(i => i.id === id ? updated : i));
-    saveItem(updated);
-  };
+    // `items` now spans every list this account owns (history is
+    // account-wide) — save back to the item's own list, not whichever list
+    // happens to be active right now.
+    saveItem(updated, existing.listId);
+  }, [items, saveItem]);
 
-  const decide = (id, status) => {
+  const decide = useCallback((id, status) => {
     const existing = items.find(i => i.id === id);
     if (!existing) return;
-    const updated = { ...existing, status, decidedAt: Date.now(), hourlyRateAtDecision: settings.hourlyRate };
+    const updated = { ...existing, status, decidedAt: Date.now(), hourlyRateAtDecision: accountSettings.hourlyRate };
     setItems(prev => prev.map(i => i.id === id ? updated : i));
-    saveItem(updated);
-  };
+    saveItem(updated, existing.listId);
+  }, [items, accountSettings, saveItem]);
 
-  const removeItem = (id) => {
+  const removeItem = useCallback((id) => {
     const index = items.findIndex(i => i.id === id);
     if (index === -1) return null;
     const removed = items[index];
     setItems(prev => prev.filter(i => i.id !== id));
     deleteItem(id);
-    return { item: removed, index };
-  };
+    // `removed.listId`, not this hook's own `listId` — `items` spans every
+    // list this account owns (history is account-wide), so the item being
+    // removed isn't necessarily on the currently active list.
+    return { item: removed, index, listId: removed.listId };
+  }, [items, deleteItem]);
 
-  const restoreItem = ({ item }) => {
+  // `originalListId` is the list the item was removed *from*, which may
+  // differ from whichever list is active by the time Undo is clicked — the
+  // item must be saved back to where it actually came from, not wherever is
+  // currently active. `items` spans every list this account owns, so it's
+  // always added back to local state regardless of which list is active.
+  const restoreItem = useCallback(({ item, listId: originalListId }) => {
+    const targetListId = originalListId ?? listId;
     setItems(prev => [...prev, item]);
-    saveItem(item);
-  };
+    saveItem(item, targetListId);
+  }, [listId, saveItem]);
 
-  const updateSettings = (updates) => {
-    let nextItems = items;
-    // Currency changes are a personal preference and should always save,
-    // but the item-rewrite side effect below must never touch a list this
-    // account doesn't own (e.g. a friend's shared list currently active) —
-    // those items belong to someone else and this account can't write them.
-    if (!readOnly && updates.currency && updates.currency !== settings.currency) {
-      const fromCode = settings.currency;
-      const toCode = updates.currency;
-      nextItems = items.map(item => ({
-        ...item,
-        price: Math.round(convertCurrency(item.price, fromCode, toCode, exchangeRates) * 100) / 100,
-        savedAmount: item.savedAmount
-          ? Math.round(convertCurrency(item.savedAmount, fromCode, toCode, exchangeRates) * 100) / 100
-          : item.savedAmount,
-        hourlyRateAtDecision: item.hourlyRateAtDecision != null
-          ? convertCurrency(item.hourlyRateAtDecision, fromCode, toCode, exchangeRates)
-          : item.hourlyRateAtDecision,
-      }));
-      setItems(nextItems);
-      nextItems.forEach(item => saveItem(item));
-    }
-    const nextSettings = { ...settings, ...updates };
-    setSettings(nextSettings);
-    saveSettings(nextSettings);
-  };
+  // Rewrites every item's price/savedAmount/hourlyRateAtDecision from one
+  // currency to another — called when the account's currency preference
+  // changes (see App.jsx). `readOnly` short-circuits this instead of
+  // relying on `items` being scoped to this account's own lists (it no
+  // longer is — see the load effect) — a friend's shared list currently
+  // active must never have its items rewritten by this account.
+  const convertItemsCurrency = useCallback((fromCode, toCode) => {
+    if (readOnly) return;
+    const nextItems = items.map(item => ({
+      ...item,
+      price: Math.round(convertCurrency(item.price, fromCode, toCode, exchangeRates) * 100) / 100,
+      savedAmount: item.savedAmount
+        ? Math.round(convertCurrency(item.savedAmount, fromCode, toCode, exchangeRates) * 100) / 100
+        : item.savedAmount,
+      hourlyRateAtDecision: item.hourlyRateAtDecision != null
+        ? convertCurrency(item.hourlyRateAtDecision, fromCode, toCode, exchangeRates)
+        : item.hourlyRateAtDecision,
+    }));
+    setItems(nextItems);
+    // `items` spans every list this account owns — save each item back to
+    // its own list, not whichever list happens to be active right now.
+    nextItems.forEach(item => saveItem(item, item.listId));
+  }, [readOnly, items, exchangeRates, saveItem]);
 
-  const exportData = () => JSON.stringify({ items, settings, exportedAt: Date.now() }, null, 2);
+  const exportData = useCallback(
+    () => JSON.stringify({ items, settings: accountSettings, exportedAt: Date.now() }, null, 2),
+    [items, accountSettings]
+  );
 
-  const importData = (parsed) => {
+  const importData = useCallback((parsed) => {
     if (!parsed || !Array.isArray(parsed.items)) return false;
-    setItems(parsed.items);
-    parsed.items.forEach(item => saveItem(item));
+    // Default to the active list for an import with no `listId` on its
+    // items (an older export predating multi-list support, or a hand-edited
+    // file) — a re-import of this account's own export already carries its
+    // items' real listId and lands back on the lists they came from.
+    const imported = parsed.items.map(item => ({ listId, ...item }));
+    // `items` spans every list this account owns — merge rather than
+    // replace, so importing doesn't make every other list's items locally
+    // disappear until the next reload brings them back.
+    const importedIds = new Set(imported.map(i => i.id));
+    setItems(prev => [...prev.filter(i => !importedIds.has(i.id)), ...imported]);
+    imported.forEach(item => saveItem(item, item.listId));
     if (parsed.settings && typeof parsed.settings === 'object') {
-      const nextSettings = { ...DEFAULT_SETTINGS, ...parsed.settings };
-      setSettings(nextSettings);
-      saveSettings(nextSettings);
+      onImportSettings({ ...DEFAULT_SETTINGS, ...parsed.settings });
     }
     return true;
-  };
+  }, [listId, saveItem, onImportSettings]);
 
-  const waiting = items.filter(i => i.status === 'waiting');
+  // Guarding on `friendItemsListId === listId` (not just truthy
+  // `friendItems`) means that when `listId` changes to a different friend's
+  // list, the still-in-flight (or not-yet-started) fetch's stale result
+  // from the *previous* friend's list can never be shown against the new
+  // one for even a single render — same reasoning as `ownerSettingsOwnerId`
+  // above.
+  const friendItemsReady = friendItemsListId === listId;
+
+  // `waiting` is a per-list wishlist — this account's own active list, or
+  // (read-only) a friend's shared one. `history` never is: it's always this
+  // account's own decisions, from `items` alone, regardless of which list —
+  // yours or a friend's — happens to be active.
+  const waiting = readOnly
+    ? (friendItemsReady ? friendItems.filter(i => i.status === 'waiting') : [])
+    : items.filter(i => i.status === 'waiting' && i.listId === listId);
   const history = items.filter(i => i.status !== 'waiting');
 
   return {
     waiting, history,
-    settings, updateSettings,
+    displaySettings,
     addItem, editItem, decide, removeItem, restoreItem,
+    convertItemsCurrency,
     exportData, importData,
-    loading, error, clearError: () => setError(null),
+    // `loading` reflects whichever source `waiting` above draws from,
+    // since that's what gates the Waiting page. `historyLoading` is always
+    // this account's own load, for the (never read-only) History page.
+    loading: readOnly ? (friendLoading || !friendItemsReady) : loading,
+    historyLoading: loading,
+    error, clearError: () => setError(null),
   };
 }
