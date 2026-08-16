@@ -112,7 +112,16 @@
   background: var(--green-bg);
 }
 
-.dayBadgeReady .dayBadgeNum { color: var(--green); }
+.dayBadgeReady .dayBadgeLabel {
+  color: var(--green);
+  font-weight: 700;
+}
+
+.dayBadgeIcon {
+  width: 18px;
+  height: 18px;
+  color: var(--green);
+}
 
 .cost {
   display: flex;
@@ -156,6 +165,13 @@
   font-size: 28px;
   color: var(--red);
   font-weight: 500;
+}
+
+/* Applied to the price on a read-only card, where it's the only figure
+   shown — sized up from the default 22px so it reads as the card's hero
+   number instead of one half of a now-absent equation. */
+.costValueSolo {
+  font-size: 23px;
 }
 
 .savings {
@@ -210,6 +226,7 @@
 
   .dayBadge { width: 40px; height: 40px; }
   .dayBadgeNum { font-size: 14px; }
+  .dayBadgeIcon { width: 16px; height: 16px; }
   .dayBadgeLabel { font-size: 8px; }
 }
 
@@ -231,6 +248,7 @@
 }
 .card.grid .dayBadgeNum { font-size: 13px; }
 .card.grid .dayBadgeLabel { font-size: 7px; }
+.card.grid .dayBadgeIcon { width: 14px; height: 14px; }
 
 .card.grid .cost {
   flex: 1;
@@ -240,7 +258,8 @@
 }
 .card.grid .costDivider { display: none; }
 .card.grid .costValue { font-size: 14px; font-weight: 500; }
-.card.grid .hoursValue { font-size: 26px; font-weight: 700; }
+.card.grid .hoursValue { font-size: 23px; font-weight: 500; }
+.card.grid .costValueSolo { font-size: 23px; font-weight: 500; }
 
 .card.grid .question { display: none; }
 
@@ -259,6 +278,8 @@
   }
   .card.grid .dayBadgeNum { font-size: 10px; }
   .card.grid .dayBadgeLabel { display: none; }
+  .card.grid .dayBadgeIcon { width: 12px; height: 12px; }
 
   .card.grid .hoursValue { font-size: 20px; }
+  .card.grid .costValueSolo { font-size: 20px; }
 }
