@@ -155,7 +155,7 @@
   justify-self: end;
 }
 
-/* .main is capped at 640px wide for any viewport below 880px (see
+/* .main is capped at 670px wide for any viewport below 880px (see
    App.module.css), so the container available to this table stays ~608px
    the whole way from 720px up to 879px too — not just below 720px. The
    full 7-column grid needs more room than that, so it was overflowing in
