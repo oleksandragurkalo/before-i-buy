@@ -3,6 +3,11 @@ import { X } from 'lucide-react';
 import { Button } from '../Button/Button';
 import styles from './Modal.module.css';
 
+// Modals opened from within another modal (e.g. confirming a delete while
+// a share/settings dialog is still open behind it) need to stack above the
+// base layer — this is the `zIndex` those callers pass explicitly.
+export const NESTED_MODAL_Z_INDEX = 300;
+
 let lockCount = 0;
 let savedScrollY = 0;
 
