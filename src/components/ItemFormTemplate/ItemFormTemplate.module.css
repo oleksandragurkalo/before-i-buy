@@ -64,7 +64,7 @@
 
 .segment {
   flex: 1;
-  min-width: 56px;
+  min-width: 50px;
   padding: 8px 10px;
   border: none;
   background: transparent;
