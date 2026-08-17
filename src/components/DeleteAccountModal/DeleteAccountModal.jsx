@@ -3,6 +3,7 @@ import { supabase } from '../../supabaseClient';
 import { useAuth } from '../../context/AuthContext';
 import { Modal, NESTED_MODAL_Z_INDEX } from '../Modal/Modal';
 import { Button } from '../Button/Button';
+import formStyles from '../../styles/form.module.css';
 import styles from './DeleteAccountModal.module.css';
 
 const CONFIRM_PHRASE = 'DELETE';
@@ -78,7 +79,7 @@ export function DeleteAccountModal({ onClose }) {
 
         {isPasswordAccount && (
           <input
-            className={styles.input}
+            className={formStyles.input}
             type="password"
             placeholder="Current password"
             value={currentPassword}
@@ -93,7 +94,7 @@ export function DeleteAccountModal({ onClose }) {
           Type <strong>{CONFIRM_PHRASE}</strong> to confirm
         </label>
         <input
-          className={styles.input}
+          className={formStyles.input}
           type="text"
           value={confirmText}
           onChange={(e) => setConfirmText(e.target.value)}
@@ -102,7 +103,7 @@ export function DeleteAccountModal({ onClose }) {
           required
         />
 
-        {status && <p className={styles.error}>{status.message}</p>}
+        {status && <p className={formStyles.error}>{status.message}</p>}
 
         <Button type="submit" variant="danger" disabled={!canSubmit || deleting} fullWidth>
           {deleting ? 'Deleting…' : 'Delete account'}

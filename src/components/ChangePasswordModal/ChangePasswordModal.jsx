@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useAuth, validatePassword } from '../../context/AuthContext';
 import { Modal, NESTED_MODAL_Z_INDEX } from '../Modal/Modal';
 import { Button } from '../Button/Button';
+import formStyles from '../../styles/form.module.css';
 import styles from './ChangePasswordModal.module.css';
 
 export function ChangePasswordModal({ onClose }) {
@@ -38,7 +39,7 @@ export function ChangePasswordModal({ onClose }) {
     <Modal title="Change password" onClose={onClose} zIndex={NESTED_MODAL_Z_INDEX}>
       <form className={styles.form} onSubmit={handleSubmit}>
         <input
-          className={styles.input}
+          className={formStyles.input}
           type="password"
           placeholder="Current password"
           value={currentPassword}
@@ -48,7 +49,7 @@ export function ChangePasswordModal({ onClose }) {
           required
         />
         <input
-          className={styles.input}
+          className={formStyles.input}
           type="password"
           placeholder="New password"
           value={newPassword}
@@ -57,7 +58,7 @@ export function ChangePasswordModal({ onClose }) {
           required
         />
         <input
-          className={styles.input}
+          className={formStyles.input}
           type="password"
           placeholder="Confirm new password"
           value={confirmPassword}
@@ -65,9 +66,9 @@ export function ChangePasswordModal({ onClose }) {
           autoComplete="new-password"
           required
         />
-        <p className={styles.hint}>At least 8 characters, with a number.</p>
+        <p className={formStyles.hint}>At least 8 characters, with a number.</p>
         {status && (
-          <p className={status.type === 'error' ? styles.error : styles.success}>{status.message}</p>
+          <p className={status.type === 'error' ? formStyles.error : formStyles.success}>{status.message}</p>
         )}
         <Button type="submit" disabled={saving} fullWidth>
           {saving ? 'Changing…' : 'Change password'}

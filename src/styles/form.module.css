@@ -1,0 +1,126 @@
+/*
+ * Shared form-control primitives. Import this module directly in a
+ * component (`import formStyles from '.../styles/form.module.css'`) and
+ * apply e.g. `formStyles.input` in JSX instead of redeclaring the same
+ * input/hint/error rules per component — see AccountSettingsModal.jsx for
+ * the pattern. Add new shared pieces here only once at least two components
+ * would otherwise duplicate them. (Named `formStyles`, not `form`, because
+ * several consumers already use `form` for unrelated form-state data.)
+ */
+
+.input {
+  width: 100%;
+  padding: 10px 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-primary);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.15s, background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Consumers that need a non-default focus color set --input-focus-color
+   on their own local class rather than overriding this rule directly. */
+.input:focus {
+  border-color: var(--input-focus-color, var(--accent));
+}
+
+/* Variant used by the pre-auth screens (auth form, username picker), which
+   sit on the page background rather than inside a card-colored modal. */
+.bareInput {
+  width: 100%;
+  padding: 10px 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-primary);
+  font-size: 14px;
+  font-family: var(--font-body);
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.bareInput:focus {
+  border-color: var(--accent);
+}
+
+.bareInput::placeholder {
+  color: var(--text-muted);
+}
+
+.hint {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.error {
+  font-size: 12px;
+  color: var(--red);
+}
+
+/* Variant for a standalone error message (not paired with a single field) —
+   rendered as a filled banner rather than inline text. */
+.errorBanner {
+  font-size: 13px;
+  color: var(--red);
+  background: var(--red-bg);
+  border-radius: var(--radius);
+  padding: 8px 12px;
+}
+
+.success {
+  font-size: 12px;
+  color: var(--green);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  /* Consumers that need a different gap set --field-gap on their own
+     local class rather than overriding this rule directly. */
+  gap: var(--field-gap, 6px);
+}
+
+.label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.segmented {
+  display: flex;
+  /* Consumers that need wrapping set --segmented-wrap on their own
+     local class rather than overriding this rule directly. */
+  flex-wrap: var(--segmented-wrap, nowrap);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 2px;
+  gap: 2px;
+}
+
+.segment {
+  flex: 1;
+  /* Consumers that need a different min-width, font-size, or wrapping
+     behavior set these on their own local class rather than overriding
+     this rule directly. */
+  min-width: var(--segment-min-width, auto);
+  padding: 8px 10px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: var(--segment-font-size, 12px);
+  font-weight: 500;
+  border-radius: calc(var(--radius) - 2px);
+  white-space: var(--segment-white-space, nowrap);
+  transition: all 0.15s;
+}
+
+.segment:hover { color: var(--text-primary); }
+
+.segmentActive {
+  background: var(--accent-bg);
+  color: var(--text-primary);
+  box-shadow: var(--shadow);
+}

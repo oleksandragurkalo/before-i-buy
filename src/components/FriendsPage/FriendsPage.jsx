@@ -3,6 +3,7 @@ import { Search, UserPlus, UserX, Check, X, Users, Share2, List } from 'lucide-r
 import { Button } from '../Button/Button';
 import { ShareWithFriendModal } from './ShareWithFriendModal';
 import { RemoveFriendModal } from './RemoveFriendModal';
+import formStyles from '../../styles/form.module.css';
 import styles from './FriendsPage.module.css';
 
 function statusFor(userId, { friends, outgoingRequests, incomingRequests }) {
@@ -76,7 +77,7 @@ export function FriendsPage({
         <Button type="submit" disabled={searching}>{searching ? 'Searching…' : 'Search'}</Button>
       </form>
 
-      {error && <p className={styles.error}>{error}</p>}
+      {error && <p className={formStyles.errorBanner}>{error}</p>}
 
       {results && (
         <div className={styles.card}>

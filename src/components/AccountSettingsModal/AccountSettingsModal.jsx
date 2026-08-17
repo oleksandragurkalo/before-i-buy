@@ -5,6 +5,7 @@ import { Modal } from '../Modal/Modal';
 import { Button } from '../Button/Button';
 import { ChangePasswordModal } from '../ChangePasswordModal/ChangePasswordModal';
 import { DeleteAccountModal } from '../DeleteAccountModal/DeleteAccountModal';
+import formStyles from '../../styles/form.module.css';
 import styles from './AccountSettingsModal.module.css';
 
 export function AccountSettingsModal({ onClose, profile, updateProfile }) {
@@ -61,11 +62,11 @@ export function AccountSettingsModal({ onClose, profile, updateProfile }) {
         }
       >
         <div className={styles.fields}>
-          <div className={styles.field}>
-            <label className={styles.label} htmlFor="account-username">Username</label>
+          <div className={`${formStyles.field} ${styles.field}`}>
+            <label className={formStyles.label} htmlFor="account-username">Username</label>
             <input
               id="account-username"
-              className={styles.input}
+              className={formStyles.input}
               type="text"
               placeholder="username"
               value={username}
@@ -73,20 +74,20 @@ export function AccountSettingsModal({ onClose, profile, updateProfile }) {
               autoComplete="off"
               maxLength={20}
             />
-            <p className={styles.hint}>So friends can find you and share lists with you.</p>
+            <p className={formStyles.hint}>So friends can find you and share lists with you.</p>
             {status && (
-              <p className={status.type === 'error' ? styles.error : styles.success}>{status.message}</p>
+              <p className={status.type === 'error' ? formStyles.error : formStyles.success}>{status.message}</p>
             )}
           </div>
 
-          <div className={styles.field}>
-            <label className={styles.label}>Password</label>
+          <div className={`${formStyles.field} ${styles.field}`}>
+            <label className={formStyles.label}>Password</label>
             {isPasswordAccount ? (
               <Button variant="secondary" onClick={() => setShowChangePassword(true)}>
                 Change password
               </Button>
             ) : (
-              <p className={styles.hint}>Signed in with Google — no password to manage here.</p>
+              <p className={formStyles.hint}>Signed in with Google — no password to manage here.</p>
             )}
           </div>
         </div>

@@ -60,54 +60,14 @@
   gap: 12px;
 }
 
-.input {
-  width: 100%;
-  padding: 10px 12px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--bg);
-  color: var(--text-primary);
-  font-size: 14px;
-  font-family: var(--font-body);
-  outline: none;
-  transition: border-color 0.15s;
-}
-
-.input:focus {
-  border-color: var(--accent);
-}
-
-.input::placeholder {
-  color: var(--text-muted);
-}
-
+/* Button's own .primary variant covers color/border/hover/disabled — this
+   only overrides the box model to match this screen's larger touch target. */
 .primaryBtn {
-  width: 100%;
   padding: 11px 16px;
-  border: none;
-  border-radius: var(--radius);
-  background: var(--accent);
-  color: var(--accent-contrast);
   font-size: 14px;
-  font-weight: 600;
   font-family: var(--font-body);
-  cursor: pointer;
-  transition: opacity 0.15s;
-}
-
-.primaryBtn:hover { opacity: 0.88; }
-.primaryBtn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-.error {
-  font-size: 13px;
-  color: var(--red);
-  background: var(--red-bg);
-  border-radius: var(--radius);
-  padding: 8px 12px;
 }
 
 .hint {
-  font-size: 11px;
-  color: var(--text-muted);
   margin-top: -4px;
 }

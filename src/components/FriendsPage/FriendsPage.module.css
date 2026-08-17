@@ -39,14 +39,6 @@
 .searchInput:focus { border-color: var(--accent); }
 .searchInput::placeholder { color: var(--text-muted); }
 
-.error {
-  font-size: 13px;
-  color: var(--red);
-  background: var(--red-bg);
-  border-radius: var(--radius);
-  padding: 8px 12px;
-}
-
 .card {
   background: var(--bg-card);
   border: 1px solid var(--border);

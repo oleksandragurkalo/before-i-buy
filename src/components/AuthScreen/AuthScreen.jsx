@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { ShoppingBag, ArrowLeft } from 'lucide-react';
 import { useAuth, validatePassword } from '../../context/AuthContext';
+import { Button } from '../Button/Button';
+import formStyles from '../../styles/form.module.css';
 import styles from './AuthScreen.module.css';
 
 // Google G icon (SVG) — avoids an extra dependency
@@ -99,7 +101,7 @@ export function AuthScreen({ onBack }) {
 
         <form className={styles.form} onSubmit={handleEmailSubmit}>
           <input
-            className={styles.input}
+            className={formStyles.bareInput}
             type="email"
             placeholder="Email"
             value={email}
@@ -108,7 +110,7 @@ export function AuthScreen({ onBack }) {
             autoComplete="email"
           />
           <input
-            className={styles.input}
+            className={formStyles.bareInput}
             type="password"
             placeholder="Password"
             value={password}
@@ -117,13 +119,13 @@ export function AuthScreen({ onBack }) {
             autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
             minLength={8}
           />
-          {mode === 'signup' && <p className={styles.hint}>At least 8 characters, with a number.</p>}
+          {mode === 'signup' && <p className={`${formStyles.hint} ${styles.hint}`}>At least 8 characters, with a number.</p>}
 
-          {error && <div className={styles.error}>{error}</div>}
+          {error && <div className={formStyles.errorBanner}>{error}</div>}
 
-          <button className={styles.primaryBtn} type="submit" disabled={loading}>
+          <Button className={styles.primaryBtn} type="submit" fullWidth disabled={loading}>
             {loading ? 'Please wait…' : mode === 'signup' ? 'Create account' : 'Sign in'}
-          </button>
+          </Button>
         </form>
 
         <div className={styles.toggle}>

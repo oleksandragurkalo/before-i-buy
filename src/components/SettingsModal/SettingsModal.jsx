@@ -5,6 +5,7 @@ import { NumberStepper } from '../NumberStepper/NumberStepper';
 import { Modal } from '../Modal/Modal';
 import { Button } from '../Button/Button';
 import { Dropdown } from '../Dropdown/Dropdown';
+import formStyles from '../../styles/form.module.css';
 import styles from './SettingsModal.module.css';
 
 const PAY_PERIODS = [
@@ -106,18 +107,18 @@ export function SettingsModal({ settings, onSave, onClose }) {
       }
     >
       <div className={styles.fields}>
-        <div className={styles.field}>
-          <label className={styles.label}>
+        <div className={formStyles.field}>
+          <label className={`${formStyles.label} ${styles.label}`}>
             Your pay
             <span className={styles.hint}>Used to work out hours of work per item</span>
           </label>
 
-          <div className={styles.segmented}>
+          <div className={formStyles.segmented}>
             {PAY_PERIODS.map(p => (
               <button
                 key={p.value}
                 type="button"
-                className={`${styles.segment} ${payPeriod === p.value ? styles.segmentActive : ''}`}
+                className={`${formStyles.segment} ${payPeriod === p.value ? formStyles.segmentActive : ''}`}
                 onClick={() => changePeriod(p.value)}
               >
                 {p.label}
@@ -134,12 +135,12 @@ export function SettingsModal({ settings, onSave, onClose }) {
               min={0}
               ariaLabel="pay amount"
             />
-            <div className={styles.segmented}>
+            <div className={formStyles.segmented}>
               {PAY_TYPES.map(t => (
                 <button
                   key={t.value}
                   type="button"
-                  className={`${styles.segment} ${payType === t.value ? styles.segmentActive : ''}`}
+                  className={`${formStyles.segment} ${payType === t.value ? formStyles.segmentActive : ''}`}
                   onClick={() => setPayType(t.value)}
                 >
                   {t.label}
@@ -185,8 +186,8 @@ export function SettingsModal({ settings, onSave, onClose }) {
           </p>
         </div>
 
-        <div className={styles.field}>
-          <label className={styles.label}>Currency</label>
+        <div className={formStyles.field}>
+          <label className={`${formStyles.label} ${styles.label}`}>Currency</label>
           <Dropdown
             value={currency}
             options={CURRENCIES.map(c => ({ value: c.code, label: c.label }))}

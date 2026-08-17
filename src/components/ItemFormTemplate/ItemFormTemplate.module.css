@@ -10,25 +10,7 @@
   gap: 12px;
 }
 
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.label {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
 .optional {
-  font-weight: 400;
-  color: var(--text-muted);
-}
-
-.hint {
-  font-size: 11px;
   font-weight: 400;
   color: var(--text-muted);
 }
@@ -47,36 +29,20 @@
 
 .input:focus { border-color: var(--green); }
 
-.error {
-  font-size: 12px;
-  color: var(--red);
-}
-
 .segmented {
-  display: flex;
-  flex-wrap: wrap;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 2px;
-  gap: 2px;
+  --segmented-wrap: wrap;
 }
 
 .segment {
-  flex: 1;
-  min-width: 50px;
-  padding: 8px 10px;
-  border: none;
-  background: transparent;
-  color: var(--text-secondary);
-  font-size: 13px;
-  font-weight: 500;
-  border-radius: calc(var(--radius) - 2px);
-  transition: all 0.15s;
+  --segment-min-width: 50px;
+  --segment-font-size: 13px;
+  --segment-white-space: normal;
 }
 
-.segment:hover { color: var(--text-primary); }
-
+/* Kept local rather than pulled into the shared segmentActive — these tone
+   compound selectors (.segmentActive.pass etc.) need to match a locally
+   scoped .segmentActive class, and this file's status toggle is the only
+   consumer that needs them. */
 .segmentActive {
   background: var(--accent-bg);
   color: var(--text-primary);

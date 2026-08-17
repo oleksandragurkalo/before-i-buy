@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { AtSign } from 'lucide-react';
 import { USERNAME_PATTERN } from '../../config';
+import { Button } from '../Button/Button';
+import formStyles from '../../styles/form.module.css';
 import styles from './ChooseUsernameScreen.module.css';
 
 export function ChooseUsernameScreen({ createProfile }) {
@@ -44,7 +46,7 @@ export function ChooseUsernameScreen({ createProfile }) {
           <label htmlFor="username" className="sr-only">Username</label>
           <input
             id="username"
-            className={styles.input}
+            className={formStyles.bareInput}
             type="text"
             placeholder="username"
             value={username}
@@ -55,13 +57,13 @@ export function ChooseUsernameScreen({ createProfile }) {
             aria-invalid={!!error}
             aria-describedby="username-hint"
           />
-          <p id="username-hint" className={styles.hint}>3-20 characters: letters, numbers, and underscores only.</p>
+          <p id="username-hint" className={`${formStyles.hint} ${styles.hint}`}>3-20 characters: letters, numbers, and underscores only.</p>
 
-          {error && <div className={styles.error} role="alert">{error}</div>}
+          {error && <div className={formStyles.errorBanner} role="alert">{error}</div>}
 
-          <button className={styles.primaryBtn} type="submit" disabled={loading}>
+          <Button className={styles.primaryBtn} type="submit" fullWidth disabled={loading}>
             {loading ? 'Saving…' : 'Continue'}
-          </button>
+          </Button>
         </form>
       </div>
     </div>

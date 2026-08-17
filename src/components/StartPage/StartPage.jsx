@@ -35,8 +35,9 @@ export function StartPage({ onGetStarted }) {
         </div>
 
         <p className={styles.description}>
-          A minimal anti-impulse-purchase tracker. See how many hours of net take-home pay
-          things cost — and decide with a clear head.
+          Part anti-impulse-purchase tracker, part shared wishlist. See how many hours of net
+          take-home pay things cost, decide with a clear head — and share your list so friends
+          know what you're eyeing.
         </p>
 
         <ul className={styles.features}>

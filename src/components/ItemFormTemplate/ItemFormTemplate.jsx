@@ -3,6 +3,7 @@ import { NumberStepper } from '../NumberStepper/NumberStepper';
 import { Modal } from '../Modal/Modal';
 import { Button } from '../Button/Button';
 import { Dropdown } from '../Dropdown/Dropdown';
+import formStyles from '../../styles/form.module.css';
 import styles from './ItemFormTemplate.module.css';
 
 const FORM_ID = 'item-form';
@@ -28,11 +29,11 @@ const CATEGORY_OPTIONS = Object.entries(CATEGORIES).map(([value, { label, emoji 
 
 function Field({ label, htmlFor, optional, hint, children }) {
   return (
-    <div className={styles.field}>
-      <label className={styles.label} htmlFor={htmlFor}>
+    <div className={formStyles.field}>
+      <label className={formStyles.label} htmlFor={htmlFor}>
         {label} {optional && <span className={styles.optional}>(optional)</span>}
       </label>
-      {hint && <p className={styles.hint}>{hint}</p>}
+      {hint && <p className={formStyles.hint}>{hint}</p>}
       {children}
     </div>
   );
@@ -121,13 +122,13 @@ export function ItemFormTemplate({
 
         {showStatus && (
           <Field label="Decision">
-            <div className={styles.segmented}>
+            <div className={`${formStyles.segmented} ${styles.segmented}`}>
               {STATUS_OPTIONS.map(({ value, label, tone }) => (
                 <button
                   key={value}
                   type="button"
                   aria-pressed={form.status === value}
-                  className={`${styles.segment} ${form.status === value ? `${styles.segmentActive} ${styles[tone]}` : ''}`}
+                  className={`${formStyles.segment} ${styles.segment} ${form.status === value ? `${styles.segmentActive} ${styles[tone]}` : ''}`}
                   onClick={() => onStatusChange(value)}
                 >
                   {label}
@@ -166,13 +167,13 @@ export function ItemFormTemplate({
 
         {showCoolingOff && (
           <Field label="Days to wait before deciding" hint="Sleep on it, or pick “No wait” to decide right away">
-            <div className={styles.segmented}>
+            <div className={`${formStyles.segmented} ${styles.segmented}`}>
               {COOLING_OFF_PRESETS.map(({ value, label }) => (
                 <button
                   key={value}
                   type="button"
                   aria-pressed={Number(form.coolingOffDays) === value}
-                  className={`${styles.segment} ${Number(form.coolingOffDays) === value ? styles.segmentActive : ''}`}
+                  className={`${formStyles.segment} ${styles.segment} ${Number(form.coolingOffDays) === value ? styles.segmentActive : ''}`}
                   onClick={() => onCoolingOffChange(String(value))}
                 >
                   {label}
@@ -182,7 +183,7 @@ export function ItemFormTemplate({
           </Field>
         )}
 
-        {error && <p className={styles.error} role="alert">{error}</p>}
+        {error && <p className={formStyles.error} role="alert">{error}</p>}
       </form>
     </Modal>
   );

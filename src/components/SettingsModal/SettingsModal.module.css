@@ -4,16 +4,7 @@
   gap: 20px;
 }
 
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
 .label {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-primary);
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -31,36 +22,6 @@
 }
 
 .row > *:first-child { flex: 1; min-width: 0; }
-
-.segmented {
-  display: flex;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 2px;
-  gap: 2px;
-}
-
-.segment {
-  flex: 1;
-  padding: 8px 10px;
-  border: none;
-  background: transparent;
-  color: var(--text-secondary);
-  font-size: 12px;
-  font-weight: 500;
-  border-radius: calc(var(--radius) - 2px);
-  white-space: nowrap;
-  transition: all 0.15s;
-}
-
-.segment:hover { color: var(--text-primary); }
-
-.segmentActive {
-  background: var(--accent-bg);
-  color: var(--text-primary);
-  box-shadow: var(--shadow);
-}
 
 .subField {
   display: flex;
