@@ -15,7 +15,6 @@
   width: 100%;
   max-width: var(--modal-max-width, 480px);
   max-height: 90vh;
-  max-height: 90svh;
   box-shadow: 0 8px 32px rgba(0,0,0,0.16);
   display: flex;
   flex-direction: column;
