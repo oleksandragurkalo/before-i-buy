@@ -74,9 +74,18 @@ export function PageHeader({
         </p>
       )}
 
-      <aside className={layout.aside}>
-        <InsightsPanel waiting={waiting} history={history} settings={settings} readOnly={readOnly} />
-      </aside>
+      {/* Insights are this account's own resistance rate / streak / category
+          breakdown — history here is this account's own decisions, never a
+          friend's (see useItems.js), so on a friend's shared list the panel
+          would either mix this account's own history with the friend's
+          waiting items, or (if fed only `waiting`) just reflect the friend's
+          own items back at them. Left out entirely on read-only rather than
+          show either. */}
+      {!readOnly && (
+        <aside className={layout.aside}>
+          <InsightsPanel waiting={waiting} history={history} settings={settings} />
+        </aside>
+      )}
     </>
   );
 }

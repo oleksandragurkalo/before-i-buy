@@ -4,7 +4,7 @@ import { computeInsights, computeStreak, formatPrice, formatHours, hoursOfWork }
 import styles from './InsightsPanel.module.css';
 import dropdownIcon from '../../assets/icon-arrow-down.svg';
 
-export function InsightsPanel({ waiting, history, settings, readOnly = false }) {
+export function InsightsPanel({ waiting, history, settings }) {
   const { resistanceRate, categoryBreakdown, topTemptations, totalItems } = useMemo(
     () => computeInsights(waiting, history),
     [waiting, history]
@@ -102,14 +102,8 @@ export function InsightsPanel({ waiting, history, settings, readOnly = false }) 
                     {topTemptations.map(item => (
                       <div className={styles.temptationRow} key={item.id}>
                         <span className={styles.temptationName}>{item.name}</span>
-                        {/* On a shared/read-only list, settings.hourlyRate is the
-                            owner's real rate — showing hours here (next to price,
-                            already visible on the item's own card) would let a
-                            viewer back it out via price ÷ hours, so price is
-                            shown here instead, which is what a friend deciding
-                            what to buy for them actually wants anyway. */}
                         <span className={`${styles.temptationHours} mono`}>
-                          {readOnly ? formatPrice(item.price, settings.currencySymbol) : formatHours(hoursOfWork(item.price, settings.hourlyRate))}
+                          {formatHours(hoursOfWork(item.price, settings.hourlyRate))}
                         </span>
                       </div>
                     ))}

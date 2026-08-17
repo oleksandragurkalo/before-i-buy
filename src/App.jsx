@@ -241,11 +241,7 @@ export default function App() {
             {view === 'waiting' && (
               <PageHeader
                 waiting={waiting}
-                // History is always this account's own (see useItems.js) —
-                // while browsing a friend's shared list, insights here
-                // should only reflect *their* waiting items, never mixed
-                // with this account's own decision history.
-                history={readOnly ? [] : history}
+                history={history}
                 settings={displaySettings}
                 lists={lists}
                 sharedLists={sharedLists}

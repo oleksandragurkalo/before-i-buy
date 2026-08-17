@@ -24,14 +24,19 @@ export function WaitingPage({ waiting, history, settings, loading, onDecide, onR
   }, []);
 
   const effectiveViewMode = isCompact ? 'rows' : viewMode;
-  // `history` here is always this account's own (see useItems.js), so
-  // these stats are this account's own resisted/spent totals regardless of
-  // whether the list currently being browsed is a friend's.
+  // `history` here is always this account's own (see useItems.js), so these
+  // stats are this account's own resisted/spent totals regardless of whether
+  // the list currently being browsed is a friend's — which is exactly why
+  // they're hidden below on a read-only (friend's) list: `settings` there is
+  // the *owner's* currency/rate, so this account's own totals would render
+  // under the wrong currency symbol and mixed with the owner's hourly rate.
   const headerStats = computeHeaderStats(history, settings.hourlyRate);
 
   return (
     <section className={styles.section} aria-label="Items waiting">
-      <StatTiles className={styles.statsRow} headerStats={headerStats} currencySymbol={settings.currencySymbol} />
+      {!readOnly && (
+        <StatTiles className={styles.statsRow} headerStats={headerStats} currencySymbol={settings.currencySymbol} />
+      )}
 
       <ItemListSection
         items={waiting}
