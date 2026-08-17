@@ -103,7 +103,7 @@ export default function App() {
     lists, sharedLists, currentListId, currentList, setCurrentListId,
     createList, renameList, deleteList, shareList, unshareList,
     loading: listsLoading, loadError: listsError, clearLoadError: clearListsError, retryLists,
-  } = useLists();
+  } = useLists(profile?.username);
   const readOnly = currentList ? !currentList.isOwner : false;
   const {
     settings, updateSettings: updateAccountSettings, replaceSettings,
