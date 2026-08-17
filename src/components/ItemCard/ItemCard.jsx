@@ -50,28 +50,33 @@ export const ItemCard = memo(function ItemCard({ item, settings, onDecide, onRem
             </Button>
           </div>
         )}
-        <div
-          className={`${styles.dayBadge} ${ready ? styles.dayBadgeReady : ''}`}
-          aria-label={ready
-            ? `Cooling-off done — ready to decide (waited ${waitingDays} day${waitingDays === 1 ? '' : 's'})`
-            : `${coolingOffDaysLeft} day${coolingOffDaysLeft === 1 ? '' : 's'} left before deciding`}
-        >
-          {/* A countdown number turning green at zero still reads as "a
-              number", not "do something now" — swapping to a check + label
-              makes the ready state its own distinct signal instead of just
-              a recolored data point. */}
-          {ready ? (
-            <>
-              <Check size={18} className={styles.dayBadgeIcon} aria-hidden="true" />
-              <span className={styles.dayBadgeLabel}>Ready</span>
-            </>
-          ) : (
-            <>
-              <span className={styles.dayBadgeNum}>{coolingOffDaysLeft}</span>
-              <span className={styles.dayBadgeLabel}>{coolingOffDaysLeft === 1 ? 'day' : 'days'}</span>
-            </>
-          )}
-        </div>
+        {/* The cooling-off countdown is the owner's own decision timeline —
+            a friend viewing a shared list can't act on it (no Decide
+            button here either), so it's just noise on a read-only card. */}
+        {!readOnly && (
+          <div
+            className={`${styles.dayBadge} ${ready ? styles.dayBadgeReady : ''}`}
+            aria-label={ready
+              ? `Cooling-off done — ready to decide (waited ${waitingDays} day${waitingDays === 1 ? '' : 's'})`
+              : `${coolingOffDaysLeft} day${coolingOffDaysLeft === 1 ? '' : 's'} left before deciding`}
+          >
+            {/* A countdown number turning green at zero still reads as "a
+                number", not "do something now" — swapping to a check + label
+                makes the ready state its own distinct signal instead of just
+                a recolored data point. */}
+            {ready ? (
+              <>
+                <Check size={18} className={styles.dayBadgeIcon} aria-hidden="true" />
+                <span className={styles.dayBadgeLabel}>Ready</span>
+              </>
+            ) : (
+              <>
+                <span className={styles.dayBadgeNum}>{coolingOffDaysLeft}</span>
+                <span className={styles.dayBadgeLabel}>{coolingOffDaysLeft === 1 ? 'day' : 'days'}</span>
+              </>
+            )}
+          </div>
+        )}
       </div>
 
       <div className={styles.cost}>
