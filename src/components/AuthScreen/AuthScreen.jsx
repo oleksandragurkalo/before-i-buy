@@ -21,8 +21,6 @@ export function AuthScreen({ onBack }) {
     authError, clearAuthError,
   } = useAuth();
   const [mode, setMode] = useState('signin'); // 'signin' | 'signup'
-  const [name, setName] = useState('');
-  const [surname, setSurname] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -63,8 +61,7 @@ export function AuthScreen({ onBack }) {
     setLoading(true);
     try {
       if (mode === 'signup') {
-        const fullName = `${name.trim()} ${surname.trim()}`.trim();
-        await signUpWithEmail(email, password, fullName);
+        await signUpWithEmail(email, password);
       } else {
         await signInWithEmail(email, password);
       }
@@ -101,29 +98,6 @@ export function AuthScreen({ onBack }) {
         <div className={styles.divider}>or</div>
 
         <form className={styles.form} onSubmit={handleEmailSubmit}>
-          {mode === 'signup' && (
-            <div className={styles.nameRow}>
-              <input
-                className={styles.input}
-                type="text"
-                placeholder="Name"
-                value={name}
-                onChange={e => setName(e.target.value)}
-                required
-                autoComplete="given-name"
-                maxLength={60}
-              />
-              <input
-                className={styles.input}
-                type="text"
-                placeholder="Surname"
-                value={surname}
-                onChange={e => setSurname(e.target.value)}
-                autoComplete="family-name"
-                maxLength={60}
-              />
-            </div>
-          )}
           <input
             className={styles.input}
             type="email"

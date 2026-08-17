@@ -97,13 +97,6 @@
   gap: 12px;
 }
 
-.nameRow {
-  display: flex;
-  gap: 8px;
-}
-
-.nameRow > * { flex: 1; min-width: 0; }
-
 .input {
   width: 100%;
   padding: 10px 12px;
