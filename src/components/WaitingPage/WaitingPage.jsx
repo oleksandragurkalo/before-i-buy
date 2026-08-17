@@ -49,8 +49,11 @@ export function WaitingPage({ waiting, history, settings, loading, onDecide, onR
         onSortChange={setSortBy}
         filterCategory={filterCategory}
         onFilterChange={setFilterCategory}
-        readinessFilter={readinessFilter}
-        onReadinessFilterChange={setReadinessFilter}
+        /* Readiness is derived from the cooling-off countdown, which is
+           hidden on a friend's read-only card (see ItemCard) — filtering by
+           it there would filter by a number the viewer never sees. */
+        readinessFilter={readOnly ? 'all' : readinessFilter}
+        onReadinessFilterChange={readOnly ? undefined : setReadinessFilter}
         grouped={grouped}
         onGroupToggle={setGrouped}
         viewMode={effectiveViewMode}
