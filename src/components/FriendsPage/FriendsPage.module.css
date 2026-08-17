@@ -97,12 +97,26 @@
   color: var(--text-secondary);
   font-size: 11px;
   font-weight: 500;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   transition: color 0.15s, background-color 0.15s;
+}
+
+.listLinkIcon {
+  flex-shrink: 0;
+}
+
+/* text-overflow: ellipsis has no effect directly on .listLink — it's a flex
+   container with the icon as a second child, and ellipsis only truncates a
+   single text node in a block/inline-block box. It has to live on this
+   inner span instead, which needs its own min-width: 0 since flex items
+   default to min-width: auto (their content's intrinsic width), which would
+   otherwise stop them from ever shrinking below the full name's width. */
+.listLinkText {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .listLink:hover {
@@ -118,13 +132,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.displayName {
-  font-size: 12px;
-  font-weight: 400;
-  color: var(--text-muted);
-  margin-left: 6px;
 }
 
 .rowActions {

@@ -87,10 +87,7 @@ export function FriendsPage({
             const key = `send-${person.userId}`;
             return (
               <div key={person.userId} className={styles.row}>
-                <span className={styles.username}>
-                  @{person.username}
-                  {person.displayName && <span className={styles.displayName}>{person.displayName}</span>}
-                </span>
+                <span className={styles.username}>@{person.username}</span>
                 {status === 'friends' && <span className={styles.badge}>Friends</span>}
                 {status === 'outgoing' && <span className={styles.badge}>Requested</span>}
                 {status === 'incoming' && <span className={styles.badge}>Wants to be friends</span>}
@@ -183,8 +180,8 @@ export function FriendsPage({
                     className={styles.listLink}
                     onClick={() => onViewList(list.id)}
                   >
-                    <List size={11} aria-hidden="true" />
-                    {list.name}
+                    <List size={11} aria-hidden="true" className={styles.listLinkIcon} />
+                    <span className={styles.listLinkText}>{list.name}</span>
                   </button>
                 ))}
               </div>
