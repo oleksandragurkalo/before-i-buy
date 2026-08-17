@@ -7,24 +7,10 @@ import { ChangePasswordModal } from '../ChangePasswordModal/ChangePasswordModal'
 import { DeleteAccountModal } from '../DeleteAccountModal/DeleteAccountModal';
 import styles from './AccountSettingsModal.module.css';
 
-// Supabase stores signup name as a single full_name string in user_metadata
-// — split it back into name/surname naively (first word vs. the rest) for
-// editing. Good enough for the common two-word-name case; not lossless for
-// anything fancier, but there's nowhere else this app tracks the two
-// separately.
-function splitName(fullName) {
-  const [first = '', ...rest] = (fullName || '').trim().split(/\s+/).filter(Boolean);
-  return { first, rest: rest.join(' ') };
-}
-
 export function AccountSettingsModal({ onClose, profile, updateProfile }) {
-  const { user, updateDisplayName } = useAuth();
+  const { user } = useAuth();
   const isPasswordAccount = user?.app_metadata?.provider === 'email';
-  const initialFullName = (user?.user_metadata?.full_name || '').trim();
-  const initial = splitName(initialFullName);
 
-  const [name, setName] = useState(initial.first);
-  const [surname, setSurname] = useState(initial.rest);
   const [username, setUsername] = useState(profile?.username || '');
   const [status, setStatus] = useState(null); // { type: 'error'|'success', message }
   const [saving, setSaving] = useState(false);
@@ -32,9 +18,6 @@ export function AccountSettingsModal({ onClose, profile, updateProfile }) {
   const [showDeleteAccount, setShowDeleteAccount] = useState(false);
 
   const handleSave = async () => {
-    const trimmedName = name.trim();
-    if (!trimmedName) { setStatus({ type: 'error', message: 'Name can’t be empty.' }); return; }
-
     const trimmedUsername = username.trim();
     const usernameChanged = trimmedUsername !== profile?.username;
     if (usernameChanged && !USERNAME_PATTERN.test(trimmedUsername)) {
@@ -42,19 +25,13 @@ export function AccountSettingsModal({ onClose, profile, updateProfile }) {
       return;
     }
 
-    const fullName = `${trimmedName} ${surname.trim()}`.trim();
-    const nameChanged = fullName !== initialFullName;
-
     setSaving(true);
     setStatus(null);
     try {
-      // Keep profiles.display_name (used for friend search) in sync
-      // whenever either the username or the name/surname changes.
-      if (usernameChanged || nameChanged) {
-        const { error: profileError } = await updateProfile(trimmedUsername, fullName);
+      if (usernameChanged) {
+        const { error: profileError } = await updateProfile(trimmedUsername);
         if (profileError) { setStatus({ type: 'error', message: profileError }); return; }
       }
-      if (nameChanged) await updateDisplayName(fullName);
       setStatus({ type: 'success', message: 'Saved.' });
     } catch {
       setStatus({ type: 'error', message: 'Could not save. Try again.' });
@@ -97,28 +74,6 @@ export function AccountSettingsModal({ onClose, profile, updateProfile }) {
               maxLength={20}
             />
             <p className={styles.hint}>So friends can find you and share lists with you.</p>
-          </div>
-
-          <div className={styles.field}>
-            <label className={styles.label}>Name</label>
-            <div className={styles.row}>
-              <input
-                className={styles.input}
-                type="text"
-                placeholder="Name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                maxLength={60}
-              />
-              <input
-                className={styles.input}
-                type="text"
-                placeholder="Surname"
-                value={surname}
-                onChange={(e) => setSurname(e.target.value)}
-                maxLength={60}
-              />
-            </div>
             {status && (
               <p className={status.type === 'error' ? styles.error : styles.success}>{status.message}</p>
             )}

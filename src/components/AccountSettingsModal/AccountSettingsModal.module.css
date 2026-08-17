@@ -16,13 +16,6 @@
   color: var(--text-primary);
 }
 
-.row {
-  display: flex;
-  gap: 8px;
-}
-
-.row > * { flex: 1; min-width: 0; }
-
 .input {
   padding: 10px 12px;
   background: var(--bg-card);
