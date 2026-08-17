@@ -45,14 +45,14 @@ export function AuthProvider({ children }) {
     if (error) throw error;
   };
 
-  const signUpWithEmail = async (email, password, name) => {
+  const signUpWithEmail = async (email, password) => {
     const { data, error } = await supabase.auth.signUp({
       email, password,
       // Without this, the confirmation email link always uses Supabase's
       // configured Site URL (pinned to the production Vercel URL) instead
       // of wherever the signup actually happened — this makes it land back
       // on localhost during local dev.
-      options: { data: { full_name: name }, emailRedirectTo: window.location.origin },
+      options: { emailRedirectTo: window.location.origin },
     });
     if (error) throw error;
     return data;
@@ -64,12 +64,6 @@ export function AuthProvider({ children }) {
   };
 
   const logOut = () => supabase.auth.signOut();
-
-  const updateDisplayName = async (name) => {
-    const { data, error } = await supabase.auth.updateUser({ data: { full_name: name } });
-    if (error) throw error;
-    setUser(data.user);
-  };
 
   // Supabase doesn't force a "recent login" check on updateUser like
   // Firebase does, but re-verifying the current password before accepting a
@@ -94,7 +88,7 @@ export function AuthProvider({ children }) {
   const value = useMemo(() => ({
     user, authError, clearAuthError: () => setAuthError(''),
     signInWithGoogle, signUpWithEmail, signInWithEmail, logOut,
-    updateDisplayName, changePassword,
+    changePassword,
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }), [user, authError]);
 
