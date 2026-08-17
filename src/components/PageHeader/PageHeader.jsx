@@ -70,7 +70,7 @@ export function PageHeader({
 
       {readOnly && currentList && (
         <p className={styles.readOnlyNote}>
-          Viewing @{currentList.ownerUsername}'s list — read only. Prices reflect their currency, not yours.
+          🍿 Window-shopping @{currentList.ownerUsername}'s list. Prices are in their currency.
         </p>
       )}
 
