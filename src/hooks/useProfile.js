@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { loadResource } from './loadResource';
 
 function profileFromRow(row) {
-  return { userId: row.user_id, username: row.username, displayName: row.display_name };
+  return { userId: row.user_id, username: row.username };
 }
 
 // Shared by useFriends.js and useLists.js — both need to turn a batch of
@@ -12,9 +12,9 @@ function profileFromRow(row) {
 // owners), and there's no direct FK PostgREST can embed across for either.
 export async function fetchProfilesByUserIds(userIds) {
   if (userIds.length === 0) return new Map();
-  const { data, error } = await supabase.from('profiles').select('user_id, username, display_name').in('user_id', userIds);
+  const { data, error } = await supabase.from('profiles').select('user_id, username').in('user_id', userIds);
   if (error) { console.error('profiles lookup error', error); return new Map(); }
-  return new Map(data.map(p => [p.user_id, { username: p.username, displayName: p.display_name }]));
+  return new Map(data.map(p => [p.user_id, { username: p.username }]));
 }
 
 // Postgres error codes: 23505 = unique_violation, 23514 = check_violation.
@@ -67,22 +67,6 @@ export function useProfile() {
       const loaded = data ? profileFromRow(data) : null;
       setProfile(loaded);
       setLoading(false);
-
-      // Self-healing backfill: accounts that set their name before
-      // display_name existed as a synced field (i.e. everyone, before
-      // this shipped) would otherwise never get it populated — nothing
-      // else ever revisits an unedited name, so friend search-by-name
-      // would silently find no one. Runs quietly on every load where the
-      // two are out of sync, no user action required.
-      const authName = (user.user_metadata?.full_name || '').trim() || null;
-      if (loaded && authName && loaded.displayName !== authName) {
-        supabase.from('profiles').update({ display_name: authName }).eq('user_id', user.id)
-          .then(({ error: syncError }) => {
-            if (cancelled) return;
-            if (syncError) { console.error('display_name backfill error', syncError); return; }
-            setProfile(prev => prev ? { ...prev, displayName: authName } : prev);
-          });
-      }
     }, {
       setLoading,
       // A genuine rejection (not a returned {error}) would otherwise leave
@@ -101,14 +85,11 @@ export function useProfile() {
 
   const retryProfile = useCallback(() => setReloadKey(k => k + 1), []);
 
-  const createProfile = useCallback(async (username, displayName) => {
+  const createProfile = useCallback(async (username) => {
     if (!user) return { error: 'Not signed in.' };
-    // Seed from the signup name when the caller doesn't pass one explicitly,
-    // so a profile has a searchable display name from the moment it exists.
-    const resolvedDisplayName = displayName !== undefined ? displayName : user.user_metadata?.full_name;
     const { data, error } = await supabase
       .from('profiles')
-      .insert({ user_id: user.id, username, display_name: resolvedDisplayName || null })
+      .insert({ user_id: user.id, username })
       .select()
       .single();
     if (error) return { error: friendlyProfileError(error) };
@@ -116,13 +97,11 @@ export function useProfile() {
     return { error: null };
   }, [user]);
 
-  const updateProfile = useCallback(async (username, displayName) => {
+  const updateProfile = useCallback(async (username) => {
     if (!user) return { error: 'Not signed in.' };
-    const updates = { username };
-    if (displayName !== undefined) updates.display_name = displayName || null;
     const { data, error } = await supabase
       .from('profiles')
-      .update(updates)
+      .update({ username })
       .eq('user_id', user.id)
       .select()
       .single();

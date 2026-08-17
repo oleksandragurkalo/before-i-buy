@@ -93,33 +93,18 @@ export function useFriends() {
     const trimmed = query.trim();
     if (!trimmed || !user) return [];
 
-    // Two separate ilike queries merged client-side, rather than a single
-    // .or() filter — .or()'s filter string is comma/paren-delimited, so a
-    // search term containing those characters (plausible for a name search,
-    // e.g. "Smith, Jo") would corrupt the query instead of just matching
-    // nothing.
-    //
     // .order('username') matters here specifically because of the .limit(20)
     // below it — without an explicit order, Postgres gives no guarantee
     // about *which* 20 rows come back when a search matches more than that,
     // so identical repeated searches could silently surface a different
     // top-20 (and in a different order) each time.
-    const base = () => supabase.from('profiles').select('user_id, username, display_name').neq('user_id', user.id).order('username').limit(20);
     // Escape LIKE/ILIKE wildcards so a literal '%' or '_' in the query (e.g.
     // a username containing '_') is matched as text, not as a pattern.
     const escaped = trimmed.replace(/[\\%_]/g, '\\$&');
-    const [byUsername, byName] = await Promise.all([
-      base().ilike('username', `%${escaped}%`),
-      base().ilike('display_name', `%${escaped}%`),
-    ]);
-    if (byUsername.error) console.error('searchUsers error', byUsername.error);
-    if (byName.error) console.error('searchUsers error', byName.error);
-
-    const merged = new Map();
-    for (const row of [...(byUsername.data || []), ...(byName.data || [])]) merged.set(row.user_id, row);
-    return [...merged.values()]
-      .slice(0, 20)
-      .map(p => ({ userId: p.user_id, username: p.username, displayName: p.display_name }));
+    const { data, error } = await supabase.from('profiles').select('user_id, username')
+      .neq('user_id', user.id).order('username').limit(20).ilike('username', `%${escaped}%`);
+    if (error) { console.error('searchUsers error', error); return []; }
+    return data.map(p => ({ userId: p.user_id, username: p.username }));
   }, [user]);
 
   // These mutations also patch `requests` locally instead of waiting on the
@@ -150,8 +135,13 @@ export function useFriends() {
   // are the same operation on the same table — kept as two names since
   // that's what reads naturally at each call site.
   const deleteFriendRequest = useCallback(async (requestId, errorMessage) => {
-    const { error } = await supabase.from('friend_requests').delete().eq('id', requestId);
+    // .select('id') so a delete RLS silently filters out (0 rows affected,
+    // no Postgrest `error`) is distinguishable from one that actually
+    // removed the row — without it, the caller looks successful and the
+    // row reappears on the next reload/realtime refetch.
+    const { data, error } = await supabase.from('friend_requests').delete().eq('id', requestId).select('id');
     if (error) { console.error('deleteFriendRequest error', error); return { error: errorMessage }; }
+    if (!data || data.length === 0) { console.error('deleteFriendRequest: no row deleted (RLS?)', requestId); return { error: errorMessage }; }
     setRequests(prev => prev.filter(r => r.id !== requestId));
     return { error: null };
   }, []);
@@ -171,8 +161,14 @@ export function useFriends() {
       if (existing.status === 'declined') {
         // Let a new request supersede a stale declined one instead of
         // getting stuck behind the unique(from_user_id, to_user_id) index.
-        const { error: cleanupError } = await supabase.from('friend_requests').delete().eq('id', existing.id);
-        if (cleanupError) console.error('sendRequest cleanup error', cleanupError);
+        // .select('id') so an RLS-filtered delete (0 rows, no Postgrest
+        // `error` — see deleteFriendRequest above) is caught here rather
+        // than silently falling through to the insert below, which would
+        // then just fail against the still-present stale row's unique
+        // (from_user_id, to_user_id) index instead.
+        const { data: deleted, error: cleanupError } = await supabase.from('friend_requests').delete().eq('id', existing.id).select('id');
+        if (cleanupError) { console.error('sendRequest cleanup error', cleanupError); return { error: 'Could not send friend request.' }; }
+        if (!deleted || deleted.length === 0) { console.error('sendRequest cleanup: no row deleted (RLS?)', existing.id); return { error: 'Could not send friend request.' }; }
         setRequests(prev => prev.filter(r => r.id !== existing.id));
       } else if (existing.fromUserId === targetUserId) {
         // They already sent a pending request the other way — accept it
@@ -204,7 +200,7 @@ export function useFriends() {
     .map(r => {
       const otherId = r.fromUserId === user?.id ? r.toUserId : r.fromUserId;
       const profile = profilesById.get(otherId);
-      return { requestId: r.id, userId: otherId, username: profile?.username ?? 'unknown', displayName: profile?.displayName ?? null };
+      return { requestId: r.id, userId: otherId, username: profile?.username ?? 'unknown' };
     });
 
   const incomingRequests = requests

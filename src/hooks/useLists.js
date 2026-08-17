@@ -64,7 +64,7 @@ function applyListChange(prev, payload) {
   return copy;
 }
 
-export function useLists() {
+export function useLists(username) {
   const { user } = useAuth();
   const [lists, setLists] = useState([]);
   const [sharedLists, setSharedLists] = useState([]);
@@ -126,7 +126,7 @@ export function useLists() {
         // this only seeds a fresh one for a brand-new signup afterward.
         const seeded = {
           user_id: user.id,
-          name: autoListName(user.user_metadata?.full_name),
+          name: autoListName(username),
           is_default: true,
         };
         const { data: created, error: seedError } = await supabase.from('lists').insert(seeded).select().single();
@@ -281,8 +281,9 @@ export function useLists() {
     return { error: null };
   }, [syncVisibility]);
 
-  // If the account's display name changes and the default list's name still
-  // matches the auto-generated pattern from the *old* name (i.e. it was
+  // If the account's username changes — including going from none to one,
+  // right after ChooseUsernameScreen — and the default list's name still
+  // matches the auto-generated pattern from the *old* username (i.e. it was
   // never manually renamed), carry the rename forward. A default list
   // that's since been customized to something else is left untouched.
   const listsRef = useRef(lists);
@@ -292,7 +293,7 @@ export function useLists() {
   const syncBaselineRef = useRef({ userId: null, name: undefined, ready: false });
 
   useEffect(() => {
-    const name = user?.user_metadata?.full_name;
+    const name = username;
     if (loading || !user) {
       syncBaselineRef.current = { userId: user?.id ?? null, name, ready: false };
       return;
@@ -312,7 +313,7 @@ export function useLists() {
     if (!defaultList || defaultList.name !== autoListName(prevName)) return;
 
     renameListRef.current(defaultList.id, autoListName(name));
-  }, [user, loading]);
+  }, [user, loading, username]);
 
   const ownedCurrentList = lists.find(l => l.id === currentListId);
   const currentList = ownedCurrentList
