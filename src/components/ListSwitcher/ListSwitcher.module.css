@@ -30,6 +30,13 @@
   left: 0;
   z-index: 60;
   min-width: 240px;
+  /* Static ceiling only — the actual per-open width (shrunk further when
+     the viewport can't fit 300px) is set inline from ListSwitcher.jsx,
+     computed purely from window.innerWidth. Deliberately not a vw-based
+     calc() here: 100vw and window.innerWidth disagree by a scrollbar's
+     width whenever one is present, and mixing the two as the width source
+     (CSS) vs. the position source (JS) caused the menu to visibly drift
+     across repeated opens instead of landing in the same place every time. */
   max-width: 300px;
   background: var(--bg-card);
   border: 1px solid var(--border);

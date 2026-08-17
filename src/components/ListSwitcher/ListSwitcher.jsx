@@ -1,10 +1,34 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { ChevronDown, Check, Pencil, Plus, Share2, Trash2, X } from 'lucide-react';
 import { supabase } from '../../supabaseClient';
 import { Button } from '../Button/Button';
 import { DeleteListModal } from './DeleteListModal';
 import { ShareListModal } from './ShareListModal';
 import styles from './ListSwitcher.module.css';
+
+// Mirrors .menu's max-width in ListSwitcher.module.css — the JS-computed
+// inline maxWidth below never exceeds this, it only ever shrinks it further
+// for a viewport too narrow to fit it.
+const MENU_MAX_WIDTH = 300;
+const EDGE_MARGIN = 16;
+
+// Pure decision behind the menu's mobile positioning (see the comment on
+// the `useLayoutEffect` that calls this, in ListSwitcher, for the why).
+// Exported for unit testing — it takes plain numbers rather than DOM rects
+// so it can be tested without a DOM environment.
+export function computeMenuPosition({ wrapperLeft, wrapperRight, menuWidth, viewportWidth }) {
+  const maxWidth = Math.min(MENU_MAX_WIDTH, viewportWidth - EDGE_MARGIN * 2);
+  const naturalWidth = Math.min(menuWidth, maxWidth);
+  const availableToRight = viewportWidth - EDGE_MARGIN - wrapperLeft;
+  if (naturalWidth > availableToRight) {
+    // CSS `right` is measured inward from the containing block's (the
+    // wrapper's) right edge, so convert the desired viewport-relative
+    // right edge (viewportWidth - EDGE_MARGIN) into that frame.
+    const right = wrapperRight - (viewportWidth - EDGE_MARGIN);
+    return { mode: 'right', right, maxWidth };
+  }
+  return { mode: 'standard', maxWidth };
+}
 
 // No "Shared with" prefix — the adjacent "Shared" badge already says that,
 // and the menu is only ~240-300px wide, so every character here competes
@@ -34,7 +58,71 @@ export function ListSwitcher({
   // a `private` list is kept in sync to have zero shares (see useLists.js),
   // so there's nothing to fetch for the common case of an unshared list.
   const [shareMap, setShareMap] = useState({});
+  // { mode: 'standard' | 'right', maxWidth, right? }, in pixels — null while
+  // closed, so the JSX default (CSS left: 0 / max-width: 300px) is used
+  // until this computes a real value. Recomputed from scratch on every open
+  // (never carried over from the previous time it was open — see why
+  // below). 'standard' leaves the menu's left edge flush with the trigger,
+  // same as before any of this positioning logic existed. 'right' instead
+  // anchors the menu's right edge to the viewport's own EDGE_MARGIN (16px)
+  // — the same horizontal inset the page content uses.
+  const [menuPos, setMenuPos] = useState(null);
   const wrapperRef = useRef(null);
+  const menuRef = useRef(null);
+
+  // The trigger sits right after the (possibly long, especially on mobile)
+  // current list title, so unlike a fixed-position control it can end up
+  // anywhere across the header — the closer it sits to the right edge, the
+  // less room 'standard' placement has before the menu runs past the
+  // page's right margin and causes horizontal scroll. So this only departs
+  // from 'standard' when it has to: it lets the menu mount and render at
+  // its natural, content-driven width under 'standard' CSS first (position
+  // doesn't affect intrinsic width, so measuring before this effect
+  // resolves menuPos is safe), then compares that width against the space
+  // actually available between the trigger and the right margin. Only if
+  // the menu wouldn't fit there does it switch to 'right'. Runs as a layout
+  // effect so that switch — when it happens — lands before the browser
+  // paints, with no visible jump.
+  //
+  // This also *sets* menuWidth itself (as an inline maxWidth), rather than
+  // trusting the CSS max-width alone, in both modes. That measure-then-trust
+  // approach is what caused the "moves on every open, converges after ~10
+  // clicks" bug in an earlier version: the CSS cap was written as
+  // `min(300px, calc(100vw - 32px))`, but 100vw and window.innerWidth
+  // disagree by a scrollbar's width whenever a vertical scrollbar is
+  // present — and this menu, before being repositioned, could itself
+  // briefly extend the page's scrollable height enough to toggle that
+  // scrollbar on or off, feeding a slightly different 100vw into the *next*
+  // open's measurement. Computing maxWidth here from window.innerWidth
+  // alone — never from 100vw or a post-render measurement — removes that
+  // feedback loop entirely: every open computes the exact same answer from
+  // the exact same inputs, independent of anything the previous open did.
+  useLayoutEffect(() => {
+    if (!open) { setMenuPos(null); return; }
+    const updatePosition = () => {
+      const wrapperRect = wrapperRef.current?.getBoundingClientRect();
+      const menuRect = menuRef.current?.getBoundingClientRect();
+      if (!wrapperRect || !menuRect) return;
+      // Below ~272px viewport width this would undershoot the menu's own
+      // 240px min-width and let it run past whichever edge it's anchored
+      // to — but that's narrower than any real phone, so it's left
+      // unclamped.
+      setMenuPos(computeMenuPosition({
+        wrapperLeft: wrapperRect.left,
+        wrapperRight: wrapperRect.right,
+        menuWidth: menuRect.width,
+        viewportWidth: window.innerWidth,
+      }));
+    };
+    updatePosition();
+    // Covers a mobile orientation change while the menu happens to be open
+    // — resize is enough on its own since the trigger's position only
+    // moves relative to the viewport when the viewport itself changes size
+    // (unlike Dropdown.jsx's portal-rendered menu, this one scrolls with
+    // its trigger, so a scroll listener isn't needed here).
+    window.addEventListener('resize', updatePosition);
+    return () => window.removeEventListener('resize', updatePosition);
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
@@ -171,7 +259,17 @@ export function ListSwitcher({
       </button>
 
       {open && (
-        <div className={styles.menu} role="menu">
+        <div
+          className={styles.menu}
+          role="menu"
+          ref={menuRef}
+          style={
+            menuPos == null ? undefined
+              : menuPos.mode === 'right'
+                ? { left: 'auto', right: menuPos.right, maxWidth: menuPos.maxWidth }
+                : { left: 0, right: 'auto', maxWidth: menuPos.maxWidth }
+          }
+        >
           <p className={styles.sectionLabel}>My lists</p>
 
           {lists.map(list => (
